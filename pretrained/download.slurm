@@ -5,8 +5,9 @@
 #SBATCH --partition=normal
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=checkpoints
+
 source /home/aaryang/anaconda3/bin/activate
-conda activate cirkd
+conda activate evit
 
 # 224 x 224
 URL_EFFICIENT_B1_IMAGE_NET="https://drive.google.com/u/0/uc?id=1hKN_hvLG4nmRzbfzKY7GlqwpR5uKpOOk&export=download"
