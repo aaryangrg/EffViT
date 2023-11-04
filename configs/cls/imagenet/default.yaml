@@ -1,6 +1,6 @@
 data_provider:
   dataset: imagenet
-  data_dir: /dataset/imagenet
+  data_dir: /home/c3-0/datasets/ImageNet
   rrc_config:
     train_interpolate: random
     test_interpolate: bicubic
@@ -9,14 +9,14 @@ data_provider:
     name: randaug
     n: 1
     m: 3
-  base_batch_size: 128
+  base_batch_size: 32
   valid_size: null
   n_worker: 8
   image_size:
-  - 128
-  - 160
-  - 192
-  - 224
+    - 128
+    - 160
+    - 192
+    - 224
   drop_last: true
 
 run_config:
@@ -30,27 +30,27 @@ run_config:
   optimizer_params:
     eps: 1.0e-08
     betas:
-    - 0.9
-    - 0.999
+      - 0.9
+      - 0.999
   weight_decay: 0.1
   no_wd_keys:
-  - norm
-  - bias
+    - norm
+    - bias
   grad_clip: 2.0
   reset_bn: true
   reset_bn_size: 16000
   reset_bn_batch_size: 100
   eval_image_size:
-  - 224
+    - 224
   label_smooth: 0.1
   mixup_config:
     op:
-    - - mixup
-      - 0.1
-      - 1.0
-    - - cutmix
-      - 0.1
-      - 1.0
+      - - mixup
+        - 0.1
+        - 1.0
+      - - cutmix
+        - 0.1
+        - 1.0
   bce: true
   mesa: null
 
