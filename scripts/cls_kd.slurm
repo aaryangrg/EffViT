@@ -7,6 +7,7 @@
 #SBATCH --cpus-per-task=8            # Two cores per task
 #SBATCH --job-name=CLSKD224
 #SBATCH --constraint=gmem32
+
 source /home/aaryang/anaconda3/bin/activate
 conda activate evit
 
@@ -16,6 +17,6 @@ nvidia-smi
 
 torchpack dist-run -np 2 \
 python ../train_kd.py ../configs/cls/imagenet/b1.yaml \
-    --path .exp/cls/imagenet/b1_r224/ \
+    --path ../exp/cls/imagenet/b1_r224/ \
     --parent_model b3 \
     --parent_weights_url ../pretrained/b1_224.pt \
