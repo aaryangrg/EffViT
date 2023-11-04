@@ -137,6 +137,7 @@ class ClsTrainerWithKD(Trainer):
             output = self.model(images)
             p_output = self.p_model(images)
             loss = self.train_criterion(output, labels) # Cross Entropy
+            ce_loss = loss
             kd_loss = self.kd_criterion(F.softmax(output, dim=1), F.log_softmax(p_output, dim = 1)) # KLDivergence (batchmean)
             # mesa loss
             if ema_output is not None:
@@ -153,11 +154,15 @@ class ClsTrainerWithKD(Trainer):
         return {
             "loss": loss,
             "top1": top1,
+            "task_loss" : ce_loss,
+            "kd_loss" : kd_loss
         }
 
     def _train_one_epoch(self, epoch: int) -> dict[str, any]:
         train_loss = AverageMeter()
         train_top1 = AverageMeter()
+        task_loss = AverageMeter()
+        kd_loss = AverageMeter()
 
         with tqdm(
             total=len(self.data_provider.train),
@@ -181,11 +186,15 @@ class ClsTrainerWithKD(Trainer):
                 train_loss.update(output_dict["loss"], images.shape[0])
                 if output_dict["top1"] is not None:
                     train_top1.update(output_dict["top1"], images.shape[0])
+                task_loss.update(output_dict["task_loss"], images.shape[0])
+                kd_loss.update(output_dict["kd_loss"], images.shape[0])
 
                 # tqdm
                 postfix_dict = {
                     "loss": train_loss.avg,
                     "top1": train_top1.avg,
+                    "task_loss" : task_loss.avg,
+                    "kd_loss" : kd_loss.avg,
                     "bs": images.shape[0],
                     "res": images.shape[2],
                     "lr": list_join(
@@ -200,6 +209,8 @@ class ClsTrainerWithKD(Trainer):
         return {
             **({"train_top1": train_top1.avg} if train_top1.count > 0 else {}),
             "train_loss": train_loss.avg,
+            "task_loss" : task_loss.avg,
+            "kd_loss" : kd_loss.avg
         }
 
     def train(self, trials=0, save_freq=1) -> None:
