@@ -9,7 +9,7 @@ from venv import create
 from efficientvit.apps import setup
 from efficientvit.apps.utils import dump_config, parse_unknown_args
 from efficientvit.cls_model_zoo import create_cls_model
-from efficientvit.clscore.data_provider import ImageNetDataProvider
+from efficientvit.clscore.data_provider.imagenet_subset import ImageNetDataProviderSubset
 from efficientvit.clscore.trainer.cls_kd_trainer import ClsTrainerWithKD
 from efficientvit.clscore.trainer import ClsRunConfig
 from efficientvit.models.nn.drop import apply_drop_func
@@ -54,7 +54,7 @@ def main():
     setup.save_exp_config(config, args.path)
 
     # setup data provider
-    data_provider = setup.setup_data_provider(config, [ImageNetDataProvider], is_distributed=True)
+    data_provider = setup.setup_data_provider(config, [ImageNetDataProviderSubset], is_distributed=True)
 
     # setup run config
     run_config = setup.setup_run_config(config, ClsRunConfig)
@@ -85,7 +85,7 @@ def main():
     # resume
     if args.resume:
         trainer.load_model()
-        trainer.data_provider = setup.setup_data_provider(config, [ImageNetDataProvider], is_distributed=True)
+        trainer.data_provider = setup.setup_data_provider(config, [ImageNetDataProviderSubset], is_distributed=True)
     else:
         trainer.sync_model()
 
