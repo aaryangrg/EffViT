@@ -69,7 +69,11 @@ def main():
     model = create_cls_model(config["net_config"]["name"], False, dropout=config["net_config"]["dropout"])
     apply_drop_func(model.backbone.stages, config["backbone_drop"])
 
+    print("student model created")
+
     p_model = create_cls_model(args.parent_model, args.parent_weights_url)
+
+    print("parent model created")
     # setup trainer
     trainer = ClsTrainerWithKD(
         path=args.path,
