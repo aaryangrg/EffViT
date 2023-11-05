@@ -6,3 +6,5 @@ assets/checkpoints/
 .exp/
 *.pt
 *.out
+exp/*
+

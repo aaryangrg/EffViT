@@ -71,7 +71,7 @@ def main():
 
     print("student model created")
 
-    p_model = create_cls_model(args.parent_model, args.parent_weights_url)
+    p_model = create_cls_model(args.parent_model ,pretrained = True, weight_url = "/home/aaryang/experiments/EffViT/pretrained/b3-r224.pt")
 
     print("parent model created")
     # setup trainer

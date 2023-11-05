@@ -8,6 +8,6 @@ rand_init: trunc_normal@0.02
 last_gamma: 0
 auto_restart_thresh: 1.0
 save_freq: 1
-parent_weights_url: ../pretrained/b3-224.pt
+parent_weights_url: /home/aaryang/experiments/EffViT/pretrained/b3-r224.pt
 parent_model: b3
 use_subset: true
