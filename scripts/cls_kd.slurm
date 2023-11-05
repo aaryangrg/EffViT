@@ -20,3 +20,4 @@ python ../train_kd.py ../configs/cls/imagenet/b1.yaml \
     --path ../exp/cls/imagenet/b1_r224/ \
     --parent_model b3 \
     --parent_weights_url ../pretrained/b1_224.pt \
+    --use_subset False

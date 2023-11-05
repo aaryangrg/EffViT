@@ -10,6 +10,7 @@ from efficientvit.apps import setup
 from efficientvit.apps.utils import dump_config, parse_unknown_args
 from efficientvit.cls_model_zoo import create_cls_model
 from efficientvit.clscore.data_provider.imagenet_subset import ImageNetDataProviderSubset
+from efficientvit.clscore.data_provider import ImageNetDataProvider
 from efficientvit.clscore.trainer.cls_kd_trainer import ClsTrainerWithKD
 from efficientvit.clscore.trainer import ClsRunConfig
 from efficientvit.models.nn.drop import apply_drop_func
@@ -32,6 +33,8 @@ parser.add_argument("--save_freq", type=int, default=1)
 # Parent model
 parser.add_argument("--parent_weights_url", type =str, default = "Parent Weights")
 parser.add_argument("--parent_model", type =str, default = "Parent Model")
+parser.add_argument("--use_subset", type = bool , default = True)
+
 def main():
     # parse args
     args, opt = parser.parse_known_args()
@@ -54,7 +57,10 @@ def main():
     setup.save_exp_config(config, args.path)
 
     # setup data provider
-    data_provider = setup.setup_data_provider(config, [ImageNetDataProviderSubset], is_distributed=True)
+    if args.use_subset :
+        data_provider = setup.setup_data_provider(config, [ImageNetDataProviderSubset], is_distributed=True)
+    else :
+        data_provider = setup.setup_data_provider(config, [ImageNetDataProvider], is_distributed=True)
 
     # setup run config
     run_config = setup.setup_run_config(config, ClsRunConfig)
@@ -85,7 +91,10 @@ def main():
     # resume
     if args.resume:
         trainer.load_model()
-        trainer.data_provider = setup.setup_data_provider(config, [ImageNetDataProviderSubset], is_distributed=True)
+        if args.use_subset :
+            trainer.data_provider = setup.setup_data_provider(config, [ImageNetDataProviderSubset], is_distributed=True)
+        else :
+            trainer.data_provider = setup.setup_data_provider(config, [ImageNetDataProvider], is_distributed=True)
     else:
         trainer.sync_model()
 
