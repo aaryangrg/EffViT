@@ -57,10 +57,10 @@ def main():
     setup.save_exp_config(config, args.path)
 
     # setup data provider
-    if args.use_subset :
-        data_provider = setup.setup_data_provider(config, [ImageNetDataProviderSubset], is_distributed=True)
-    else :
-        data_provider = setup.setup_data_provider(config, [ImageNetDataProvider], is_distributed=True)
+    # if args.use_subset :
+    #     data_provider = setup.setup_data_provider(config, [ImageNetDataProviderSubset], is_distributed=True)
+    # else :
+    data_provider = setup.setup_data_provider(config, [ImageNetDataProvider], is_distributed=True)
 
     # setup run config
     run_config = setup.setup_run_config(config, ClsRunConfig)
@@ -91,10 +91,10 @@ def main():
     # resume
     if args.resume:
         trainer.load_model()
-        if args.use_subset :
-            trainer.data_provider = setup.setup_data_provider(config, [ImageNetDataProviderSubset], is_distributed=True)
-        else :
-            trainer.data_provider = setup.setup_data_provider(config, [ImageNetDataProvider], is_distributed=True)
+        # if args.use_subset :
+        #     trainer.data_provider = setup.setup_data_provider(config, [ImageNetDataProviderSubset], is_distributed=True)
+        # else :
+        trainer.data_provider = setup.setup_data_provider(config, [ImageNetDataProvider], is_distributed=True)
     else:
         trainer.sync_model()
 
