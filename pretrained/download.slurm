@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --output=/home/aaryang/experiments/CIRKD/model_weights/checkpoints.out
+#SBATCH --output=/home/aaryang/experiments/EffViT/pretrained/checkpoints.out
 #SBATCH --account=group3
 #SBATCH --nodes=1
 #SBATCH --partition=normal
