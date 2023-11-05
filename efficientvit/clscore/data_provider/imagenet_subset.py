@@ -119,7 +119,7 @@ class ImageNetDataProviderSubset(DataProviderSubset):
         valid_transform = self.build_valid_transform()
 
         train_dataset = ImageFolder(os.path.join(self.data_dir, "train"), train_transform)
-        test_dataset = ImageFolder(os.path.join(self.data_dir, "val"), valid_transform)
+        test_dataset = ImageFolder(os.path.join(self.data_dir, "validation"), valid_transform)
 
         train_dataset, val_dataset = self.sample_val_dataset(train_dataset, valid_transform)
         return train_dataset, val_dataset, test_dataset
