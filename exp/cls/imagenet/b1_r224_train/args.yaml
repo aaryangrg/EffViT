@@ -1,0 +1,10 @@
+config: ../configs/cls/imagenet/b1.yaml
+path: ../exp/cls/imagenet/b1_r224_train/
+gpu: 0,1
+manual_seed: 0
+resume: false
+fp16: true
+rand_init: trunc_normal@0.02
+last_gamma: 0
+auto_restart_thresh: 1.0
+save_freq: 1

@@ -1,0 +1,1 @@
+/home/aaryang/experiments/EffViT/exp/cls/imagenet/b1_r224_train/checkpoint/sync.pt

@@ -15,8 +15,10 @@ echo CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
 
 nvidia-smi
 
-python3 ../train_kd.py ../configs/cls/imagenet/b1.yaml \
+torchpack dist-run -np 1 \
+python3 ../train_kd.py ../configs/cls/imagenet/b1.yaml --fp16  \
     --path ../exp/cls/imagenet/b1_r224/ \
     --parent_model b3 \
     --parent_weights_url ../pretrained/b3-224.pt \
-    --use_subset false
+    --use_subset false \
+    --gpu 0,1

@@ -4,7 +4,7 @@ data_provider:
   rrc_config:
     train_interpolate: random
     test_interpolate: bicubic
-    test_crop_ratio: 1.0
+    test_crop_ratio: 0.95
   data_aug:
     name: randaug
     n: 1
@@ -13,12 +13,11 @@ data_provider:
   valid_size: null
   n_worker: 8
   image_size:
-    - 128
-    - 160
-    - 192
-    - 224
+  - 128
+  - 160
+  - 192
+  - 224
   drop_last: true
-
 run_config:
   n_epochs: 300
   base_lr: 0.00025
@@ -30,33 +29,34 @@ run_config:
   optimizer_params:
     eps: 1.0e-08
     betas:
-      - 0.9
-      - 0.999
+    - 0.9
+    - 0.999
   weight_decay: 0.1
   no_wd_keys:
-    - norm
-    - bias
+  - norm
+  - bias
   grad_clip: 2.0
   reset_bn: true
   reset_bn_size: 16000
   reset_bn_batch_size: 100
   eval_image_size:
-    - 224
+  - 224
   label_smooth: 0.1
   mixup_config:
     op:
-      - - mixup
-        - 0.1
-        - 1.0
-      - - cutmix
-        - 0.1
-        - 1.0
+    - - mixup
+      - 0.1
+      - 1.0
+    - - cutmix
+      - 0.1
+      - 1.0
   bce: true
   mesa: null
-
 backbone_drop:
   name: droppath
   drop_prob: 0.05
   linear_decay: true
-
 ema_decay: 0.9998
+net_config:
+  name: b1
+  dropout: 0
