@@ -11,7 +11,7 @@ from torch.utils.data.distributed import DistributedSampler
 from efficientvit.apps.data_provider.random_resolution import RRSController
 from efficientvit.models.utils import val2tuple
 
-__all__ = ["parse_image_size", "random_drop_data", "DataProviderSubset"]
+__all__ = ["DataProviderSubset"]
 
 
 def parse_image_size(size: int or str) -> tuple[int, int]:
@@ -57,7 +57,7 @@ class DataProviderSubset:
         train_ratio: float or None = None,
         drop_last: bool = False,
         class_subset : bool = True,
-        class_subset_size : int = 1000
+        class_subset_size : int = 200
     ):
         warnings.filterwarnings("ignore")
         super().__init__()
@@ -96,6 +96,7 @@ class DataProviderSubset:
 
         # Class subset
         selected_classes = range(class_subset_size)
+        print("CREATING SUBSETS")
         if class_subset:
             if train_dataset :
                 train_dataset = torch.utils.data.Subset(train_dataset, [idx for idx, (_, label) in enumerate(train_dataset) if label in selected_classes])
@@ -104,6 +105,7 @@ class DataProviderSubset:
             if test_dataset :
                 test_dataset = torch.utils.data.Subset(test_dataset, [idx for idx, (_, label) in enumerate(test_dataset) if label in selected_classes])
 
+        print("SUBSETS CREATED")
         # build data loader
         self.train = self.build_dataloader(train_dataset, train_batch_size, n_worker, drop_last=drop_last, train=True)
         self.valid = self.build_dataloader(val_dataset, test_batch_size, n_worker, drop_last=False, train=False)
