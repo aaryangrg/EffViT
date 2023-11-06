@@ -163,7 +163,7 @@ class ClsTrainerWithKD(Trainer):
     def get_kld_loss(self,scale_pred, scale_soft, temperature = 1.0):
         p_s = F.log_softmax(scale_pred / temperature, dim=1)
         p_t = F.softmax(scale_soft / temperature, dim=1)
-        loss = F.kl_div(p_s, p_t, reduction='batchmean')
+        loss = F.kl_div(p_s, p_t, reduction='mean')
         return loss
 
     def _train_one_epoch(self, epoch: int) -> dict[str, any]:
