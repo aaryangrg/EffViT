@@ -18,7 +18,7 @@ from efficientvit.clscore.trainer.utils import accuracy, apply_mixup, label_smoo
 from efficientvit.models.utils import list_join, list_mean, torch_random_choices
 
 __all__ = ["ClsTrainerWithKD"]
-
+LOG_SOFTMAX_CONST = 1e-6
 
 class ClsTrainerWithKD(Trainer):
     def __init__(
@@ -138,7 +138,7 @@ class ClsTrainerWithKD(Trainer):
             p_output = self.p_model(images)
             loss = self.train_criterion(output, labels) # Cross Entropy
             ce_loss = loss
-            kd_loss = self.kd_criterion(F.softmax(output, dim=1), F.log_softmax(p_output, dim = 1)) # KLDivergence (batchmean)
+            kd_loss = self.kd_criterion(F.softmax(output, dim=1), F.log_softmax(p_output + LOG_SOFTMAX_CONST, dim = 1)) # KLDivergence (batchmean)
             print("KD LOSS ", kd_loss)
             # mesa loss
             if ema_output is not None:
@@ -149,7 +149,6 @@ class ClsTrainerWithKD(Trainer):
         # calc train top1 acc
         if self.run_config.mixup_config is None:
             top1 = accuracy(output, torch.argmax(labels, dim=1), topk=(1,))[0][0]
-            print("TOP 1 : ", top1)
         else:
             top1 = None
 
