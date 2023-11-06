@@ -39,28 +39,29 @@ def main():
     # parse args
     args, opt = parser.parse_known_args()
     opt = parse_unknown_args(opt)
-
+    print("Args parsed")
     # setup gpu and distributed training
     setup.setup_dist_env(args.gpu)
-
+    print("Distributed env setup")
     # setup path, update args, and save args to path
     os.makedirs(args.path, exist_ok=True)
     dump_config(args.__dict__, os.path.join(args.path, "args.yaml"))
 
     # setup random seed
     setup.setup_seed(args.manual_seed, args.resume)
-
+    print("Random seed setup")
     # setup exp config
     config = setup.setup_exp_config(args.config, recursive=True, opt_args=opt)
-
+    print("Experiment config setup")
     # save exp config
     setup.save_exp_config(config, args.path)
 
     # setup data provider
-    if args.use_subset :
-        data_provider = setup.setup_data_provider(config, [ImageNetDataProviderSubset], is_distributed=True)
-    else :
-        data_provider = setup.setup_data_provider(config, [ImageNetDataProvider], is_distributed=True)
+    # if args.use_subset :
+    #     data_provider = setup.setup_data_provider(config, [ImageNetDataProviderSubset], is_distributed=True)
+    # else :
+    #     data_provider = setup.setup_data_provider(config, [ImageNetDataProvider], is_distributed=True)
+    data_provider = setup.setup_data_provider(config, [ImageNetDataProviderSubset], is_distributed=True)
     print("Data Provider Created")
     # setup run config
     run_config = setup.setup_run_config(config, ClsRunConfig)
@@ -95,10 +96,11 @@ def main():
     # resume
     if args.resume:
         trainer.load_model()
-        if args.use_subset :
-            trainer.data_provider = setup.setup_data_provider(config, [ImageNetDataProviderSubset], is_distributed=True)
-        else :
-            trainer.data_provider = setup.setup_data_provider(config, [ImageNetDataProvider], is_distributed=True)
+        # if args.use_subset :
+        #     trainer.data_provider = setup.setup_data_provider(config, [ImageNetDataProviderSubset], is_distributed=True)
+        # else :
+        #     trainer.data_provider = setup.setup_data_provider(config, [ImageNetDataProvider], is_distributed=True)
+        data_provider = setup.setup_data_provider(config, [ImageNetDataProviderSubset], is_distributed=True)
     else:
         trainer.sync_model()
 
