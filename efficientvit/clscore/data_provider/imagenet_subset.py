@@ -5,6 +5,7 @@
 import copy
 import math
 import os
+from efficientvit.clscore.data_provider.CustomDataset import CustomImageDataset
 
 import torchvision.transforms as transforms
 from torchvision.datasets import ImageFolder
@@ -118,8 +119,10 @@ class ImageNetDataProviderSubset(DataProviderSubset):
         train_transform = self.build_train_transform()
         valid_transform = self.build_valid_transform()
 
-        train_dataset = ImageFolder(os.path.join(self.data_dir, "train"), train_transform)
-        test_dataset = ImageFolder(os.path.join(self.data_dir, "validation"), valid_transform)
+        # train_dataset = ImageFolder(os.path.join(self.data_dir, "train"), train_transform)
+        # test_dataset = ImageFolder(os.path.join(self.data_dir, "validation"), valid_transform)
+        train_dataset = CustomImageDataset(os.path.join(self.data_dir,"train"), train_transform)
+        test_dataset = CustomImageDataset(os.path.join(self.data_dir,"validation"), train_transform)
 
         train_dataset, val_dataset = self.sample_val_dataset(train_dataset, valid_transform)
         return train_dataset, val_dataset, test_dataset

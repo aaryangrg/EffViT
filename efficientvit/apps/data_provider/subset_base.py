@@ -95,22 +95,22 @@ class DataProviderSubset:
             )
 
         # Class subset
-        selected_classes = range(class_subset_size)
-        print("CREATING SUBSETS")
-        if len(train_dataset) :
-            print("Train start")
-            subset_idx = []
-            for i in range(len(train_dataset)) :
-                print(i)
-                if train_dataset[i][1] <= class_subset_size :
-                    subset_idx.append(i)
-            print("Indices found")
-            train_dataset = torch.utils.data.Subset(train_dataset, subset_idx)
-            print("Train end")
-        if len(val_dataset) :
-            val_dataset = torch.utils.data.Subset(val_dataset, [idx for idx, (_, label) in enumerate(val_dataset) if label in selected_classes])
-        if len(test_dataset) :
-            test_dataset = torch.utils.data.Subset(test_dataset, [idx for idx, (_, label) in enumerate(test_dataset) if label in selected_classes])
+        # selected_classes = range(class_subset_size)
+        # print("CREATING SUBSETS")
+        # if len(train_dataset) :
+        #     print("Train start")
+        #     subset_idx = []
+        #     for i in range(len(train_dataset)) :
+        #         print(i)
+        #         if train_dataset[i][1] <= class_subset_size :
+        #             subset_idx.append(i)
+        #     print("Indices found")
+        #     train_dataset = torch.utils.data.Subset(train_dataset, subset_idx)
+        #     print("Train end")
+        # if len(val_dataset) :
+        #     val_dataset = torch.utils.data.Subset(val_dataset, [idx for idx, (_, label) in enumerate(val_dataset) if label in selected_classes])
+        # if len(test_dataset) :
+        #     test_dataset = torch.utils.data.Subset(test_dataset, [idx for idx, (_, label) in enumerate(test_dataset) if label in selected_classes])
 
         print("SUBSETS CREATED")
         # build data loader
