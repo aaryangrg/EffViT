@@ -61,7 +61,7 @@ def main():
         data_provider = setup.setup_data_provider(config, [ImageNetDataProviderSubset], is_distributed=True)
     else :
         data_provider = setup.setup_data_provider(config, [ImageNetDataProvider], is_distributed=True)
-
+    print("Data Provider Created")
     # setup run config
     run_config = setup.setup_run_config(config, ClsRunConfig)
 
@@ -69,11 +69,11 @@ def main():
     model = create_cls_model(config["net_config"]["name"], False, dropout=config["net_config"]["dropout"])
     apply_drop_func(model.backbone.stages, config["backbone_drop"])
 
-    print("student model created")
+    print("Student Model Created")
 
     p_model = create_cls_model(args.parent_model ,pretrained = True, weight_url = "/home/aaryang/experiments/EffViT/pretrained/b3-r224.pt")
 
-    print("parent model created")
+    print("Parent Model Created")
     # setup trainer
     trainer = ClsTrainerWithKD(
         path=args.path,
