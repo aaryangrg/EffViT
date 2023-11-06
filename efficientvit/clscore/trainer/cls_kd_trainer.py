@@ -139,6 +139,7 @@ class ClsTrainerWithKD(Trainer):
             loss = self.train_criterion(output, labels) # Cross Entropy
             ce_loss = loss
             kd_loss = self.kd_criterion(F.softmax(output, dim=1), F.log_softmax(p_output, dim = 1)) # KLDivergence (batchmean)
+            print("KD LOSS ", kd_loss)
             # mesa loss
             if ema_output is not None:
                 mesa_loss = self.train_criterion(output, ema_output) # Calculated only on CrossEntropy loss
@@ -148,6 +149,7 @@ class ClsTrainerWithKD(Trainer):
         # calc train top1 acc
         if self.run_config.mixup_config is None:
             top1 = accuracy(output, torch.argmax(labels, dim=1), topk=(1,))[0][0]
+            print("TOP 1 : ", top1)
         else:
             top1 = None
 
