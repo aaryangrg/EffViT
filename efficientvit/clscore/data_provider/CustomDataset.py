@@ -7,7 +7,7 @@ class CustomImageDataset(VisionDataset):
         super(CustomImageDataset, self).__init__(root, transform=transform, target_transform=target_transform)
         self.loader = loader
         self.classes = [d.name for d in os.scandir(root) if d.is_dir()]
-        self.classes = sorted(self.classes)[:200]  # Sort and take the first 200 sub-folders
+        self.classes = sorted(self.classes)[:100]  # Sort and take the first 200 sub-folders
 
         self.samples = []
         for class_idx, class_name in enumerate(self.classes):
