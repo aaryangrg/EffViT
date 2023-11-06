@@ -97,13 +97,12 @@ class DataProviderSubset:
         # Class subset
         selected_classes = range(class_subset_size)
         print("CREATING SUBSETS")
-        if class_subset:
-            if train_dataset :
-                train_dataset = torch.utils.data.Subset(train_dataset, [idx for idx, (_, label) in enumerate(train_dataset) if label in selected_classes])
-            if val_dataset :
-                val_dataset = torch.utils.data.Subset(val_dataset, [idx for idx, (_, label) in enumerate(val_dataset) if label in selected_classes])
-            if test_dataset :
-                test_dataset = torch.utils.data.Subset(test_dataset, [idx for idx, (_, label) in enumerate(test_dataset) if label in selected_classes])
+        if len(train_dataset) :
+            train_dataset = torch.utils.data.Subset(train_dataset, [idx for idx, (_, label) in enumerate(train_dataset) if label in selected_classes])
+        if len(val_dataset) :
+            val_dataset = torch.utils.data.Subset(val_dataset, [idx for idx, (_, label) in enumerate(val_dataset) if label in selected_classes])
+        if len(test_dataset) :
+            test_dataset = torch.utils.data.Subset(test_dataset, [idx for idx, (_, label) in enumerate(test_dataset) if label in selected_classes])
 
         print("SUBSETS CREATED")
         # build data loader
