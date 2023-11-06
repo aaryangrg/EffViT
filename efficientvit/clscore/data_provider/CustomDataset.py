@@ -13,9 +13,7 @@ class CustomImageDataset(VisionDataset):
         for class_idx, class_name in enumerate(self.classes):
             class_path = os.path.join(root, class_name)
             for file_name in os.listdir(class_path):
-                print(file_name)
                 if self.is_image_file(file_name):
-                    print("appending")
                     self.samples.append((os.path.join(class_path, file_name), class_idx))
         print(len(self.samples))
 
