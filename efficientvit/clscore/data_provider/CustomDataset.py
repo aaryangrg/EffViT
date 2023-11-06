@@ -7,15 +7,17 @@ class CustomImageDataset(VisionDataset):
         super(CustomImageDataset, self).__init__(root, transform=transform, target_transform=target_transform)
         self.loader = loader
         self.classes = [d.name for d in os.scandir(root) if d.is_dir()]
-        # self.classes = sorted(self.classes)[:200]  # Sort and take the first 200 sub-folders
-        print("CLASSES : ", len(self.classes))
+        self.classes = sorted(self.classes)[:200]  # Sort and take the first 200 sub-folders
 
         self.samples = []
         for class_idx, class_name in enumerate(self.classes):
             class_path = os.path.join(root, class_name)
             for file_name in os.listdir(class_path):
+                print(file_name)
                 if self.is_image_file(file_name):
+                    print("appending")
                     self.samples.append((os.path.join(class_path, file_name), class_idx))
+        print(len(self.samples))
 
     def __getitem__(self, index):
         path, target = self.samples[index]
