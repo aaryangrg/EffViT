@@ -32,4 +32,4 @@ class CustomImageDataset(VisionDataset):
         return len(self.samples)
 
     def is_image_file(self, filename):
-        return any(filename.endswith(extension) for extension in [".jpg", ".jpeg", ".png", ".bmp", ".ppm", ".tif"])
+        return any(filename.endswith(extension) for extension in [".jpg", ".jpeg", ".png", ".bmp", ".ppm", ".tif", ".JPEG"])
