@@ -138,7 +138,8 @@ class ClsTrainerWithKD(Trainer):
             p_output = self.p_model(images)
             loss = self.train_criterion(output, labels) # Cross Entropy
             ce_loss = loss
-            kd_loss = self.kd_criterion(F.softmax(output, dim=1), F.log_softmax(p_output + LOG_SOFTMAX_CONST, dim = 1)) # KLDivergence (batchmean)
+            # kd_loss = self.kd_criterion(F.softmax(output, dim=1), F.log_softmax(p_output + LOG_SOFTMAX_CONST, dim = 1)) # KLDivergence (batchmean)
+            kd_loss = self.get_kld_loss(output + LOG_SOFTMAX_CONST, p_output+LOG_SOFTMAX_CONST)
             print("KD LOSS ", kd_loss)
             # mesa loss
             if ema_output is not None:
@@ -158,6 +159,12 @@ class ClsTrainerWithKD(Trainer):
             "task_loss" : ce_loss,
             "kd_loss" : kd_loss
         }
+    
+    def get_kld_loss(self,scale_pred, scale_soft, temperature = 1.0):
+        p_s = F.log_softmax(scale_pred / temperature, dim=1)
+        p_t = F.softmax(scale_soft / temperature, dim=1)
+        loss = F.kl_div(p_s, p_t, reduction='batchmean')
+        return loss
 
     def _train_one_epoch(self, epoch: int) -> dict[str, any]:
         train_loss = AverageMeter()
