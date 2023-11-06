@@ -99,7 +99,7 @@ class DataProviderSubset:
         print("CREATING SUBSETS")
         if len(train_dataset) :
             print("Train start")
-            subset_idx = [idx for idx, (_, label) in enumerate(train_dataset) if label in selected_classes]
+            subset_idx = [idx for idx, (_, label) in enumerate(train_dataset) if label < class_subset_size]
             print("Indices found")
             train_dataset = torch.utils.data.Subset(train_dataset, subset_idx)
             print("Train end")
