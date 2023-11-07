@@ -3,10 +3,10 @@
 #SBATCH --output=/home/aaryang/experiments/EffViT/outs/b1_224_subset_100.out
 #SBATCH --nodes=1   # Get one node
 #SBATCH --partition=gpu
-#SBATCH --gres=gpu:2            # And two GPU
+#SBATCH --gres=gpu:1            # And two GPU
 #SBATCH --cpus-per-task=8            # Two cores per task
 #SBATCH --job-name=CLSKDFULL
-#SBATCH --constraint=gmem32
+#SBATCH --constraint=gmem16
 
 source /home/aaryang/anaconda3/bin/activate
 conda activate evit
@@ -21,4 +21,3 @@ python3 ../train_kd.py ../configs/cls/imagenet/b1.yaml --fp16 \
     --parent_model b3 \
     --parent_weights_url /home/aaryang/experiments/EffViT/pretrained/b3-r224.pt \
     --use_subset true \
-    --gpu 0,1
