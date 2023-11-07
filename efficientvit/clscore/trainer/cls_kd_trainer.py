@@ -140,7 +140,6 @@ class ClsTrainerWithKD(Trainer):
             ce_loss = loss
             # kd_loss = self.kd_criterion(F.softmax(output, dim=1), F.log_softmax(p_output + LOG_SOFTMAX_CONST, dim = 1)) # KLDivergence (batchmean)
             kd_loss = self.get_kld_loss(output + LOG_SOFTMAX_CONST, p_output+LOG_SOFTMAX_CONST)
-            print("KD LOSS ", kd_loss)
             # mesa loss
             if ema_output is not None:
                 mesa_loss = self.train_criterion(output, ema_output) # Calculated only on CrossEntropy loss
