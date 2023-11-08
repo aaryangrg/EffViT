@@ -9,9 +9,9 @@ data_provider:
     name: randaug
     n: 1
     m: 3
-  base_batch_size: 512
+  base_batch_size: 360
   valid_size: null
-  n_worker: 16
+  n_worker: 12
   image_size:
     - 128
     - 160
