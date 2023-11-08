@@ -5,6 +5,7 @@
 import argparse
 import math
 import os
+from efficientvit.clscore.data_provider.CustomDataset import CustomImageDataset
 
 import torch.utils.data
 from torchvision import datasets, transforms
@@ -62,9 +63,7 @@ def main():
     ])
 
     # Create the dataset
-    dataset = datasets.ImageFolder(args.path, transform=transform)
-    selected_classes = range(args.subset_classes)
-    dataset = torch.utils.data.Subset(dataset, [idx for idx, (_, label) in enumerate(dataset) if label in selected_classes])
+    dataset = CustomImageDataset(args.path, transform = transform)
 
 # Create the data loader
     data_loader = torch.utils.data.DataLoader(
