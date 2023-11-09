@@ -6,7 +6,7 @@
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=8
 #SBATCH --job-name=MiniTrain
-#SBATCH --constraint=gmem32
+#SBATCH --constraint=gmem16
 
 source /home/aaryang/anaconda3/bin/activate
 conda activate evit
@@ -18,4 +18,4 @@ nvidia-smi
 torchpack dist-run -np 1 \
 python ../train_cls_mini_imagenet.py ../configs/cls/imagenet/b1.yaml  --fp16 \
     --path ../exp/train/miniimgnet/b1_r224_train/ \
-    --data_provider.train_batch_size 512 \
+    --data_provider.train_batch_size 256 \
