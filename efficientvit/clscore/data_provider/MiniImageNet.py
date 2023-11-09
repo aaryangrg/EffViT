@@ -33,7 +33,7 @@ class MiniImageNet(VisionDataset):
 
             for cls in tqdm(images.keys()):
                 for file_name in images[cls] :
-                    file_name = cls + "_" + int(file_name.split(".")[0].replace(cls,"")) + ".JPEG"
+                    file_name = cls + "_" + str(int(file_name.split(".")[0].replace(cls,""))) + ".JPEG"
                     class_idx = self.classes.index(cls)
                     self.samples.append((os.path.join(root, cls, file_name), class_idx))
             print(self.type, " : ", len(self.samples))
