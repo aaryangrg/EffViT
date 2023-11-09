@@ -11,7 +11,7 @@ data_provider:
     m: 3
   base_batch_size: 512
   valid_size: null
-  n_worker: 16
+  n_worker: 8
   image_size:
     - 128
     - 160
@@ -51,7 +51,7 @@ run_config:
       - - cutmix
         - 0.1
         - 1.0
-  bce: true
+  bce: false
   mesa: null
 
 backbone_drop:
