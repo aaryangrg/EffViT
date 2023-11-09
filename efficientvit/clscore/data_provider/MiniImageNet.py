@@ -4,7 +4,7 @@ from torchvision.datasets import VisionDataset
 from torchvision.datasets.folder import default_loader
 from tqdm import tqdm
 
-DEFAULT_CSV_DIR = "../../mini_csv_files/"
+DEFAULT_CSV_DIR = "/home/aaryang/experiments/EffViT/efficientvit/mini_csv_files/"
 
 class MiniImageNet(VisionDataset):
     def __init__(self, root, transform=None, type = "train", target_transform=None, loader=default_loader):
