@@ -29,7 +29,8 @@ class MiniImageNet(VisionDataset):
                 if len(row) == 2 and row[1] in images.keys():
                     images[row[1]].append(row[0])
                 else:
-                    images[row[1]] = [row[0]]
+                    if len(row) == 2 :
+                        images[row[1]] = [row[0]]
 
             for cls in tqdm(images.keys()):
                 for file_name in images[cls] :
