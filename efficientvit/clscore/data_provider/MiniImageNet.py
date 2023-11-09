@@ -17,9 +17,9 @@ class MiniImageNet(VisionDataset):
     
         csv_dir  = None
         if self.type == "validation" :
-            csv_dir = os.path.join(DEFAULT_CSV_DIR, "val.csv")
+            csv_dir = os.path.join(DEFAULT_CSV_DIR, "test.csv")
         else :
-            csv_dir = os.path.join(DEFAULT_CSV_DIR, "train.csv")
+            csv_dir = os.path.join(DEFAULT_CSV_DIR, "trainval.csv")
         
         with open(csv_dir) as csvfile:
             csv_reader = csv.reader(csvfile, delimiter=',')
