@@ -26,6 +26,7 @@ class MiniImageNet(VisionDataset):
             next(csv_reader, None)
             images = {}
             for row in tqdm(csv_reader):
+                print(row)
                 if row[1] in images.keys():
                     images[row[1]].append(row[0])
                 else:
