@@ -3,6 +3,7 @@ import os
 from torchvision.datasets import VisionDataset
 from torchvision.datasets.folder import default_loader
 from tqdm import tqdm
+from torch.nn.functional import one_hot
 
 DEFAULT_CSV_DIR = "/home/aaryang/experiments/EffViT/efficientvit/mini_csv_files/"
 
@@ -43,6 +44,8 @@ class MiniImageNet(VisionDataset):
 
     def __getitem__(self, index):
         path, target = self.samples[index]
+        # One-hot the target
+        target = one_hot(target, num_classes=len(self.classes))
         sample = self.loader(path)
         if self.transform is not None:
             sample = self.transform(sample)

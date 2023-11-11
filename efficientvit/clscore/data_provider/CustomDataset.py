@@ -2,6 +2,7 @@ import os
 from torchvision.datasets import VisionDataset
 from torchvision.datasets.folder import default_loader
 
+# Missing one-hot encoding for targets
 class CustomImageDataset(VisionDataset):
     def __init__(self, root, transform=None, target_transform=None, loader=default_loader):
         super(CustomImageDataset, self).__init__(root, transform=transform, target_transform=target_transform)
