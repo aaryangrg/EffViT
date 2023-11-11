@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=group3
-#SBATCH --output=/home/aaryang/experiments/EffViT/outs/train/b1_mini_12gb.out
+#SBATCH --output=/home/aaryang/experiments/EffViT/outs/train/b1_mini.out
 #SBATCH --nodes=1   # Get one node
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:1
@@ -17,6 +17,6 @@ nvidia-smi
 
 torchpack dist-run -np 1 \
 python ../train_cls_mini_imagenet.py ../configs/cls/imagenet/b1.yaml  --fp16 \
-    --path ../exp/train/miniimgnet/b1_r224_train_12gb/ \
+    --path ../exp/train/miniimgnet/b1_r224_train/ \
     --data_provider.train_batch_size 128 \
     --run_config.bce true \

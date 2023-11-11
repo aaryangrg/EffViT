@@ -22,3 +22,4 @@ python3 ../train_kd.py ../configs/cls/imagenet/b1.yaml  --fp16 \
     --parent_weights_url /home/aaryang/experiments/EffViT/pretrained/b3-r224.pt \
     --use_subset true \
     --data_provider.train_batch_size 512 \
+    --student_weights \
