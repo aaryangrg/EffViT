@@ -7,4 +7,5 @@ assets/checkpoints/
 *.pt
 *.out
 exp/*
+graphs/*
 

@@ -16,23 +16,38 @@ class MiniImageNet(VisionDataset):
         self.type = type
         self.samples = []
     
-        csv_dir  = None
-        if self.type == "validation" :
-            csv_dir = os.path.join(DEFAULT_CSV_DIR, "test.csv")
-        else :
-            csv_dir = os.path.join(DEFAULT_CSV_DIR, "trainval.csv")
         
+        # if self.type == "validation" :
+        #     csv_dir = os.path.join(DEFAULT_CSV_DIR, "test.csv")
+        # else :
+        #     csv_dir = os.path.join(DEFAULT_CSV_DIR, "trainval.csv")
+
+        csv_dir  = os.path.join(DEFAULT_CSV_DIR, "allimages.csv")
+        # 600 samples / class x 100 classes
         with open(csv_dir) as csvfile:
             csv_reader = csv.reader(csvfile, delimiter=',')
             next(csv_reader, None)
             images = {}
-            for row in tqdm(csv_reader):
-                if len(row) == 2 and row[1] in images.keys():
-                    images[row[1]].append(row[0])
-                else:
-                    if len(row) == 2 :
-                        images[row[1]] = [row[0]]
-
+            count = 0
+            if type == "train" :
+                for row in tqdm(csv_reader):
+                    if count % 6 != 0 :
+                        if len(row) == 2 and row[1] in images.keys():
+                            images[row[1]].append(row[0])
+                        else:
+                            if len(row) == 2 :
+                                images[row[1]] = [row[0]]
+                    count += 1
+            else :
+                for row in tqdm(csv_reader):
+                    if count % 6 == 0 :
+                        if len(row) == 2 and row[1] in images.keys():
+                            images[row[1]].append(row[0])
+                        else:
+                            if len(row) == 2 :
+                                images[row[1]] = [row[0]]
+                    count += 1
+            
             for cls in tqdm(images.keys()):
                 for file_name in images[cls] :
                     class_path = os.path.join(root, cls)
