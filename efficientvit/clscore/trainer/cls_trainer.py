@@ -190,6 +190,7 @@ class ClsTrainer(Trainer):
         }
 
     def train(self, trials=0, save_freq=1) -> None:
+        print("TASK LOSS (BCE) : ", self.run_config.bce)
         if self.run_config.bce:
             self.train_criterion = nn.BCEWithLogitsLoss()
         else:

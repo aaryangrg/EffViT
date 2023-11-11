@@ -19,3 +19,4 @@ torchpack dist-run -np 1 \
 python ../train_cls_mini_imagenet.py ../configs/cls/imagenet/b1.yaml  --fp16 \
     --path ../exp/train/miniimgnet/b1_r224_train/ \
     --data_provider.train_batch_size 768 \
+    --run_config.bce true \
