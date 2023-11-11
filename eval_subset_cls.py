@@ -5,6 +5,7 @@
 import argparse
 import math
 import os
+from efficientvit.clscore.data_provider.MiniImageNet import MiniImageNet
 from efficientvit.clscore.data_provider.CustomDataset import CustomImageDataset
 
 import torch.utils.data
@@ -63,7 +64,7 @@ def main():
     ])
 
     # Create the dataset
-    dataset = CustomImageDataset(args.path, transform = transform)
+    dataset = MiniImageNet(args.path, transform = transform, type = "train")
 
 # Create the data loader
     data_loader = torch.utils.data.DataLoader(
