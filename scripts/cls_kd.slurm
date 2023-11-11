@@ -4,7 +4,7 @@
 #SBATCH --nodes=1   # Get one node
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:1         # And two GPU
-#SBATCH --cpus-per-task=8            # Two cores per task
+#SBATCH --cpus-per-task=10            # Two cores per task
 #SBATCH --job-name=DistMini
 #SBATCH --constraint=gmem32
 
