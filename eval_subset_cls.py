@@ -64,7 +64,7 @@ def main():
     ])
 
     # Create the dataset
-    dataset = MiniImageNet(args.path, transform = transform, type = "train")
+    dataset = MiniImageNet(args.path, transform = transform, type = "validation")
 
 # Create the data loader
     data_loader = torch.utils.data.DataLoader(
