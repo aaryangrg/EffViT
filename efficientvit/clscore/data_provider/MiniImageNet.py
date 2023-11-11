@@ -35,17 +35,15 @@ class MiniImageNet(VisionDataset):
 
             for cls in tqdm(images.keys()):
                 for file_name in images[cls] :
-                    # Required if using non-Vinayls et al released split
-                    # file_name = cls + "_" + str(int(file_name.split(".")[0].replace(cls,""))) + ".JPEG"
+                    class_path = os.path.join(root, cls)
                     class_idx = self.classes.index(cls)
-                    self.samples.append((os.path.join(root, cls, file_name), class_idx))
+                    self.samples.append((os.path.join(class_path, file_name), class_idx))
             print(self.type, " : ", len(self.samples))
        
 
     def __getitem__(self, index):
         path, target = self.samples[index]
-        # One-hot the target
-        target = one_hot(target, num_classes=len(self.classes))
+        # One-hot the target --> happens in before_step --> label_smooth function
         sample = self.loader(path)
         if self.transform is not None:
             sample = self.transform(sample)
