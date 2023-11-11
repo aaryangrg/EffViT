@@ -125,8 +125,8 @@ class ImageNetDataProviderSubset(DataProviderSubset):
         # train_dataset = CustomImageDataset(os.path.join(self.data_dir,"train"), train_transform)
         # test_dataset = CustomImageDataset(os.path.join(self.data_dir,"validation"), valid_transform)
 
-        train_dataset = MiniImageNet(os.path.join(self.data_dir,"train"), train_transform, type = "train")
-        test_dataset = MiniImageNet(os.path.join(self.data_dir,"train"), valid_transform, type = "validation")
+        train_dataset = MiniImageNet(os.path.join(self.data_dir,"train"), transform = train_transform, type = "train")
+        test_dataset = MiniImageNet(os.path.join(self.data_dir,"train"), transform = valid_transform, type = "validation")
         
         train_dataset, val_dataset = self.sample_val_dataset(train_dataset, valid_transform)
         return train_dataset, val_dataset, test_dataset
