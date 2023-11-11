@@ -4,7 +4,7 @@
 #SBATCH --nodes=1   # Get one node
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:1
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=10
 #SBATCH --job-name=TrainCE
 #SBATCH --constraint=gmem32
 
