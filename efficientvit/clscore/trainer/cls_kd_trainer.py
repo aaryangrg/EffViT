@@ -36,7 +36,6 @@ class ClsTrainerWithKD(Trainer):
         )
         self.auto_restart_thresh = auto_restart_thresh
         self.test_criterion = nn.CrossEntropyLoss()
-        self.kd_criterion = nn.KLDivLoss(reduction = "batchmean")
         self.p_model = p_model
         self.p_model.cuda()
         # Freeze the parameters of the pre-trained model
@@ -122,8 +121,7 @@ class ClsTrainerWithKD(Trainer):
         images = feed_dict["data"]
         labels = feed_dict["label"]
         
-        # Leaving KLD out of Mesa --> add later
-        # setup mesa
+        # Mesa --> null by default
         if self.run_config.mesa is not None and self.run_config.mesa["thresh"] <= self.run_config.progress:
             ema_model = self.ema.shadows
             with torch.inference_mode():
@@ -136,16 +134,18 @@ class ClsTrainerWithKD(Trainer):
         with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16):
             output = self.model(images)
             p_output = self.p_model(images)
-            loss = self.train_criterion(output, labels) # Cross Entropy
+            #BCEWithLogits or CE --> configurable
+            loss = self.train_criterion(output, labels) 
             ce_loss = loss
-            # kd_loss = self.kd_criterion(F.softmax(output, dim=1), F.log_softmax(p_output + LOG_SOFTMAX_CONST, dim = 1)) # KLDivergence (batchmean)
-            kd_loss = self.get_kld_loss(output + LOG_SOFTMAX_CONST, p_output+LOG_SOFTMAX_CONST)
-            # mesa loss
+            kd_loss = self.get_kld_loss(output + LOG_SOFTMAX_CONST, p_output + LOG_SOFTMAX_CONST)
+
+            # mesa loss (Not included by default)
             if ema_output is not None:
                 mesa_loss = self.train_criterion(output, ema_output) # Calculated only on CrossEntropy loss
                 loss = loss + kd_loss + self.run_config.mesa["ratio"] * mesa_loss
+            else :
+                loss = ce_loss + kd_loss
         self.scaler.scale(loss).backward()
-
         # calc train top1 acc
         if self.run_config.mixup_config is None:
             top1 = accuracy(output, torch.argmax(labels, dim=1), topk=(1,))[0][0]
