@@ -26,6 +26,7 @@ parser.add_argument("--last_gamma", type=float, default=0)
 
 parser.add_argument("--auto_restart_thresh", type=float, default=1.0)
 parser.add_argument("--save_freq", type=int, default=1)
+parser.add_argument("--student_weights", type = str, default = None)
 
 
 def main():
@@ -56,7 +57,11 @@ def main():
     run_config = setup.setup_run_config(config, ClsRunConfig)
 
     # setup model
-    model = create_cls_model(config["net_config"]["name"], False, dropout=config["net_config"]["dropout"])
+    if args.student_weights :
+        model = create_cls_model(config["net_config"]["name"], True, weight_url = args.student_weights, dropout=config["net_config"]["dropout"])
+    else :
+        model = create_cls_model(config["net_config"]["name"], False, dropout=config["net_config"]["dropout"])
+    # model = create_cls_model(config["net_config"]["name"], False, dropout=config["net_config"]["dropout"])
     apply_drop_func(model.backbone.stages, config["backbone_drop"])
 
     # setup trainer

@@ -2,6 +2,9 @@
 # Han Cai, Junyan Li, Muyan Hu, Chuang Gan, Song Han
 # International Conference on Computer Vision (ICCV), 2023
 
+
+# EVALUATION ON MINI-IMAGENET 10K split
+
 import argparse
 import math
 import os
@@ -42,7 +45,6 @@ def main():
     parser.add_argument("--crop_ratio", type=float, default=0.95)
     parser.add_argument("--model", type=str)
     parser.add_argument("--weight_url", type=str, default=None)
-    parser.add_argument("--subset_classes", type=int, default = 200)
 
     args = parser.parse_args()
     if args.gpu == "all":
@@ -83,7 +85,7 @@ def main():
     top1 = AverageMeter(is_distributed=False)
     top5 = AverageMeter(is_distributed=False)
     with torch.inference_mode():
-        with tqdm(total=len(data_loader), desc=f"Eval {args.model} on ImageNet") as t:
+        with tqdm(total=len(data_loader), desc=f"Eval {args.model} on Mini-ImageNet Validation Set (100 classes)") as t:
             for images, labels in data_loader:
                 images, labels = images.cuda(), labels.cuda()
                 # compute output

@@ -68,7 +68,7 @@ class MiniImageNet(VisionDataset):
 
 
 class MiniImageNetV2(VisionDataset):
-    # Mini-ImageNet (60K) --> all used for train (100 classes x 600 img)
+    # Mini-ImageNet (60K) --> 50K used for train
     # Validation --> ImageNet validation files on Mini-ImageNet classes
     def __init__(self, root, transform=None, type = "train", target_transform=None, loader=default_loader):
         super(MiniImageNetV2, self).__init__(root, transform=transform, target_transform=target_transform)
@@ -82,16 +82,18 @@ class MiniImageNetV2(VisionDataset):
         if self.type == "train" :
             csv_dir  = os.path.join(DEFAULT_CSV_DIR, "allimages.csv")
             # 600 samples / class x 100 classes
+            count = 0
             with open(csv_dir) as csvfile:
                 csv_reader = csv.reader(csvfile, delimiter=',')
                 next(csv_reader, None)
-                if type == "train" :
-                    for row in tqdm(csv_reader):
+                for row in tqdm(csv_reader):
+                    if count == 0 or count % 6 != 0 :
                         if len(row) == 2 and row[1] in images.keys():
                             images[row[1]].append(row[0])
                         else:
                             if len(row) == 2 :
                                 images[row[1]] = [row[0]]
+                    count += 1
             
             for cls in tqdm(images.keys()):
                 for file_name in images[cls] :
