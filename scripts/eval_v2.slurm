@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=group3
-#SBATCH --output=/home/aaryang/experiments/EffViT/outs/valv2/b3_b1_r224_miniimgnet.out
+#SBATCH --output=/home/aaryang/experiments/EffViT/outs/valv2/b3_b1_pretrained_r224_miniimgnet.out
 #SBATCH --nodes=1   # Get one node
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:2            # And two GPU
@@ -16,6 +16,6 @@ echo CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
 nvidia-smi
 
 python3 ../eval_cls_v2.py --model b1-r224 --image_size 224 \
-    --weight_url  ../exp/distillation/miniimgnet/b3_b1_r224/checkpoint/model_best.pt \
+    --weight_url  ../exp/distillation/miniimgnet/b3_b1_pretrained_r224/checkpoint \
     --batch_size 128 \
     --path /home/c3-0/datasets/ImageNet/validation
