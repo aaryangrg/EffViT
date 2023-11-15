@@ -61,6 +61,7 @@ def main():
         model = create_cls_model(config["net_config"]["name"], True, weight_url = args.student_weights, dropout=config["net_config"]["dropout"])
     else :
         model = create_cls_model(config["net_config"]["name"], False, dropout=config["net_config"]["dropout"])
+        print("Training from scratch")
     apply_drop_func(model.backbone.stages, config["backbone_drop"])
 
     # setup trainer

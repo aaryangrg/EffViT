@@ -16,6 +16,6 @@ echo CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
 nvidia-smi
 
 python3 ../eval_cls_v2.py --model b1-r224 --image_size 224 \
-    --weight_url ../pretrained/b1-r244.pt \
+    --weight_url ../pretrained/b1-r224.pt \
     --batch_size 128 \
     --path /home/c3-0/datasets/ImageNet/validation
