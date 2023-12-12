@@ -6,7 +6,7 @@
 #SBATCH --gres=gpu:1         # And two GPU
 #SBATCH --cpus-per-task=10            # Two cores per task
 #SBATCH --job-name=HalfDistillation
-#SBATCH --constraint=gmem32
+#SBATCH --constraint=gmem24
 
 source /home/aaryang/anaconda3/bin/activate
 conda activate evit
