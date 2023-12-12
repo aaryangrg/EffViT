@@ -11,11 +11,13 @@ from efficientvit.models.efficientvit import (
     efficientvit_cls_l1,
     efficientvit_cls_l2,
     efficientvit_cls_l3,
+    efficientvit_width_adjusted_cls_b0,
+    efficientvit_width_adjusted_cls_b1,
 )
 from efficientvit.models.nn.norm import set_norm_eps
 from efficientvit.models.utils import load_state_dict_from_file
 
-__all__ = ["create_cls_model"]
+__all__ = ["create_cls_model", "create_custom_cls_model"]
 
 
 REGISTERED_CLS_MODEL: dict[str, str] = {
@@ -66,6 +68,29 @@ def create_cls_model(name: str, pretrained=True, weight_url: str or None = None,
         raise ValueError(f"Do not find {name} in the model zoo. List of models: {list(model_dict.keys())}")
     else:
         model = model_dict[model_id](**kwargs)
+    if model_id in ["l1", "l2", "l3"]:
+        set_norm_eps(model, 1e-7)
+
+    if pretrained:
+        weight_url = weight_url or REGISTERED_CLS_MODEL.get(name, None)
+        if weight_url is None:
+            raise ValueError(f"Do not find the pretrained weight of {name}.")
+        else:
+            weight = load_state_dict_from_file(weight_url)
+            model.load_state_dict(weight)
+    return model
+
+def create_custom_cls_model(name: str, pretrained=True, weight_url: str or None = None, width_multiplier = 1, depth_multiplier = 1,  **kwargs) -> EfficientViTCls:
+    model_id = name
+    model_dict = {
+        "b0_custom" : efficientvit_width_adjusted_cls_b0,
+        "b1_custom" : efficientvit_width_adjusted_cls_b1,
+    }
+    if model_id not in model_dict:
+        raise ValueError(f"Do not find {name} set of custom models {list(model_dict.keys())}")
+    else:
+        model = model_dict[model_id](width_multiplier=width_multiplier, height_multiplier= depth_multiplier,**kwargs)
+    
     if model_id in ["l1", "l2", "l3"]:
         set_norm_eps(model, 1e-7)
 

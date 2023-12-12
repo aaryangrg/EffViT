@@ -20,6 +20,9 @@ __all__ = [
     "efficientvit_cls_l1",
     "efficientvit_cls_l2",
     "efficientvit_cls_l3",
+    ###################### - Width Adjusted Models
+    "efficientvit_width_adjusted_cls_b0"
+    "efficientvit_width_adjusted_cls_b1"
 ]
 
 
@@ -74,6 +77,20 @@ def efficientvit_cls_b0(**kwargs) -> EfficientViTCls:
     model = EfficientViTCls(backbone, head)
     return model
 
+#### WIDTH ADJUSTED COMPLETE B0 MODEL #####
+def efficientvit_width_adjusted_cls_b0(width_multiplier = 1, height_multiplier = 1, **kwargs) -> EfficientViTCls:
+    from efficientvit.models.efficientvit.backbone import efficientvit_modified_backbone_b0
+
+    backbone = efficientvit_modified_backbone_b0(width_multiplier = width_multiplier,height_multiplier = height_multiplier,**kwargs)
+    default_out_channels = 128
+    new_out_channels = default_out_channels * width_multiplier
+    head = ClsHead(
+        in_channels=new_out_channels,
+        width_list=[1024, 1280],
+        **build_kwargs_from_config(kwargs, ClsHead),
+    )
+    model = EfficientViTCls(backbone, head)
+    return model
 
 def efficientvit_cls_b1(**kwargs) -> EfficientViTCls:
     from efficientvit.models.efficientvit.backbone import efficientvit_backbone_b1
@@ -82,6 +99,21 @@ def efficientvit_cls_b1(**kwargs) -> EfficientViTCls:
 
     head = ClsHead(
         in_channels=256,
+        width_list=[1536, 1600],
+        **build_kwargs_from_config(kwargs, ClsHead),
+    )
+    model = EfficientViTCls(backbone, head)
+    return model
+
+#### WIDTH ADJUSTED COMPLETE B1 MODEL #####
+def efficientvit_width_adjusted_cls_b1(width_multiplier = 1, height_multiplier = 1, **kwargs) -> EfficientViTCls:
+    from efficientvit.models.efficientvit.backbone import efficientvit_modified_backbone_b1
+
+    backbone = efficientvit_modified_backbone_b1(width_multiplier = width_multiplier,height_multiplier = height_multiplier,**kwargs)
+    default_out_channels = 256
+    new_out_channels = default_out_channels * width_multiplier
+    head = ClsHead(
+        in_channels=new_out_channels,
         width_list=[1536, 1600],
         **build_kwargs_from_config(kwargs, ClsHead),
     )

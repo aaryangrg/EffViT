@@ -4,10 +4,11 @@
 
 import argparse
 import os
+from turtle import width
 
 from efficientvit.apps import setup
 from efficientvit.apps.utils import dump_config, parse_unknown_args
-from efficientvit.cls_model_zoo import create_cls_model
+from efficientvit.cls_model_zoo import create_cls_model, create_custom_cls_model
 from efficientvit.clscore.data_provider.imagenet_subset import ImageNetDataProviderSubset
 from efficientvit.clscore.trainer import ClsRunConfig, ClsTrainer
 from efficientvit.models.nn.drop import apply_drop_func
@@ -27,6 +28,12 @@ parser.add_argument("--last_gamma", type=float, default=0)
 parser.add_argument("--auto_restart_thresh", type=float, default=1.0)
 parser.add_argument("--save_freq", type=int, default=1)
 parser.add_argument("--student_weights", type = str, default = None)
+
+# Width and Depth customization
+parser.add_argument("--reduced_width", type = bool, default = False )
+parser.add_argument("--width_multiplier", type = float, default=1.0)
+parser.add_argument("--depth_multiplier", type = float, default=1.0)
+parser.add_argument("--student_model", type = str, default = None)
 
 
 def main():
@@ -57,11 +64,21 @@ def main():
     run_config = setup.setup_run_config(config, ClsRunConfig)
 
     # setup model
-    if args.student_weights :
-        model = create_cls_model(config["net_config"]["name"], True, weight_url = args.student_weights, dropout=config["net_config"]["dropout"])
-    else :
-        model = create_cls_model(config["net_config"]["name"], False, dropout=config["net_config"]["dropout"])
-        print("Training from scratch")
+    if not args.reduced_width :
+        if args.student_weights :
+            model = create_cls_model(config["net_config"]["name"], True, weight_url = args.student_weights, dropout=config["net_config"]["dropout"])
+        else :
+            model = create_cls_model(config["net_config"]["name"], False, dropout=config["net_config"]["dropout"])
+            print("Scratch Training")
+    else : 
+        print("Using width / depth customization")
+        print("Width multiplier : ", args.width_multiplier)
+        print("Depth multiplier : ", args.depth_multiplier)
+        if args.student_weights :
+            model = create_custom_cls_model(args.student_model, True, weight_url = args.student_weights,width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier,  dropout=config["net_config"]["dropout"])
+        else :
+            model = create_custom_cls_model(args.student_model, False, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier, dropout=config["net_config"]["dropout"])
+            print("Training from scratch")
     apply_drop_func(model.backbone.stages, config["backbone_drop"])
 
     # setup trainer

@@ -29,6 +29,8 @@ __all__ = [
     "efficientvit_backbone_l1",
     "efficientvit_backbone_l2",
     "efficientvit_backbone_l3",
+    "efficientvit_modified_backbone_b0",
+    "efficientvit_modified_backbone_b1"
 ]
 
 
@@ -88,6 +90,7 @@ class EfficientViTBackbone(nn.Module):
                 stage.append(block)
                 in_channels = w
             self.stages.append(OpSequential(stage))
+            # What is the point of this line ?
             self.width_list.append(in_channels)
 
         for w, d in zip(width_list[3:], depth_list[3:]):
@@ -167,11 +170,34 @@ def efficientvit_backbone_b0(**kwargs) -> EfficientViTBackbone:
     )
     return backbone
 
+#### MODIFIED B0 BACKBONE ####
+def efficientvit_modified_backbone_b0(width_multiplier = 1, depth_multiplier = 1, **kwargs) -> EfficientViTBackbone:
+    default_width_list = [8, 16, 32, 64, 128]
+    default_height_list = [1, 2, 2, 2, 2]
+    backbone = EfficientViTBackbone(
+        width_list=[int(w * width_multiplier) for w in default_width_list],
+        depth_list= [int(h * depth_multiplier) for h in default_height_list],
+        dim=16,
+        **build_kwargs_from_config(kwargs, EfficientViTBackbone),
+    )
+    return backbone
 
 def efficientvit_backbone_b1(**kwargs) -> EfficientViTBackbone:
     backbone = EfficientViTBackbone(
         width_list=[16, 32, 64, 128, 256],
         depth_list=[1, 2, 3, 3, 4],
+        dim=16,
+        **build_kwargs_from_config(kwargs, EfficientViTBackbone),
+    )
+    return backbone
+
+##### MODIFIED B1 BACKBONE #####
+def efficientvit_modified_backbone_b1(width_multiplier = 1, depth_multiplier = 1, **kwargs) -> EfficientViTBackbone:
+    default_width_list = [16, 32, 64, 128, 256]
+    default_height_list = [1, 2, 3, 3, 4]
+    backbone = EfficientViTBackbone(
+        width_list=[int(w * width_multiplier) for w in default_width_list],
+        depth_list= [int(h * depth_multiplier) for h in default_height_list],
         dim=16,
         **build_kwargs_from_config(kwargs, EfficientViTBackbone),
     )

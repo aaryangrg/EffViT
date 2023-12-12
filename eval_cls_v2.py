@@ -16,7 +16,7 @@ from torchvision.transforms.functional import InterpolationMode
 from tqdm import tqdm
 
 from efficientvit.apps.utils import AverageMeter
-from efficientvit.cls_model_zoo import create_cls_model
+from efficientvit.cls_model_zoo import create_cls_model, create_custom_cls_model 
 
 
 def accuracy(output: torch.Tensor, target: torch.Tensor, topk=(1,)) -> list[torch.Tensor]:
@@ -44,6 +44,12 @@ def main():
     parser.add_argument("--crop_ratio", type=float, default=0.95)
     parser.add_argument("--model", type=str)
     parser.add_argument("--weight_url", type=str, default=None)
+
+
+    parser.add_argument("--reduced_width", type = bool, default = False )
+    parser.add_argument("--width_multiplier", type = float, default=1.0)
+    parser.add_argument("--depth_multiplier", type = float, default=1.0)
+
 
     args = parser.parse_args()
     if args.gpu == "all":
@@ -77,7 +83,11 @@ def main():
         drop_last=False,
     )
 
-    model = create_cls_model(args.model, weight_url=args.weight_url)
+    if args.reduced_width : 
+        model = create_custom_cls_model(args.model, True, weight_url = args.student_weights, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
+    else :
+        model = create_cls_model(args.model, weight_url=args.weight_url)
+        
     model = torch.nn.DataParallel(model).cuda()
     model.eval()
 
