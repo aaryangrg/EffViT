@@ -21,7 +21,7 @@ python3 ../../train_kd.py ../../configs/cls/imagenet/b1.yaml  --fp16 \
     --parent_model b3 \
     --parent_weights_url /home/aaryang/experiments/EffViT/pretrained/b3-r224.pt \
     --use_subset true \
-    --data_provider.train_batch_size 512 \
+    --data_provider.train_batch_size 768 \
     --reduced_width true \
     --width_multiplier 0.5 \
     --student_model b1_custom
