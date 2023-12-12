@@ -20,6 +20,6 @@ python ../../train_cls_mini_imagenet.py ../../configs/cls/imagenet/b1.yaml  --fp
     --path ../../exp/custom_width/train/b1_r224_train_0.5w/ \
     --data_provider.train_batch_size 768 \
     --run_config.bce true \
-    --reduced_width true \s
+    --reduced_width true \
     --width_multiplier 0.5 \
     --student_model b1_custom
