@@ -83,7 +83,7 @@ def efficientvit_width_adjusted_cls_b0(width_multiplier = 1, height_multiplier =
 
     backbone = efficientvit_modified_backbone_b0(width_multiplier = width_multiplier,height_multiplier = height_multiplier,**kwargs)
     default_out_channels = 128
-    new_out_channels = default_out_channels * width_multiplier
+    new_out_channels = int(default_out_channels * width_multiplier)
     head = ClsHead(
         in_channels=new_out_channels,
         width_list=[1024, 1280],
@@ -111,7 +111,7 @@ def efficientvit_width_adjusted_cls_b1(width_multiplier = 1, height_multiplier =
 
     backbone = efficientvit_modified_backbone_b1(width_multiplier = width_multiplier,height_multiplier = height_multiplier,**kwargs)
     default_out_channels = 256
-    new_out_channels = default_out_channels * width_multiplier
+    new_out_channels = int(default_out_channels * width_multiplier)
     head = ClsHead(
         in_channels=new_out_channels,
         width_list=[1536, 1600],
