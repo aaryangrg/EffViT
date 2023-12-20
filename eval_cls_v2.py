@@ -84,7 +84,7 @@ def main():
     )
 
     if args.reduced_width : 
-        model = create_custom_cls_model(args.model, True, weight_url = args.student_weights, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
+        model = create_custom_cls_model(args.model, True, weight_url = args.weight_url, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
     else :
         model = create_cls_model(args.model, weight_url=args.weight_url)
         

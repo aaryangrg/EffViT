@@ -5,7 +5,7 @@
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:2            # And two GPU
 #SBATCH --cpus-per-task=8            # Two cores per task
-#SBATCH --job-name=B1halfVal
+#SBATCH --job-name=DisthalfVal
 #SBATCH --constraint=gmem12
 
 source /home/aaryang/anaconda3/bin/activate
@@ -21,4 +21,3 @@ python3 ../../eval_cls_v2.py --model b1_custom --image_size 224 \
     --path /home/c3-0/datasets/ImageNet/validation \
     --reduced_width true \
     --width_multiplier 0.5 \
-    --student_model b1_custom
