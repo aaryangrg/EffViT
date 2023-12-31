@@ -16,7 +16,7 @@ echo CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
 nvidia-smi
 
 python3 ../../eval_cls_v2.py --model b1_custom --image_size 224 \
-    --weight_url ../../exp/custom_width/train/b3_b1_0.5w_450epochs_r224/checkpoint/model_best.pt \
+    --weight_url ../../exp/custom_width/distillation/b3_b1_0.5w_450epochs_r224/checkpoint/model_best.pt \
     --batch_size 128 \
     --path /home/c3-0/datasets/ImageNet/validation \
     --reduced_width true \
