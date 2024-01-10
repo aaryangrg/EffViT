@@ -96,7 +96,7 @@ class FlexibleConvLayer(nn.Module):
             out_channels = int(make_divisible(self.out_channels_basic * self.width_mult))
         # Slicing default (max width) conv layer weights
         weight = self.conv.weight[:out_channels, :in_channels, :, :]
-        if self.use_bias is not None:
+        if self.use_bias :
             bias = self.conv.bias[:out_channels]
         else:
             bias = self.conv.bias
@@ -107,7 +107,6 @@ class FlexibleConvLayer(nn.Module):
         # What is this exactly?
         # if getattr(FLAGS, 'conv_averaged', False):
             # out = out * (max(self.in_channels_list)/self.in_channels)
-        
         if self.norm :
             out = self.norm(out)
         if self.act :
