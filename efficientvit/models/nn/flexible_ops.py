@@ -1,4 +1,3 @@
-from efficientvit.models.efficientvit import flexible_backbone
 from efficientvit.models.nn.ops import IdentityLayer, ResidualBlock
 import torch
 import torch.nn as nn
