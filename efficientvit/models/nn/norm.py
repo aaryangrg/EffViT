@@ -40,7 +40,7 @@ def build_norm(name="bn2d", num_features=None, **kwargs) -> nn.Module or None:
     else:
         return None
 
-def build_flexible_norm(**kwargs) -> nn.Module or None :
+def build_flexible_norm(name,**kwargs) -> nn.Module or None :
     from efficientvit.models.nn import FlexibleBatchNorm2d
     norm_cls = FlexibleBatchNorm2d
     args = build_kwargs_from_config(kwargs, norm_cls)
