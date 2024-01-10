@@ -120,7 +120,7 @@ class FlexibleBatchNorm2d(nn.BatchNorm2d):
         num_features_max = num_features
 
         # Using default BatchNorm2d configs --> affine and track not specified in configs
-        super(FlexibleBatchNorm2d, self).__init__(num_features_max, affine=True, track_running_stats=True)
+        super(FlexibleBatchNorm2d, self).__init__(num_features_max)
         self.num_features_basic = num_features
 
         # Different layer for each pre-determined width
