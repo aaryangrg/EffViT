@@ -1,4 +1,3 @@
-from efficientvit.models.nn.flexible_ops import FlexibleConvLayer
 import torch
 import torch.nn as nn
 
