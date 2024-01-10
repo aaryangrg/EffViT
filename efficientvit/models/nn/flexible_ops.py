@@ -113,7 +113,7 @@ class FlexibleConvLayer(nn.Module):
         if self.act :
             out = self.act(out)
 
-        print(out.size)
+        print(out.shape)
         return out 
     
 # Adapted from USBatchNorm2D
