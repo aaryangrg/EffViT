@@ -1,4 +1,4 @@
-from efficientvit.models.nn.ops import IdentityLayer, ResidualBlock
+from efficientvit.models.nn import IdentityLayer, ResidualBlock
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
