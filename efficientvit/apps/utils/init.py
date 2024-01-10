@@ -11,7 +11,7 @@ __all__ = ["init_modules", "zero_last_gamma"]
 
 
 def init_modules(model: nn.Module or list[nn.Module], init_type="trunc_normal") -> None:
-    from efficientvit.models.nn.flexible_ops import FlexibleBatchNorm2d
+    import efficientvit.models.nn.flexible_ops as flexops
     _DEFAULT_INIT_PARAM = {"trunc_normal": 0.02}
 
     if isinstance(model, list):
@@ -35,7 +35,7 @@ def init_modules(model: nn.Module or list[nn.Module], init_type="trunc_normal") 
                     m.bias.data.zero_()
             elif isinstance(m, nn.Embedding):
                 init_func(m.weight)
-            elif isinstance(m, FlexibleBatchNorm2d) :
+            elif isinstance(m, flexops.FlexibleBatchNorm2d) :
                 continue
                 # for child_layer in m.bn.children():
                 #      if isinstance(child_layer, (_BatchNorm, nn.GroupNorm, nn.LayerNorm)):
