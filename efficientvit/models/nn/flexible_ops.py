@@ -144,6 +144,8 @@ class FlexibleBatchNorm2d(nn.BatchNorm2d):
         weight = self.weight
         bias = self.bias
         c = int(make_divisible(self.num_features_basic * self.width_mult)) if self.flex else self.num_features_basic
+        if not self.flex :
+            print(c)
         if self.width_mult in WIDTH_LIST:
             idx = WIDTH_LIST.index(self.width_mult)
             y = nn.functional.batch_norm(
