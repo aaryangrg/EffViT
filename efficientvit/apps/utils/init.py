@@ -6,12 +6,12 @@
 import torch
 import torch.nn as nn
 from torch.nn.modules.batchnorm import _BatchNorm
-from efficientvit.models.nn.flexible_ops import FlexibleBatchNorm2d
 
 __all__ = ["init_modules", "zero_last_gamma"]
 
 
 def init_modules(model: nn.Module or list[nn.Module], init_type="trunc_normal") -> None:
+    from efficientvit.models.nn.flexible_ops import FlexibleBatchNorm2d
     _DEFAULT_INIT_PARAM = {"trunc_normal": 0.02}
 
     if isinstance(model, list):
