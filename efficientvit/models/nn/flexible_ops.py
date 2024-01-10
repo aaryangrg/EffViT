@@ -143,11 +143,11 @@ class FlexibleBatchNorm2d(nn.BatchNorm2d):
     def forward(self, input):
         weight = self.weight
         bias = self.bias
+        # If its the last layer --> use the original number of features
         c = int(make_divisible(self.num_features_basic * self.width_mult)) if self.flex else self.num_features_basic
-        if not self.flex :
-            print(c)
         if self.width_mult in WIDTH_LIST:
-            idx = WIDTH_LIST.index(self.width_mult)
+            # If its the last layer --> use the original width (multiple of 1)
+            idx = WIDTH_LIST.index(self.width_mult) if self.flex else len(WIDTH_LIST)-1
             y = nn.functional.batch_norm(
                 input,
                 self.bn[idx].running_mean[:c],
