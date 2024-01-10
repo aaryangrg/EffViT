@@ -2,6 +2,7 @@
 # Han Cai, Junyan Li, Muyan Hu, Chuang Gan, Song Han
 # International Conference on Computer Vision (ICCV), 2023
 
+from efficientvit.models.nn.flexible_ops import FlexibleBatchNorm2d
 import torch
 import torch.nn as nn
 from torch.nn.modules.batchnorm import _BatchNorm
@@ -33,6 +34,11 @@ def init_modules(model: nn.Module or list[nn.Module], init_type="trunc_normal") 
                     m.bias.data.zero_()
             elif isinstance(m, nn.Embedding):
                 init_func(m.weight)
+            elif isinstance(m, FlexibleBatchNorm2d) :
+                for child_layer in m.bn.children():
+                     if isinstance(child_layer, (_BatchNorm, nn.GroupNorm, nn.LayerNorm)):
+                        child_layer.weight.data.fill_(1)
+                        child_layer.bias.data.zero_()
             elif isinstance(m, (_BatchNorm, nn.GroupNorm, nn.LayerNorm)):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
