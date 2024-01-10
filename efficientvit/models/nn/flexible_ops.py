@@ -140,6 +140,7 @@ class FlexibleBatchNorm2d(nn.BatchNorm2d):
         self.ignore_model_profiling = True
         self.flex = flex
 
+    # Why are some widths explicitly pre-defined? --> for test / val purposes?
     def forward(self, input):
         weight = self.weight
         bias = self.bias
@@ -160,8 +161,8 @@ class FlexibleBatchNorm2d(nn.BatchNorm2d):
         else:
             y = nn.functional.batch_norm(
                 input,
-                self.running_mean,
-                self.running_var,
+                self.running_mean[:c],
+                self.running_var[:c],
                 weight[:c],
                 bias[:c],
                 self.training,
