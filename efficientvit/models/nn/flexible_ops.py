@@ -103,7 +103,7 @@ class FlexibleConvLayer(nn.Module):
             bias = self.conv.bias
         out = nn.functional.conv2d(
             input, weight, bias, self.stride, self.padding,
-            self.dilation, self.group_desc)
+            self.dilation, self.groups_desc)
         
         # What is this exactly?
         # if getattr(FLAGS, 'conv_averaged', False):
