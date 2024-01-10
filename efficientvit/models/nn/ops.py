@@ -32,7 +32,6 @@ __all__ = [
 #                             Basic Layers                                      #
 #################################################################################
 
-
 class ConvLayer(nn.Module):
     def __init__(
         self,
@@ -75,7 +74,6 @@ class ConvLayer(nn.Module):
         if self.act:
             x = self.act(x)
         return x
-
 
 class UpSampleLayer(nn.Module):
     def __init__(

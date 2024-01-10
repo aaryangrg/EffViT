@@ -2,13 +2,14 @@
 # Han Cai, Junyan Li, Muyan Hu, Chuang Gan, Song Han
 # International Conference on Computer Vision (ICCV), 2023
 
+from efficientvit.models.nn.flexible_ops import FlexibleBatchNorm2d
 import torch
 import torch.nn as nn
 from torch.nn.modules.batchnorm import _BatchNorm
 
 from efficientvit.models.utils import build_kwargs_from_config
 
-__all__ = ["LayerNorm2d", "build_norm", "reset_bn", "set_norm_eps"]
+__all__ = ["LayerNorm2d", "build_norm", "reset_bn", "set_norm_eps", "build_flexible_norm"]
 
 
 class LayerNorm2d(nn.LayerNorm):
@@ -40,6 +41,10 @@ def build_norm(name="bn2d", num_features=None, **kwargs) -> nn.Module or None:
     else:
         return None
 
+def build_flexible_norm(num_features = None, **kwargs) -> nn.Module or None :
+    norm_cls = FlexibleBatchNorm2d()
+    args = build_kwargs_from_config(kwargs, norm_cls)
+    return norm_cls(**args)
 
 def reset_bn(
     model: nn.Module,

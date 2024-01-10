@@ -2,6 +2,8 @@
 # Han Cai, Junyan Li, Muyan Hu, Chuang Gan, Song Han
 # International Conference on Computer Vision (ICCV), 2023
 
+from efficientvit.models.efficientvit.flexible_backbone import FlexibleEfficientViTBackbone
+from efficientvit.models.nn.flexible_ops import FlexibleConvLayer
 import torch
 import torch.nn as nn
 
@@ -23,6 +25,8 @@ __all__ = [
     ###################### - Width Adjusted Models
     "efficientvit_width_adjusted_cls_b0",
     "efficientvit_width_adjusted_cls_b1"
+    ###################### - Flexible Models
+    "flexible_efficientvit_cls_b1"
 ]
 
 
@@ -52,8 +56,34 @@ class ClsHead(OpSequential):
         return OpSequential.forward(self, x)
 
 
+class FlexibleClsHead(OpSequential):
+    def __init__(
+        self,
+        in_channels: int,
+        width_list: list[int],
+        n_classes=1000,
+        dropout=0.0,
+        norm="bn2d",
+        act_func="hswish",
+        fid="stage_final",
+    ):
+        # Could set to True, False (no changes to the linear layers)
+        ops = [
+            FlexibleConvLayer(in_channels, width_list[0], 1, norm=norm, act_func=act_func, flex = [True, True]),
+            nn.AdaptiveAvgPool2d(output_size=1),
+            LinearLayer(width_list[0], width_list[1], False, norm="ln", act_func=act_func),
+            LinearLayer(width_list[1], n_classes, True, dropout, None, None),
+        ]
+        super().__init__(ops)
+
+        self.fid = fid
+
+    def forward(self, feed_dict: dict[str, torch.Tensor]) -> torch.Tensor:
+        x = feed_dict[self.fid]
+        return OpSequential.forward(self, x)
+
 class EfficientViTCls(nn.Module):
-    def __init__(self, backbone: EfficientViTBackbone or EfficientViTLargeBackbone, head: ClsHead) -> None:
+    def __init__(self, backbone: EfficientViTBackbone or EfficientViTLargeBackbone or FlexibleEfficientViTBackbone, head: ClsHead or FlexibleClsHead) -> None:
         super().__init__()
         self.backbone = backbone
         self.head = head
@@ -188,6 +218,21 @@ def efficientvit_cls_l3(**kwargs) -> EfficientViTCls:
         in_channels=1024,
         width_list=[6144, 6400],
         act_func="gelu",
+        **build_kwargs_from_config(kwargs, ClsHead),
+    )
+    model = EfficientViTCls(backbone, head)
+    return model
+
+
+#### Flexible Cls Models #####
+def flexible_efficientvit_cls_b1(**kwargs) -> EfficientViTCls:
+    from efficientvit.models.efficientvit.flexible_backbone import flexible_efficientvit_backbone_b1
+
+    backbone = flexible_efficientvit_backbone_b1(**kwargs)
+
+    head = FlexibleClsHead(
+        in_channels=256,
+        width_list=[1536, 1600],
         **build_kwargs_from_config(kwargs, ClsHead),
     )
     model = EfficientViTCls(backbone, head)
