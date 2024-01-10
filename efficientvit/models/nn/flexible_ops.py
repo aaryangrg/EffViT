@@ -49,7 +49,8 @@ class FlexibleConvLayer(nn.Module):
         norm="bn2d",
         act_func="relu",
         # Input Channels , Output Channels
-        flex = [True, True]
+        flex = [True, True],
+        flex_norm = True
     ):
         super(FlexibleConvLayer, self).__init__()
 
@@ -70,6 +71,7 @@ class FlexibleConvLayer(nn.Module):
         self.padding = padding
         self.flex = flex
         self.dilation = dilation
+        self.flex_norm = flex_norm
 
         # Full width conv weights initialized
         self.conv = nn.Conv2d(
@@ -82,7 +84,7 @@ class FlexibleConvLayer(nn.Module):
             groups=groups,
             bias=use_bias,
         )
-        self.norm = build_flexible_norm(norm, num_features=out_channels)
+        self.norm = build_flexible_norm(norm, flex = self.flex_norm, num_features=out_channels)
         self.act = build_act(act_func)
     
     def forward(self, input):
@@ -118,7 +120,7 @@ class FlexibleConvLayer(nn.Module):
     
 # Adapted from USBatchNorm2D
 class FlexibleBatchNorm2d(nn.BatchNorm2d):
-    def __init__(self, num_features):
+    def __init__(self, flex = True,  num_features = None):
         num_features_max = num_features
 
         # Using default BatchNorm2d configs --> affine and track not specified in configs
@@ -137,11 +139,12 @@ class FlexibleBatchNorm2d(nn.BatchNorm2d):
         # self.ratio = ratio
         self.width_mult = None
         self.ignore_model_profiling = True
+        self.flex = flex
 
     def forward(self, input):
         weight = self.weight
         bias = self.bias
-        c = int(make_divisible(self.num_features_basic * self.width_mult))
+        c = int(make_divisible(self.num_features_basic * self.width_mult)) if self.flex else self.num_features_basic
         if self.width_mult in WIDTH_LIST:
             idx = WIDTH_LIST.index(self.width_mult)
             y = nn.functional.batch_norm(
