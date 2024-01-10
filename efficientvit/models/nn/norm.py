@@ -2,12 +2,12 @@
 # Han Cai, Junyan Li, Muyan Hu, Chuang Gan, Song Han
 # International Conference on Computer Vision (ICCV), 2023
 
-from efficientvit.models.nn import FlexibleBatchNorm2d
+
 import torch
 import torch.nn as nn
 from torch.nn.modules.batchnorm import _BatchNorm
-
 from efficientvit.models.utils import build_kwargs_from_config
+from efficientvit.models.nn import FlexibleBatchNorm2d
 
 __all__ = ["LayerNorm2d", "build_norm", "reset_bn", "set_norm_eps", "build_flexible_norm"]
 
