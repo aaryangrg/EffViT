@@ -69,6 +69,7 @@ class FlexibleConvLayer(nn.Module):
         self.stride = stride
         self.padding = padding
         self.flex = flex
+        self.dilation = dilation
 
         # Full width conv weights initialized
         self.conv = nn.Conv2d(
