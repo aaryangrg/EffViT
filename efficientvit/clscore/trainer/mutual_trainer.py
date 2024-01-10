@@ -44,7 +44,7 @@ class ClsMutualTrainer(Trainer):
         self.p_model.eval()
         
         # Initializing model with width-mult = 1.0
-        model.apply(lambda m: setattr(m, 'width_mult', 1.0))
+        model.apply(lambda m: setattr(m, 'width_mult', 1) if hasattr(m, 'width_mult') else None)
 
     def _validate(self, model, data_loader, epoch) -> dict[str, any]:
         val_loss = AverageMeter()
