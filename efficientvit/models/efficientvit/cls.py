@@ -69,7 +69,7 @@ class FlexibleClsHead(OpSequential):
     ):
         # Could set to True, False (no changes to the linear layers)
         ops = [
-            FlexibleConvLayer(in_channels, width_list[0], 1, norm=norm, act_func=act_func, flex = [True, True]),
+            FlexibleConvLayer(in_channels, width_list[0], 1, norm=norm, act_func=act_func, flex = [True, False]),
             nn.AdaptiveAvgPool2d(output_size=1),
             LinearLayer(width_list[0], width_list[1], False, norm="ln", act_func=act_func),
             LinearLayer(width_list[1], n_classes, True, dropout, None, None),
