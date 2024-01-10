@@ -36,6 +36,7 @@ def init_modules(model: nn.Module or list[nn.Module], init_type="trunc_normal") 
             elif isinstance(m, nn.Embedding):
                 init_func(m.weight)
             elif isinstance(m, flexops.FlexibleBatchNorm2d) :
+                print("FlexibleNormBlock Initialized")
                 continue
                 # for child_layer in m.bn.children():
                 #      if isinstance(child_layer, (_BatchNorm, nn.GroupNorm, nn.LayerNorm)):
@@ -43,8 +44,9 @@ def init_modules(model: nn.Module or list[nn.Module], init_type="trunc_normal") 
                 #             child_layer.weight.data.fill_(1)
                 #             child_layer.bias.data.zero_()
             elif isinstance(m, (_BatchNorm, nn.GroupNorm, nn.LayerNorm)):
-                m.weight.data.fill_(1)
-                m.bias.data.zero_()
+                if hasattr(m, 'weight') and hasattr(m, 'bias'):
+                    m.weight.data.fill_(1)
+                    m.bias.data.zero_()
             else:
                 weight = getattr(m, "weight", None)
                 bias = getattr(m, "bias", None)
