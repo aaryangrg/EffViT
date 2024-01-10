@@ -18,7 +18,7 @@ from efficientvit.models.efficientvit import (
 from efficientvit.models.nn.norm import set_norm_eps
 from efficientvit.models.utils import load_state_dict_from_file
 
-__all__ = ["create_cls_model", "create_custom_cls_model"]
+__all__ = ["create_cls_model", "create_custom_cls_model", "create_flexible_cls_model"]
 
 
 REGISTERED_CLS_MODEL: dict[str, str] = {

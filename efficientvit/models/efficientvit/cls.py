@@ -225,6 +225,7 @@ def efficientvit_cls_l3(**kwargs) -> EfficientViTCls:
 
 
 #### Flexible Cls Models #####
+
 def flexible_efficientvit_cls_b1(**kwargs) -> EfficientViTCls:
     from efficientvit.models.efficientvit.flexible_backbone import flexible_efficientvit_backbone_b1
 
