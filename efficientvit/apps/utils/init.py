@@ -45,6 +45,7 @@ def init_modules(model: nn.Module or list[nn.Module], init_type="trunc_normal") 
                 #             child_layer.bias.data.zero_()
             elif isinstance(m, (_BatchNorm, nn.GroupNorm, nn.LayerNorm)):
                 if hasattr(m, 'weight') and hasattr(m, 'bias'):
+                    print(m)
                     m.weight.data.fill_(1)
                     m.bias.data.zero_()
             else:
