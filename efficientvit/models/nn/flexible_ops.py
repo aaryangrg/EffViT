@@ -50,7 +50,6 @@ class FlexibleConvLayer(nn.Module):
         act_func="relu",
         # Input Channels , Output Channels
         flex = [True, True],
-        flex_norm = True
     ):
         super(FlexibleConvLayer, self).__init__()
 
@@ -71,7 +70,7 @@ class FlexibleConvLayer(nn.Module):
         self.padding = padding
         self.flex = flex
         self.dilation = dilation
-        self.flex_norm = flex_norm
+        self.flex_norm = flex[1]
 
         # Full width conv weights initialized
         self.conv = nn.Conv2d(
