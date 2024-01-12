@@ -153,7 +153,8 @@ class ClsMutualTrainer(Trainer):
 
             # KLD for each width, added back to total loss func
             for width_mult in PREDEFINED_WIDTHS[:len(PREDEFINED_WIDTHS)-1]:
-                self.model.apply(lambda m: setattr(m, 'width_mult', width_mult))
+                with torch.no_grad():
+                    self.model.apply(lambda m: setattr(m, 'width_mult', width_mult))
                 output = self.model(images)
                 kd_loss = self.get_kld_loss(output + LOG_SOFTMAX_CONST, max_width_output_detached + LOG_SOFTMAX_CONST)
                 total_kd_loss += kd_loss
