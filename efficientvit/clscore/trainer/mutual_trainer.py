@@ -131,14 +131,14 @@ class ClsMutualTrainer(Trainer):
         labels = feed_dict["label"]
         
         # Mesa --> null by default
-        if self.run_config.mesa is not None and self.run_config.mesa["thresh"] <= self.run_config.progress:
-            ema_model = self.ema.shadows
-            with torch.inference_mode():
-                ema_output = ema_model(images).detach()
-            ema_output = torch.clone(ema_output)
-            ema_output = F.sigmoid(ema_output).detach()
-        else:
-            ema_output = None
+        # if self.run_config.mesa is not None and self.run_config.mesa["thresh"] <= self.run_config.progress:
+        #     ema_model = self.ema.shadows
+        #     with torch.inference_mode():
+        #         ema_output = ema_model(images).detach()
+        #     ema_output = torch.clone(ema_output)
+        #     ema_output = F.sigmoid(ema_output).detach()
+        # else:
+        #     ema_output = None
 
         with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16):
             # p_output = self.p_model(images)
@@ -150,6 +150,8 @@ class ClsMutualTrainer(Trainer):
             loss = self.train_criterion(max_width_output, labels) 
             # For log
             ce_loss = loss
+            self.scaler.scale(loss).backward()
+
             max_width_output_detached = max_width_output.detach()
             total_kd_loss = 0
 
@@ -159,17 +161,16 @@ class ClsMutualTrainer(Trainer):
                     self.model.apply(lambda m: setattr(m, 'width_mult', width_mult))
                 output = self.model(images)
                 kd_loss = self.get_kld_loss(output + LOG_SOFTMAX_CONST, max_width_output_detached + LOG_SOFTMAX_CONST)
+                self.scaler.scale(kd_loss).backward()
                 total_kd_loss += kd_loss
-                loss += kd_loss
 
             # mesa loss (Not included by default)
-            if ema_output is not None:
-                mesa_loss = self.train_criterion(output, ema_output) # Calculated only on CrossEntropy loss
-                loss = loss + self.run_config.mesa["ratio"] * mesa_loss
-            else :
-                pass
+            # if ema_output is not None:
+            #     mesa_loss = self.train_criterion(output, ema_output) # Calculated only on CrossEntropy loss
+            #     loss = loss + total_kd_loss + self.run_config.mesa["ratio"] * mesa_loss
+            # else :
+            #     pass
 
-        self.scaler.scale(loss).backward()
         # calc train top1 acc
         if self.run_config.mixup_config is None:
             top1 = accuracy(output, torch.argmax(labels, dim=1), topk=(1,))[0][0]
@@ -177,7 +178,7 @@ class ClsMutualTrainer(Trainer):
             top1 = None
 
         return {
-            "loss": loss,
+            "loss": ce_loss + total_kd_loss,
             "top1": top1,
             "task_loss" : ce_loss,
             "kd_loss" : total_kd_loss
