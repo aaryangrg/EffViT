@@ -21,6 +21,8 @@ __all__ = ["ClsMutualTrainer"]
 LOG_SOFTMAX_CONST = 1e-6
 PREDEFINED_WIDTHS = [0.25, 0.50, 0.75, 1.0]
 
+torch.autograd.set_detect_anomaly(True)
+
 class ClsMutualTrainer(Trainer):
     def __init__(
         self,
