@@ -19,6 +19,7 @@ from efficientvit.models.utils import list_join, list_mean, torch_random_choices
 
 __all__ = ["ClsMutualTrainer"]
 LOG_SOFTMAX_CONST = 1e-6
+PREDEFINED_WIDTHS = [0.25, 0.50, 0.75, 1.0]
 
 class ClsMutualTrainer(Trainer):
     def __init__(
@@ -44,13 +45,17 @@ class ClsMutualTrainer(Trainer):
         self.p_model.eval()
         
         # Initializing model with width-mult = 1.0
-        model.apply(lambda m: setattr(m, 'width_mult', 0.25))
+        model.apply(lambda m: setattr(m, 'width_mult', 1.0))
 
     def _validate(self, model, data_loader, epoch) -> dict[str, any]:
+
         val_loss = AverageMeter()
         val_top1 = AverageMeter()
         val_top5 = AverageMeter()
-
+        
+        #Validate on max-width
+        self.model.apply(lambda m: setattr(m, 'width_mult', PREDEFINED_WIDTHS[-1]))
+        
         with torch.no_grad():
             with tqdm(
                 total=len(data_loader),
@@ -118,7 +123,7 @@ class ClsMutualTrainer(Trainer):
             "label": labels,
         }
 
-    # MODIFIED
+    # Using pre-defined fixed widths (0.25, 0.50, 0.75, 1.0) [MutualNet scheme with fixed widths]
     def run_step(self, feed_dict: dict[str, any]) -> dict[str, any]:
         images = feed_dict["data"]
         labels = feed_dict["label"]
@@ -134,19 +139,33 @@ class ClsMutualTrainer(Trainer):
             ema_output = None
 
         with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16):
-            output = self.model(images)
-            p_output = self.p_model(images)
-            #BCEWithLogits or CE --> configurable
-            loss = self.train_criterion(output, labels) 
+            # p_output = self.p_model(images)
+
+            # Max-width
+            self.model.apply(lambda m: setattr(m, 'width_mult', PREDEFINED_WIDTHS[-1]))
+            max_width_output = self.model(images)
+            #Task Loss
+            loss = self.train_criterion(max_width_output, labels) 
+            # For log
             ce_loss = loss
-            kd_loss = self.get_kld_loss(output + LOG_SOFTMAX_CONST, p_output + LOG_SOFTMAX_CONST)
+            max_width_output_detached = max_width_output.detach()
+            total_kd_loss = 0
+
+            # KLD for each width, added back to total loss func
+            for width_mult in PREDEFINED_WIDTHS[:len(PREDEFINED_WIDTHS)-1]:
+                self.model.apply(lambda m: setattr(m, 'width_mult', width_mult))
+                output = self.model(images)
+                kd_loss = self.get_kld_loss(output + LOG_SOFTMAX_CONST, max_width_output_detached + LOG_SOFTMAX_CONST)
+                total_kd_loss += kd_loss
+                loss += kd_loss
 
             # mesa loss (Not included by default)
             if ema_output is not None:
                 mesa_loss = self.train_criterion(output, ema_output) # Calculated only on CrossEntropy loss
-                loss = loss + kd_loss + self.run_config.mesa["ratio"] * mesa_loss
+                loss = loss + self.run_config.mesa["ratio"] * mesa_loss
             else :
-                loss = ce_loss + kd_loss
+                pass
+
         self.scaler.scale(loss).backward()
         # calc train top1 acc
         if self.run_config.mixup_config is None:
@@ -158,7 +177,7 @@ class ClsMutualTrainer(Trainer):
             "loss": loss,
             "top1": top1,
             "task_loss" : ce_loss,
-            "kd_loss" : kd_loss
+            "kd_loss" : total_kd_loss
         }
     
     def get_kld_loss(self,scale_pred, scale_soft, temperature = 1.0):

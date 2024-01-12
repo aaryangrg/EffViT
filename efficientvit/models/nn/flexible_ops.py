@@ -18,7 +18,8 @@ __all__ = [
 ]
 
 # Take from configs / flags
-WIDTH_LIST = [0.25, 0.50, 0.75, 1.0]
+# WIDTH_LIST = [0.25, 0.50, 0.75, 1.0]
+WIDTH_LIST = []
 
 def make_divisible(v, divisor=8, min_value=1):
     """
@@ -105,7 +106,6 @@ class FlexibleConvLayer(nn.Module):
         out = nn.functional.conv2d(
             input, weight, bias, self.stride, self.padding,
             self.dilation, self.groups_desc if self.groups_desc == 1 else in_channels)
-        
         # What is this exactly?
         # if getattr(FLAGS, 'conv_averaged', False):
             # out = out * (max(self.in_channels_list)/self.in_channels)
@@ -113,8 +113,6 @@ class FlexibleConvLayer(nn.Module):
             out = self.norm(out)
         if self.act :
             out = self.act(out)
-
-        print(out.shape)
         return out 
     
 # Adapted from USBatchNorm2D
