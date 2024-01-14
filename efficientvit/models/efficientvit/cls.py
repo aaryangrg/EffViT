@@ -25,6 +25,8 @@ __all__ = [
     ###################### - Width Adjusted Models
     "efficientvit_width_adjusted_cls_b0",
     "efficientvit_width_adjusted_cls_b1",
+    "efficientvit_width_adjusted_cls_b3",
+    "efficientvit_width_adjusted_cls_l3"
     ###################### - Flexible Models
     "flexible_efficientvit_cls_b1"
 ]
@@ -151,6 +153,21 @@ def efficientvit_width_adjusted_cls_b1(width_multiplier = 1, height_multiplier =
     return model
 
 
+#### WIDTH ADJUSTED COMPLETE B3 MODEL #####
+def efficientvit_width_adjusted_cls_b3(width_multiplier = 1, height_multiplier = 1, **kwargs) -> EfficientViTCls:
+    from efficientvit.models.efficientvit.backbone import efficientvit_modified_backbone_b3
+
+    backbone = efficientvit_modified_backbone_b3(width_multiplier = width_multiplier,height_multiplier = height_multiplier,**kwargs)
+    default_out_channels = 512
+    new_out_channels = int(default_out_channels * width_multiplier)
+    head = ClsHead(
+        in_channels=new_out_channels,
+        width_list=[2304, 2560],
+        **build_kwargs_from_config(kwargs, ClsHead),
+    )
+    model = EfficientViTCls(backbone, head)
+    return model
+
 def efficientvit_cls_b2(**kwargs) -> EfficientViTCls:
     from efficientvit.models.efficientvit.backbone import efficientvit_backbone_b2
 
@@ -223,6 +240,20 @@ def efficientvit_cls_l3(**kwargs) -> EfficientViTCls:
     model = EfficientViTCls(backbone, head)
     return model
 
+#### WIDTH ADJUSTED COMPLETE L3 MODEL #####
+def efficientvit_width_adjusted_cls_l3(width_multiplier = 1, height_multiplier = 1, **kwargs) -> EfficientViTCls:
+    from efficientvit.models.efficientvit.backbone import efficientvit_modified_backbone_l3
+
+    backbone = efficientvit_modified_backbone_l3(width_multiplier = width_multiplier,height_multiplier = height_multiplier,**kwargs)
+    default_out_channels = 1024
+    new_out_channels = int(default_out_channels * width_multiplier)
+    head = ClsHead(
+        in_channels=new_out_channels,
+        width_list=[6144, 6400],
+        **build_kwargs_from_config(kwargs, ClsHead),
+    )
+    model = EfficientViTCls(backbone, head)
+    return model
 
 #### Flexible Cls Models #####
 

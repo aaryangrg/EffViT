@@ -31,6 +31,8 @@ __all__ = [
     "efficientvit_backbone_l3",
     "efficientvit_modified_backbone_b0",
     "efficientvit_modified_backbone_b1"
+    "efficientvit_modified_backbone_b3"
+    "efficientvit_modified_backbone_l3"
 ]
 
 
@@ -223,6 +225,17 @@ def efficientvit_backbone_b3(**kwargs) -> EfficientViTBackbone:
     )
     return backbone
 
+##### MODIFIED B3 BACKBONE #####
+def efficientvit_modified_backbone_b3(width_multiplier = 1, depth_multiplier = 1, **kwargs) -> EfficientViTBackbone:
+    default_width_list = [32, 64, 128, 256, 512]
+    default_height_list = [1, 4, 6, 6, 9]
+    backbone = EfficientViTBackbone(
+        width_list=[int(w * width_multiplier) for w in default_width_list],
+        depth_list= [int(h * depth_multiplier) for h in default_height_list],
+        dim=32,
+        **build_kwargs_from_config(kwargs, EfficientViTBackbone),
+    )
+    return backbone
 
 class EfficientViTLargeBackbone(nn.Module):
     def __init__(
@@ -393,6 +406,17 @@ def efficientvit_backbone_l3(**kwargs) -> EfficientViTLargeBackbone:
     backbone = EfficientViTLargeBackbone(
         width_list=[64, 128, 256, 512, 1024],
         depth_list=[1, 2, 2, 8, 8],
+        **build_kwargs_from_config(kwargs, EfficientViTLargeBackbone),
+    )
+    return backbone
+
+##### MODIFIED L3 backbone #######
+def efficientvit_modified_backbone_l3(width_multiplier = 1, depth_multiplier = 1, **kwargs) -> EfficientViTBackbone:
+    default_width_list = [64, 128, 256, 512, 1024]
+    default_height_list = [1, 2, 2, 8, 8]
+    backbone = EfficientViTLargeBackbone(
+        width_list=[int(w * width_multiplier) for w in default_width_list],
+        depth_list= [int(h * depth_multiplier) for h in default_height_list],
         **build_kwargs_from_config(kwargs, EfficientViTLargeBackbone),
     )
     return backbone
