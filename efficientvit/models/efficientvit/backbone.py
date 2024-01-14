@@ -30,8 +30,8 @@ __all__ = [
     "efficientvit_backbone_l2",
     "efficientvit_backbone_l3",
     "efficientvit_modified_backbone_b0",
-    "efficientvit_modified_backbone_b1"
-    "efficientvit_modified_backbone_b3"
+    "efficientvit_modified_backbone_b1",
+    "efficientvit_modified_backbone_b3",
     "efficientvit_modified_backbone_l3"
 ]
 

@@ -26,7 +26,7 @@ __all__ = [
     "efficientvit_width_adjusted_cls_b0",
     "efficientvit_width_adjusted_cls_b1",
     "efficientvit_width_adjusted_cls_b3",
-    "efficientvit_width_adjusted_cls_l3"
+    "efficientvit_width_adjusted_cls_l3",
     ###################### - Flexible Models
     "flexible_efficientvit_cls_b1"
 ]

@@ -6,7 +6,7 @@
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=10
 #SBATCH --job-name=ParamTot
-#SBATCH --constraint=gmem12
+#SBATCH --constraint=gmem24
 
 source /home/aaryang/anaconda3/bin/activate
 conda activate evit
