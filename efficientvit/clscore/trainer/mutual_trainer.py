@@ -151,7 +151,7 @@ class ClsMutualTrainer(Trainer):
             # For log
             ce_loss = loss
             print("1x")
-            # self.scaler.scale(loss).backward()
+            self.scaler.scale(loss).backward()
 
             max_width_output_detached = max_width_output.detach()
             total_kd_loss = 0

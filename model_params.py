@@ -34,7 +34,7 @@ parser.add_argument("--save_freq", type=int, default=1)
 parser.add_argument("--reduced_width", type = bool, default = False )
 parser.add_argument("--width_multiplier", type = float, default=1.0)
 parser.add_argument("--depth_multiplier", type = float, default=1.0)
-parser.add_argument("--student_model", type = str, default = None)
+parser.add_argument("--student_model", type = str, default = "b1")
 
 def main():
     # parse args
@@ -56,20 +56,9 @@ def main():
 
         # setup model
     if not args.reduced_width :
-        if args.student_weights :
-            model = create_cls_model(config["net_config"]["name"], True, weight_url = args.student_weights, dropout=config["net_config"]["dropout"])
-        else :
-            model = create_cls_model(config["net_config"]["name"], False, dropout=config["net_config"]["dropout"])
-            print("Distillation from scratch")
+        pass
     else : 
-        print("Using width / depth customization")
-        print("Width multiplier : ", args.width_multiplier)
-        print("Depth multiplier : ", args.depth_multiplier)
-        if args.student_weights :
-            model = create_custom_cls_model(args.student_model, True, weight_url = args.student_weights, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier, dropout=config["net_config"]["dropout"])
-        else :
-            model = create_custom_cls_model(args.student_model, False, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier, dropout=config["net_config"]["dropout"])
-            print("Distillation from scratch")
+        model = create_custom_cls_model(args.student_model, False, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier, dropout=config["net_config"]["dropout"])
     apply_drop_func(model.backbone.stages, config["backbone_drop"])
 
     total_params = sum(
