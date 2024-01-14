@@ -197,9 +197,10 @@ def efficientvit_backbone_b1(**kwargs) -> EfficientViTBackbone:
 def efficientvit_modified_backbone_b1(width_multiplier = 1, depth_multiplier = 1, **kwargs) -> EfficientViTBackbone:
     default_width_list = [16, 32, 64, 128, 256]
     default_height_list = [1, 2, 3, 3, 4]
+    modified_depth_list = [int(h * depth_multiplier) for h in default_height_list]
     backbone = EfficientViTBackbone(
         width_list=[int(w * width_multiplier) for w in default_width_list],
-        depth_list= [int(h * depth_multiplier) for h in default_height_list],
+        depth_list= [1 if depth == 0 else depth for depth in modified_depth_list],
         dim=16,
         **build_kwargs_from_config(kwargs, EfficientViTBackbone),
     )
@@ -229,9 +230,10 @@ def efficientvit_backbone_b3(**kwargs) -> EfficientViTBackbone:
 def efficientvit_modified_backbone_b3(width_multiplier = 1, depth_multiplier = 1, **kwargs) -> EfficientViTBackbone:
     default_width_list = [32, 64, 128, 256, 512]
     default_height_list = [1, 4, 6, 6, 9]
+    modified_depth_list = [int(h * depth_multiplier) for h in default_height_list]
     backbone = EfficientViTBackbone(
         width_list=[int(w * width_multiplier) for w in default_width_list],
-        depth_list= [int(h * depth_multiplier) for h in default_height_list],
+        depth_list= [1 if depth == 0 else depth for depth in modified_depth_list],
         dim=32,
         **build_kwargs_from_config(kwargs, EfficientViTBackbone),
     )
@@ -414,9 +416,10 @@ def efficientvit_backbone_l3(**kwargs) -> EfficientViTLargeBackbone:
 def efficientvit_modified_backbone_l3(width_multiplier = 1, depth_multiplier = 1, **kwargs) -> EfficientViTBackbone:
     default_width_list = [64, 128, 256, 512, 1024]
     default_height_list = [1, 2, 2, 8, 8]
+    modified_depth_list = [int(h * depth_multiplier) for h in default_height_list]
     backbone = EfficientViTLargeBackbone(
         width_list=[int(w * width_multiplier) for w in default_width_list],
-        depth_list= [int(h * depth_multiplier) for h in default_height_list],
+        depth_list= [1 if depth == 0 else depth for depth in modified_depth_list]
         **build_kwargs_from_config(kwargs, EfficientViTLargeBackbone),
     )
     return backbone
