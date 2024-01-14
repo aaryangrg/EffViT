@@ -9,7 +9,7 @@ import argparse
 import math
 import os
 from efficientvit.clscore.data_provider.MiniImageNet import MiniImageNetV2
-from torch.profiler import profiler, record_function, ProfilerActivity
+from torch.profiler import profile as profiler, record_function, ProfilerActivity
 from thop import profile
 
 import torch.utils.data
@@ -99,7 +99,7 @@ def main():
                 print("Iteration")
                 images, labels = images.cuda(), labels.cuda()
 
-                with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True, profile_memory=True) as prof:
+                with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True, profile_memory=True) as prof:
                     # with record_function("model_inference"):
                     model(images)
 
