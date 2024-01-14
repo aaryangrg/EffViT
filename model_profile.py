@@ -109,7 +109,7 @@ def main():
                 print(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit=10))
                 
                 # MACS calculation & Params (single image)
-                macs, params = profile(model, input = (input,))
+                macs, params = profile(model, inputs = (input,))
                 print(f"MACSs: {macs}, Params: {params}")
 
 
