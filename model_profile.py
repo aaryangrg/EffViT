@@ -93,12 +93,9 @@ def main():
     # # Print GPU memory summary
     # print(torch.cuda.memory_summary(device=None, abbreviated=False))
 
-
-    top1 = AverageMeter(is_distributed=False)
-    top5 = AverageMeter(is_distributed=False)
     with torch.inference_mode():
         with tqdm(total=len(data_loader)) as t:
-            for images, labels in data_loader[:5]:
+            for images, labels in data_loader:
                 print("Iteration")
                 images, labels = images.cuda(), labels.cuda()
 
