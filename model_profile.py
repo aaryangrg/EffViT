@@ -84,6 +84,7 @@ def main():
         pin_memory=True,
         drop_last=False,
     )
+    input = torch.randn(1, 3, 224, 224)
 
     model = create_custom_cls_model(args.student_model, False, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
         
@@ -107,7 +108,7 @@ def main():
                 print(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit=10))
                 
                 # MACS calculation & Params (single image)
-                macs, params = profile(model, [[images[0]]])
+                macs, params = profile(model, input)
                 print(f"MACSs: {macs}, Params: {params}")
 
 
