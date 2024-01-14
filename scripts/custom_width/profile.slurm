@@ -3,7 +3,7 @@
 #SBATCH --output=/home/aaryang/experiments/EffViT/outs/profile/b1_1x.out
 #SBATCH --nodes=1   # Get one node
 #SBATCH --partition=gpu
-#SBATCH --gres=gpu:2            # And two GPU
+#SBATCH --gres=gpu:1           # And two GPU
 #SBATCH --cpus-per-task=8            # Two cores per task
 #SBATCH --job-name=B1Profile
 #SBATCH --constraint=gmem12
