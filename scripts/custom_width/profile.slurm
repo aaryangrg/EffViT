@@ -20,3 +20,4 @@ python3 ../../model_profile.py --model b1_custom --image_size 224 \
     --batch_size 128 \
     --path /home/c3-0/datasets/ImageNet/validation \
     --reduced_width true \
+    --student_model b1_custom

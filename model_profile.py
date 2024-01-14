@@ -51,7 +51,7 @@ def main():
     parser.add_argument("--reduced_width", type = bool, default = False )
     parser.add_argument("--width_multiplier", type = float, default=1.0)
     parser.add_argument("--depth_multiplier", type = float, default=1.0)
-
+    parser.add_argument("--student_model", type = str, default = "b1_custom")
 
     args = parser.parse_args()
     if args.gpu == "all":
@@ -85,7 +85,7 @@ def main():
         drop_last=False,
     )
 
-    model = create_custom_cls_model(args.student_model, False, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier, dropout=config["net_config"]["dropout"])
+    model = create_custom_cls_model(args.student_model, False, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
         
     model = torch.nn.DataParallel(model).cuda()
     model.eval()
