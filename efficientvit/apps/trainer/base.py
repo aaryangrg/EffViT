@@ -209,7 +209,7 @@ class Trainer:
         self.model = nn.parallel.DistributedDataParallel(
             self.model.cuda(),
             device_ids=[dist.local_rank()],
-            static_graph=True,
+            static_graph=False,
         )
 
         self.run_config.global_step = 0

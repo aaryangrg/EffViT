@@ -149,10 +149,9 @@ class ClsMutualTrainer(Trainer):
             #Task Loss
             loss = self.train_criterion(max_width_output, labels) 
             # For log
-            ce_loss = loss
             print("1x")
             self.scaler.scale(loss).backward()
-
+            ce_loss = loss
             max_width_output_detached = max_width_output.detach()
             total_kd_loss = 0
 
