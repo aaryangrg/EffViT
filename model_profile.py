@@ -21,21 +21,6 @@ from efficientvit.apps.utils import AverageMeter
 from efficientvit.cls_model_zoo import create_cls_model, create_custom_cls_model 
 
 
-def accuracy(output: torch.Tensor, target: torch.Tensor, topk=(1,)) -> list[torch.Tensor]:
-    maxk = max(topk)
-    batch_size = target.shape[0]
-
-    _, pred = output.topk(maxk, 1, True, True)
-    pred = pred.t()
-    correct = pred.eq(target.reshape(1, -1).expand_as(pred))
-
-    res = []
-    for k in topk:
-        correct_k = correct[:k].reshape(-1).float().sum(0, keepdim=True)
-        res.append(correct_k.mul_(100.0 / batch_size))
-    return res
-
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--path", type=str, default="/dataset/imagenet/val")
@@ -61,57 +46,29 @@ def main():
         device_list = [int(_) for _ in args.gpu.split(",")]
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
 
-    args.batch_size = args.batch_size * max(len(device_list), 1)
-
-    transform = transforms.Compose([
-        transforms.Resize(
-            int(math.ceil(args.image_size / args.crop_ratio)), interpolation=InterpolationMode.BICUBIC
-        ),
-        transforms.CenterCrop(args.image_size),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ])
-
-    # Create the dataset
-    dataset = MiniImageNetV2(args.path, transform = transform, type = "validation")
-
-# Create the data loader
-    data_loader = torch.utils.data.DataLoader(
-        dataset,
-        batch_size=args.batch_size,
-        shuffle=True,
-        num_workers=args.workers,
-        pin_memory=True,
-        drop_last=False,
-    )
     input = torch.randn(1, 3, 224, 224)
     input.to(dtype=torch.float16)
 
     model = create_custom_cls_model(args.student_model, False, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
         
-    # model = torch.nn.DataParallel(model).cuda()
     model.to("cuda:0")
     model.eval()
 
     # # Print GPU memory summary
     # print(torch.cuda.memory_summary(device=None, abbreviated=False))
 
-    with torch.inference_mode():
-        with tqdm(total=len(data_loader)) as t:
-            for images, labels in data_loader:
-                input = input.cuda()
-                # Batch recorded
-                images, labels = images.cuda(), labels.cuda()
+    for i in range(5) :
+        input = input.cuda()
+        # Batch recorded
 
-                with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True, profile_memory=True) as prof:
-                    model(images)
+        with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True, profile_memory=True) as prof:
+            model(input)
 
-                print(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit=10))
-                
-                # MACS calculation & Params (single image)
-                macs, params = profile(model, inputs = (input,))
-                print(f"MACSs: {macs}, Params: {params}")
-
+        print(prof.key_averages().table(sort_by="self_cuda_time_total"))
+        
+        # MACS calculation & Params (single image)
+    macs, params = profile(model, inputs = (input,))
+    print(f"MACSs: {macs}, Params: {params}")
 
 if __name__ == "__main__":
     main()
