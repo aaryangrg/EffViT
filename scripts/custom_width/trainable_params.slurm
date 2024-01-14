@@ -14,9 +14,6 @@ conda activate evit
 echo CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
 nvidia-smi
 
-# Add a timestamp for reference
-echo "Timestamp: $(date)"
-
 models=("b1_custom" "b3_custom" "l3_custom")
 width_multipliers=("0.25" "0.50" "0.75" "1.0")
 
@@ -31,6 +28,6 @@ for model in "${models[@]}"; do
             --run_config.bce true \
             --reduced_width true \
             --width_multiplier $width_multiplier \
-            --student_model $model \
+            --student_model $model
     done
 done
