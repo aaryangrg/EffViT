@@ -15,7 +15,7 @@ echo CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
 nvidia-smi
 
 # Add a timestamp for reference
-echo "Timestamp: $(date)" > $output_file
+echo "Timestamp: $(date)"
 
 models=("b1_custom" "b3_custom" "l3_custom")
 width_multipliers=("0.25" "0.50" "0.75" "1.0")
