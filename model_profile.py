@@ -97,17 +97,17 @@ def main():
     with torch.inference_mode():
         with tqdm(total=len(data_loader)) as t:
             for images, labels in data_loader:
-                print("Iteration")
+
+                # Batch recorded
                 images, labels = images.cuda(), labels.cuda()
 
                 with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True, profile_memory=True) as prof:
-                    # with record_function("model_inference"):
                     model(images)
 
                 print(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit=10))
                 
-                # MACS calculation & Params
-                macs, params = profile(model, images,)
+                # MACS calculation & Params (single image)
+                macs, params = profile(model, images[0],)
                 print(f"MACSs: {macs}, Params: {params}")
 
 
