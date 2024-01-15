@@ -26,7 +26,7 @@ for model in "${models[@]}"; do
             --batch_size 128 \
             --path /home/c3-0/datasets/ImageNet/validation \
             --width_multiplier $width_multiplier \
-            --student_model $model
+            --student_model $model \
             --find_macs true \
             --profile false \
     done
