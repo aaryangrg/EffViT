@@ -94,7 +94,7 @@ def create_custom_cls_model(name: str, pretrained=True, weight_url: str or None 
     if model_id not in model_dict:
         raise ValueError(f"Do not find {name} set of custom models {list(model_dict.keys())}")
     else:
-        model = model_dict[model_id](width_multiplier=width_multiplier, height_multiplier= depth_multiplier,**kwargs)
+        model = model_dict[model_id](width_multiplier=width_multiplier, depth_multiplier = depth_multiplier,**kwargs)
     
     if model_id in ["l1", "l2", "l3"]:
         set_norm_eps(model, 1e-7)
