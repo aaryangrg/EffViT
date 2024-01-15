@@ -21,8 +21,6 @@ __all__ = ["ClsMutualTrainer"]
 LOG_SOFTMAX_CONST = 1e-6
 PREDEFINED_WIDTHS = [0.25, 0.50, 0.75, 1.0]
 
-torch.autograd.set_detect_anomaly(True)
-
 class ClsMutualTrainer(Trainer):
     def __init__(
         self,
@@ -139,45 +137,46 @@ class ClsMutualTrainer(Trainer):
         #     ema_output = F.sigmoid(ema_output).detach()
         # else:
         #     ema_output = None
+        with torch.autograd.set_detect_anomaly(True) :
+            with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16):
+                # p_output = self.p_model(images)
 
-        with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16):
-            # p_output = self.p_model(images)
+                # Max-width
+                self.model.apply(lambda m: setattr(m, 'width_mult', PREDEFINED_WIDTHS[-1]))
+                max_width_output = self.model(images)
 
-            # Max-width
-            self.model.apply(lambda m: setattr(m, 'width_mult', PREDEFINED_WIDTHS[-1]))
-            max_width_output = self.model(images)
+                #Task Loss - Max-width
+                loss = self.train_criterion(max_width_output, labels) 
+                self.scaler.scale(loss).backward()
+                max_width_output_detached = max_width_output.detach()
 
-            #Task Loss - Max-width
-            loss = self.train_criterion(max_width_output, labels) 
-            self.scaler.scale(loss).backward()
-            max_width_output_detached = max_width_output.detach()
+                # For log
+                print("1x")
+                
+                ce_loss = loss
+                total_kd_loss = 0
 
-            # For log
-            print("1x")
-            
-            ce_loss = loss
-            total_kd_loss = 0
+                # KLD for each width, added back to total loss func
+                for width_mult in (PREDEFINED_WIDTHS[:len(PREDEFINED_WIDTHS)-1])[::-1]:
+                    with torch.no_grad():
+                        self.model.apply(lambda m: setattr(m, 'width_mult', width_mult))
+                    output = self.model(images)
+                    kd_loss = self.get_kld_loss(output + LOG_SOFTMAX_CONST, max_width_output_detached + LOG_SOFTMAX_CONST)
+                    print(width_mult,"x")
+                    self.scaler.scale(kd_loss).backward()
+                    for param in self.model.parameters():
+                        print(param.grad)
+                    total_kd_loss += kd_loss.detach()
 
-            # KLD for each width, added back to total loss func
-            for width_mult in (PREDEFINED_WIDTHS[:len(PREDEFINED_WIDTHS)-1])[::-1]:
-                with torch.no_grad():
-                    self.model.apply(lambda m: setattr(m, 'width_mult', width_mult))
-                output = self.model(images)
-                kd_loss = self.get_kld_loss(output + LOG_SOFTMAX_CONST, max_width_output_detached + LOG_SOFTMAX_CONST)
-                print(width_mult,"x")
-                self.scaler.scale(kd_loss).backward()
-                total_kd_loss += kd_loss.detach()
-
-            # mesa loss (Not included by default)
-            # if ema_output is not None:
-            #     mesa_loss = self.train_criterion(output, ema_output) # Calculated only on CrossEntropy loss
-            #     loss = loss + total_kd_loss + self.run_config.mesa["ratio"] * mesa_loss
-            # else :
-            #     pass
-
+                # mesa loss (Not included by default)
+                # if ema_output is not None:
+                #     mesa_loss = self.train_criterion(output, ema_output) # Calculated only on CrossEntropy loss
+                #     loss = loss + total_kd_loss + self.run_config.mesa["ratio"] * mesa_loss
+                # else :
+                #     pass
         # calc train top1 acc
         if self.run_config.mixup_config is None:
-            top1 = accuracy(output, torch.argmax(labels, dim=1), topk=(1,))[0][0]
+            top1 = accuracy(max_width_output_detached, torch.argmax(labels, dim=1), topk=(1,))[0][0]
         else:
             top1 = None
 
