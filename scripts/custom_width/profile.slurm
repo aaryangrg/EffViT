@@ -17,6 +17,7 @@ nvidia-smi
 
 models=("b1_custom" "b3_custom" "l3_custom")
 width_multipliers=("0.25" "0.50" "0.75" "1.0")
+resolutions=("128" "160" "192" "224")
 
 for model in "${models[@]}"; do
     for width_multiplier in "${width_multipliers[@]}"; do
