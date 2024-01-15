@@ -37,6 +37,8 @@ def main():
     parser.add_argument("--width_multiplier", type = float, default=1.0)
     parser.add_argument("--depth_multiplier", type = float, default=1.0)
     parser.add_argument("--student_model", type = str, default = "b1_custom")
+    parser.add_argument("--find_macs", type = bool, default = True)
+    parser.add_argument("--profile", type = bool, default = True)
 
     args = parser.parse_args()
     if args.gpu == "all":
@@ -46,7 +48,7 @@ def main():
         device_list = [int(_) for _ in args.gpu.split(",")]
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
 
-    input = torch.randn(1, 3, 224, 224)
+    input = torch.randn(1, 3, args.image_size, args.image_size)
     input.to(dtype=torch.float16)
 
     model = create_custom_cls_model(args.student_model, False, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
@@ -57,18 +59,17 @@ def main():
     # # Print GPU memory summary
     # print(torch.cuda.memory_summary(device=None, abbreviated=False))
 
-    for i in range(5) :
-        input = input.cuda()
-        # Batch recorded
-
-        with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True, profile_memory=True) as prof:
-            model(input)
-
-        print(prof.key_averages().table(sort_by="self_cuda_time_total"))
-        
+    if args.profile :
+        for i in range(5) :
+            input = input.cuda()
+            # Batch recorded
+            with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True, profile_memory=True) as prof:
+                model(input)
+            print(prof.key_averages().table(sort_by="self_cuda_time_total"))
         # MACS calculation & Params (single image)
-    macs, params = profile(model, inputs = (input,))
-    print(f"MACSs: {macs}, Params: {params}")
+    if args.find_macs : 
+        macs, params = profile(model, inputs = (input,))
+        print(f"MACSs: {macs}, Params: {params}")
 
 if __name__ == "__main__":
     main()

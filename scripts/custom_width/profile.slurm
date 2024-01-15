@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=group3
-#SBATCH --output=/home/aaryang/experiments/EffViT/outs/profile/b1_1x.out
+#SBATCH --output=/home/aaryang/experiments/EffViT/outs/profile/macs/b1_b3_l3_widths_224.out
 #SBATCH --nodes=1   # Get one node
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:1           # And two GPU
@@ -15,9 +15,19 @@ echo CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
 
 nvidia-smi
 
-python3 ../../model_profile.py --model b1_custom --image_size 224 \
-    --weight_url ../../exp/custom_width/distillation/b3_b1_0.75w_r224/checkpoint/model_best.pt \
-    --batch_size 128 \
-    --path /home/c3-0/datasets/ImageNet/validation \
-    --reduced_width true \
-    --student_model b1_custom
+models=("b1_custom" "b3_custom" "l3_custom")
+width_multipliers=("0.25" "0.50" "0.75" "1.0")
+
+for model in "${models[@]}"; do
+    for width_multiplier in "${width_multipliers[@]}"; do
+        echo "$model - $width_multiplier x"
+        python3 ../../model_profile.py --image_size 224 \
+            --weight_url ../../exp/custom_width/distillation/b3_b1_0.75w_r224/checkpoint/model_best.pt \
+            --batch_size 128 \
+            --path /home/c3-0/datasets/ImageNet/validation \
+            --width_multiplier $width_multiplier \
+            --student_model $model
+            --find_macs true \
+            --profile false \
+    done
+done
