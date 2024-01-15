@@ -146,17 +146,20 @@ class ClsMutualTrainer(Trainer):
             # Max-width
             self.model.apply(lambda m: setattr(m, 'width_mult', PREDEFINED_WIDTHS[-1]))
             max_width_output = self.model(images)
-            #Task Loss
+
+            #Task Loss - Max-width
             loss = self.train_criterion(max_width_output, labels) 
+            self.scaler.scale(loss).backward()
+            max_width_output_detached = max_width_output.detach()
+
             # For log
             print("1x")
-            self.scaler.scale(loss).backward()
+            
             ce_loss = loss
-            max_width_output_detached = max_width_output.detach()
             total_kd_loss = 0
 
             # KLD for each width, added back to total loss func
-            for width_mult in PREDEFINED_WIDTHS[:len(PREDEFINED_WIDTHS)-1]:
+            for width_mult in (PREDEFINED_WIDTHS[:len(PREDEFINED_WIDTHS)-1])[::-1]:
                 with torch.no_grad():
                     self.model.apply(lambda m: setattr(m, 'width_mult', width_mult))
                 output = self.model(images)
