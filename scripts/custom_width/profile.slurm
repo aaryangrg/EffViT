@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=group3
-#SBATCH --output=/home/aaryang/experiments/EffViT/outs/profile/macs/b1_b3_l3_widths_224.out
+#SBATCH --output=/home/aaryang/experiments/EffViT/outs/profile/macs/b1_b3_l3_widths_multires.out
 #SBATCH --nodes=1   # Get one node
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:1           # And two GPU
@@ -21,11 +21,13 @@ resolutions=("128" "160" "192" "224")
 
 for model in "${models[@]}"; do
     for width_multiplier in "${width_multipliers[@]}"; do
-        echo "$model - $width_multiplier x"
-        python3 ../../model_profile.py --image_size 224 \
-            --width_multiplier $width_multiplier \
-            --student_model $model \
-            --find_macs true \
-            --profile false
+        for resolution in "${resolutions[@]}"; do
+            echo "$model || width : $width_multiplier x || res : $resolution"
+            python3 ../../model_profile.py --image_size $resolution \
+                --width_multiplier $width_multiplier \
+                --student_model $model \
+                --find_macs true \
+                --profile false
+        done
     done
 done
