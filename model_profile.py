@@ -38,7 +38,7 @@ def main():
     parser.add_argument("--depth_multiplier", type = float, default=1.0)
     parser.add_argument("--student_model", type = str, default = "b1_custom")
     parser.add_argument("--find_macs", type = bool, default = True)
-    parser.add_argument("--profile", type = bool, default = True)
+    parser.add_argument("--profile", type = bool, default = False)
 
     args = parser.parse_args()
     if args.gpu == "all":
