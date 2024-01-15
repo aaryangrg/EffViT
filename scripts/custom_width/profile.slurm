@@ -22,12 +22,9 @@ for model in "${models[@]}"; do
     for width_multiplier in "${width_multipliers[@]}"; do
         echo "$model - $width_multiplier x"
         python3 ../../model_profile.py --image_size 224 \
-            --weight_url ../../exp/custom_width/distillation/b3_b1_0.75w_r224/checkpoint/model_best.pt \
-            --batch_size 128 \
-            --path /home/c3-0/datasets/ImageNet/validation \
             --width_multiplier $width_multiplier \
             --student_model $model \
             --find_macs true \
-            --profile false \
+            --profile false
     done
 done
