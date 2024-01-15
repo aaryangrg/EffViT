@@ -18,8 +18,8 @@ __all__ = [
 ]
 
 # Take from configs / flags
-# WIDTH_LIST = [0.25, 0.50, 0.75, 1.0]
-WIDTH_LIST = []
+WIDTH_LIST = [0.25, 0.50, 0.75, 1.0]
+# WIDTH_LIST = []
 
 def make_divisible(v, divisor=8, min_value=1):
     """
