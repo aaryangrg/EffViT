@@ -147,9 +147,9 @@ class ClsMutualTrainer(Trainer):
 
                 #Task Loss - Max-width
                 loss = self.train_criterion(max_width_output, labels) 
-                self.scaler.scale(loss).backward()
                 for param in self.model.parameters():
                     print(param.grad)
+                self.scaler.scale(loss).backward()
                 max_width_output_detached = max_width_output.detach()
 
                 # For log
@@ -164,9 +164,9 @@ class ClsMutualTrainer(Trainer):
                         self.model.apply(lambda m: setattr(m, 'width_mult', width_mult))
                     output = self.model(images)
                     kd_loss = self.get_kld_loss(output + LOG_SOFTMAX_CONST, max_width_output_detached + LOG_SOFTMAX_CONST)
-                    self.scaler.scale(kd_loss).backward()
                     for param in self.model.parameters():
                         print(param.grad)
+                    self.scaler.scale(kd_loss).backward()
                     total_kd_loss += kd_loss.detach()
                     print(width_mult,"x")
 
