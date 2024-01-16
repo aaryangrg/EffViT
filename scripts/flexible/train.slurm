@@ -22,3 +22,4 @@ python3 ../../mutual_train.py ../../configs/cls/imagenet/b1.yaml  --fp16 \
     --parent_weights_url /home/aaryang/experiments/EffViT/pretrained/b3-r224.pt \
     --data_provider.train_batch_size 512 \
     --student_model b1 \
+    --run_config.base_lr 0.00005

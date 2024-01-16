@@ -148,9 +148,6 @@ class ClsMutualTrainer(Trainer):
                 
                 self.scaler.scale(loss).backward()
                 max_width_output_detached = max_width_output.detach()
-
-                # For log
-                print("1x")
                 
                 ce_loss = loss
                 total_kd_loss = 0
@@ -162,7 +159,6 @@ class ClsMutualTrainer(Trainer):
                     output = self.model(images)
                     kd_loss = self.get_kld_loss(output + LOG_SOFTMAX_CONST, max_width_output_detached + LOG_SOFTMAX_CONST)
                     total_kd_loss += kd_loss.detach()
-                    print(width_mult,"x")
 
                 # mesa loss (Not included by default)
                 # if ema_output is not None:
