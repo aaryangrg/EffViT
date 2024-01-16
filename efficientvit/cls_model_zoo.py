@@ -15,8 +15,10 @@ from efficientvit.models.efficientvit import (
     efficientvit_width_adjusted_cls_b1,
     efficientvit_width_adjusted_cls_b3,
     efficientvit_width_adjusted_cls_l3,
-    flexible_efficientvit_cls_b1
+    flexible_efficientvit_cls_b1,
+    flexible_efficientvit_cls_b3
 )
+from efficientvit.models.efficientvit.cls import flexible_efficientvit_cls_b3
 from efficientvit.models.nn.norm import set_norm_eps
 from efficientvit.models.utils import load_state_dict_from_file
 
@@ -112,6 +114,7 @@ def create_flexible_cls_model(name: str, pretrained=True, weight_url: str or Non
     model_id = name
     model_dict = {
         "b1" : flexible_efficientvit_cls_b1,
+        "b3" : flexible_efficientvit_cls_b3
     }
     if model_id not in model_dict:
         raise ValueError(f"Do not find {name} set of custom models {list(model_dict.keys())}")
