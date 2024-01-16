@@ -11,7 +11,7 @@ __all__ = ["init_modules", "zero_last_gamma"]
 
 
 def init_modules(model: nn.Module or list[nn.Module], init_type="trunc_normal") -> None:
-    _DEFAULT_INIT_PARAM = {"trunc_normal": 0.02}
+    _DEFAULT_INIT_PARAM = {"trunc_normal": 0.015}
 
     if isinstance(model, list):
         for sub_module in model:
