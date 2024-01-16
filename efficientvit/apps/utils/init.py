@@ -11,7 +11,6 @@ __all__ = ["init_modules", "zero_last_gamma"]
 
 
 def init_modules(model: nn.Module or list[nn.Module], init_type="trunc_normal") -> None:
-    import efficientvit.models.nn.flexible_ops as flexops
     _DEFAULT_INIT_PARAM = {"trunc_normal": 0.02}
 
     if isinstance(model, list):
@@ -50,10 +49,17 @@ def init_modules(model: nn.Module or list[nn.Module], init_type="trunc_normal") 
 
 def zero_last_gamma(model: nn.Module, init_val=0) -> None:
     import efficientvit.models.nn.ops as ops
+    import efficientvit.models.nn.flexible_ops as flexops
 
     for m in model.modules():
         if isinstance(m, ops.ResidualBlock) and isinstance(m.shortcut, ops.IdentityLayer):
-            if isinstance(m.main, (ops.DSConv, ops.MBConv, ops.FusedMBConv)):
+            if isinstance(m.main, (flexops.FlexibleDSConv, flexops.FlexibleMBConv)) :
+                parent_module = m.main.point_conv
+            elif isinstance(m.main, flexops.FlexibleConvLayer) :
+                parent_module = m.main
+            elif isinstance(m.main, (flexops.FlexibleLiteMLA)) :
+                parent_module = m.main.proj
+            elif isinstance(m.main, (ops.DSConv, ops.MBConv, ops.FusedMBConv)):
                 parent_module = m.main.point_conv
             elif isinstance(m.main, ops.ResBlock):
                 parent_module = m.main.conv2
