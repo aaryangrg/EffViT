@@ -36,7 +36,7 @@ def init_modules(model: nn.Module or list[nn.Module], init_type="trunc_normal") 
             elif isinstance(m, nn.Embedding):
                 init_func(m.weight)
             elif isinstance(m, (_BatchNorm, nn.GroupNorm, nn.LayerNorm)):
-                if hasattr(m, 'weight') and hasattr(m, 'bias') and m.weight is not None and m.bias is not None:
+                if hasattr(m, 'weight') and hasattr(m, 'bias') :
                     m.weight.data.fill_(1)
                     m.bias.data.zero_()
             else:
