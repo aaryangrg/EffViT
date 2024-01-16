@@ -28,7 +28,8 @@ __all__ = [
     "efficientvit_width_adjusted_cls_b3",
     "efficientvit_width_adjusted_cls_l3",
     ###################### - Flexible Models
-    "flexible_efficientvit_cls_b1"
+    "flexible_efficientvit_cls_b1",
+    "flexible_effficientvit_cls_b3"
 ]
 
 
@@ -265,6 +266,19 @@ def flexible_efficientvit_cls_b1(**kwargs) -> EfficientViTCls:
     head = FlexibleClsHead(
         in_channels=256,
         width_list=[1536, 1600],
+        **build_kwargs_from_config(kwargs, ClsHead),
+    )
+    model = EfficientViTCls(backbone, head)
+    return model
+
+
+def flexible_efficientvit_cls_b3(**kwargs) -> EfficientViTCls:
+    from efficientvit.models.efficientvit.flexible_backbone import flexible_efficientvit_backbone_b3
+
+    backbone = flexible_efficientvit_backbone_b3(**kwargs)
+    head = FlexibleClsHead(
+        in_channels=256,
+        width_list=[2304, 2560],
         **build_kwargs_from_config(kwargs, ClsHead),
     )
     model = EfficientViTCls(backbone, head)

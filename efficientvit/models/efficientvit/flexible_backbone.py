@@ -18,6 +18,7 @@ from efficientvit.models.utils import build_kwargs_from_config
 __all__ = [
     "FlexibleEfficientViTBackbone",
     "flexible_efficientvit_backbone_b1",
+    "flexible_efficientvit_backbone_b3"
 ]
 
 class FlexibleEfficientViTBackbone(nn.Module):
@@ -153,6 +154,15 @@ def flexible_efficientvit_backbone_b1(**kwargs) -> FlexibleEfficientViTBackbone:
         width_list=[16, 32, 64, 128, 256],
         depth_list=[1, 2, 3, 3, 4],
         dim=16,
+        **build_kwargs_from_config(kwargs, FlexibleEfficientViTBackbone),
+    )
+    return backbone
+
+def flexible_efficientvit_backbone_b3(**kwargs) -> FlexibleEfficientViTBackbone:
+    backbone = FlexibleEfficientViTBackbone(
+        width_list=[32, 64, 128, 256, 512],
+        depth_list=[1, 4, 6, 6, 9],
+        dim=32,
         **build_kwargs_from_config(kwargs, FlexibleEfficientViTBackbone),
     )
     return backbone

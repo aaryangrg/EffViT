@@ -18,8 +18,7 @@ __all__ = [
 ]
 
 # Take from configs / flags
-WIDTH_LIST = [0.25, 0.50, 0.75, 1.0]
-# WIDTH_LIST = []
+WIDTH_LIST = []
 
 def make_divisible(v, divisor=8, min_value=1):
     """
@@ -125,14 +124,14 @@ class FlexibleBatchNorm2d(nn.BatchNorm2d):
         self.num_features_basic = num_features
 
         # Different layer for each pre-determined width
-        self.bn = nn.ModuleList(
-            [nn.BatchNorm2d(i, affine=False)
-             for i in [
-                     int(make_divisible(
-                         num_features * width_mult))
-                     for width_mult in WIDTH_LIST]
-             ]
-        )
+        # self.bn = nn.ModuleList(
+        #     [nn.BatchNorm2d(i, affine=False)
+        #      for i in [
+        #              int(make_divisible(
+        #                  num_features * width_mult))
+        #              for width_mult in WIDTH_LIST]
+        #      ]
+        # )
         # self.ratio = ratio
         self.width_mult = None
         self.ignore_model_profiling = True
