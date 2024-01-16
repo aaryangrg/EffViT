@@ -16,11 +16,11 @@ echo CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
 nvidia-smi
 
 torchpack dist-run -np 1 \
-python3 ../../mutual_train.py ../../configs/cls/imagenet/b1.yaml \
+python3 ../../mutual_train.py ../../configs/cls/imagenet/b1.yaml  --fp16 \
     --path ../exp/flexible/distillation/miniimgnet/b1_4ths_mutliway_training/ \
     --parent_model b3 \
     --parent_weights_url /home/aaryang/experiments/EffViT/pretrained/b3-r224.pt \
-    --data_provider.train_batch_size 64 \
-    --data_provider.n_worker 6 \
+    --data_provider.train_batch_size 512 \
+    --data_provider.n_worker 12 \
     --student_model b1 \
     --run_config.base_lr 0.00005
