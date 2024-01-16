@@ -134,6 +134,7 @@ class ClsMutualTrainer(Trainer):
         #     ema_output = F.sigmoid(ema_output).detach()
         # else:
         #     ema_output = None
+
         with torch.autograd.set_detect_anomaly(True) :
             with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16):
                 # p_output = self.p_model(images)
@@ -160,9 +161,6 @@ class ClsMutualTrainer(Trainer):
                         self.model.apply(lambda m: setattr(m, 'width_mult', width_mult))
                     output = self.model(images)
                     kd_loss = self.get_kld_loss(output + LOG_SOFTMAX_CONST, max_width_output_detached + LOG_SOFTMAX_CONST)
-                    for param in self.model.parameters():
-                        print(param.grad)
-                    self.scaler.scale(kd_loss).backward()
                     total_kd_loss += kd_loss.detach()
                     print(width_mult,"x")
 
