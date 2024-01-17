@@ -5,7 +5,7 @@
 import argparse
 import os
 from venv import create
-
+import torch
 from efficientvit.apps import setup
 from efficientvit.apps.utils import dump_config, parse_unknown_args
 from efficientvit.cls_model_zoo import create_cls_model, create_flexible_cls_model
@@ -86,10 +86,18 @@ def main():
         last_gamma=args.last_gamma,
     )
 
-    print(model)
+    for param_a, param_b in zip(model.parameters(), p_model.parameters()):
+        if torch.equal(param_a, param_b):
+            pass
+        else :
+            print("A : ")
+            print(param_a)
+            print("B : ")
+            print(param_b)
+    # print(model)
 
-    print("Flexible model ")
-    print(p_model)
+    # print("Flexible model ")
+    # print(p_model)
     # # setup trainer
     # trainer = ClsMutualTrainer(
     #     path=args.path,
