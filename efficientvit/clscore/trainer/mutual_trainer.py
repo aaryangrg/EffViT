@@ -147,7 +147,7 @@ class ClsMutualTrainer(Trainer):
                 #Task Loss - Max-width
                 loss = self.train_criterion(max_width_output, labels) 
                 
-                self.scaler.scale(loss).backward()
+                self.scaler.scale(loss/2).backward()
                 max_width_output_detached = max_width_output.detach()
                 
                 ce_loss = loss
