@@ -108,7 +108,8 @@ class FlexibleConvLayer(nn.Module):
                 self.dilation, self.groups_desc if self.groups_desc == 1 else in_channels)
             # What is this exactly?
             # if getattr(FLAGS, 'conv_averaged', False):
-                # out = out * (max(self.in_channels_list)/self.in_channels)
+            # Added scaling of output
+            out = out * (max(self.in_channels_basic)/in_channels)
             if self.norm :
                 out = self.norm(out)
             if self.act :
