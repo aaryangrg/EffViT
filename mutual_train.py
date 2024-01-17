@@ -65,15 +65,12 @@ def main():
     run_config = setup.setup_run_config(config, ClsRunConfig)
 
     # Set-up student model
-    if args.student_weights :
-        print("Student : Pretrained")
-        model = create_flexible_cls_model(args.student_model, True, weight_url = args.student_weights, dropout=config["net_config"]["dropout"])
-    else : 
-        model = create_flexible_cls_model(args.student_model, False, dropout=config["net_config"]["dropout"])
+
+    model = create_flexible_cls_model(args.student_model, False, dropout=config["net_config"]["dropout"])
     apply_drop_func(model.backbone.stages, config["backbone_drop"])
     # p_model = create_cls_model(args.parent_model ,pretrained = True, weight_url = "/home/aaryang/experiments/EffViT/pretrained/b3-r224.pt")
     p_model = create_cls_model("b1" ,pretrained = False, dropout=config["net_config"]["dropout"])
-
+    
     setup.init_model(
         model,
         rand_init=args.rand_init,

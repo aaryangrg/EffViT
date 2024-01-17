@@ -32,6 +32,9 @@ __all__ = [
 #                             Basic Layers                                      #
 #################################################################################
 
+def calculate_macs_conv(in_channels, out_channels, kernel_width, kernel_height, out_width, out_height, groups, batch) :
+        return (in_channels * out_channels * kernel_width * kernel_height * out_width * out_height // groups ) * batch
+
 class ConvLayer(nn.Module):
     def __init__(
         self,
@@ -62,6 +65,12 @@ class ConvLayer(nn.Module):
             groups=groups,
             bias=use_bias,
         )
+        #Extra --> MACs calculation
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.kernel_dim = kernel_size
+        self.groups = groups
+
         self.norm = build_norm(norm, num_features=out_channels)
         self.act = build_act(act_func)
 
@@ -69,6 +78,7 @@ class ConvLayer(nn.Module):
         if self.dropout is not None:
             x = self.dropout(x)
         x = self.conv(x)
+        print("MACs : ", calculate_macs_conv(self.in_channels, self.out_channels, self.kernel_dim, self.kernel_dim, len(x[2]), len(x[3]), self.groups, len(x[0])))
         if self.norm:
             x = self.norm(x)
         if self.act:

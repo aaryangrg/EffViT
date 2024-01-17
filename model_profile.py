@@ -59,19 +59,19 @@ def main():
     # # Print GPU memory summary
     # print(torch.cuda.memory_summary(device=None, abbreviated=False))
 
-    if args.profile :
-        for i in range(5) :
-            input = input.cuda()
-            # Batch recorded
-            with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], profile_memory=True) as prof:
-                with record_function("model_specific") :
-                    model(input)
-            print(prof.key_averages().table(sort_by="self_cuda_time_total"))
+    # if args.profile :
+    #     for i in range(5) :
+    #         input = input.cuda()
+    #         # Batch recorded
+    #         with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], profile_memory=True) as prof:
+    #             with record_function("model_specific") :
+    #                 model(input)
+    #         print(prof.key_averages().table(sort_by="self_cuda_time_total"))
 
-    #MACS calculation & Params (single image)
-    # if args.find_macs : 
-    #     macs, params = profile(model, inputs = (input,))
-    #     print(f"MACSs: {macs}, Params: {params}")
+    # MACS calculation & Params (single image)
+    if args.find_macs : 
+        macs, params = profile(model, inputs = (input,))
+        print(f"MACSs: {macs}, Params: {params}")
 
 if __name__ == "__main__":
     main()

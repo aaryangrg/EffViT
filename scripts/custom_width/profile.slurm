@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=group3
-#SBATCH --output=/home/aaryang/experiments/EffViT/outs/profile/torchprofiler/b3_1x.out
+#SBATCH --output=/home/aaryang/experiments/EffViT/outs/profile/macs/b3_convolutions_total.out
 #SBATCH --nodes=1   # Get one node
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:1           # And two GPU
