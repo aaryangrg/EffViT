@@ -87,6 +87,8 @@ def main():
     )
 
     print(model)
+
+    print("Flexible model ")
     print(p_model)
     # # setup trainer
     # trainer = ClsMutualTrainer(
