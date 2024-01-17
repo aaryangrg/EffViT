@@ -71,37 +71,50 @@ def main():
     else : 
         model = create_flexible_cls_model(args.student_model, False, dropout=config["net_config"]["dropout"])
     apply_drop_func(model.backbone.stages, config["backbone_drop"])
-    print("Flexible Student Initialized : ", args.student_model)
-    p_model = create_cls_model(args.parent_model ,pretrained = True, weight_url = "/home/aaryang/experiments/EffViT/pretrained/b3-r224.pt")
-    print("Parent Model Initialized : ", args.parent_model)
+    # p_model = create_cls_model(args.parent_model ,pretrained = True, weight_url = "/home/aaryang/experiments/EffViT/pretrained/b3-r224.pt")
+    p_model = create_cls_model("b1" ,pretrained = False, dropout=config["net_config"]["dropout"])
 
-    # setup trainer
-    trainer = ClsMutualTrainer(
-        path=args.path,
-        model=model,
-        p_model = p_model,
-        data_provider=data_provider,
-        auto_restart_thresh=args.auto_restart_thresh,
-    )
-    # initialization
     setup.init_model(
-        trainer.network,
+        model,
+        rand_init=args.rand_init,
+        last_gamma=args.last_gamma,
+    )
+    
+    setup.init_model(
+        p_model,
         rand_init=args.rand_init,
         last_gamma=args.last_gamma,
     )
 
-    # prep for training
-    trainer.prep_for_training(run_config, config["ema_decay"], args.fp16)
+    print(model)
+    print(p_model)
+    # # setup trainer
+    # trainer = ClsMutualTrainer(
+    #     path=args.path,
+    #     model=model,
+    #     p_model = p_model,
+    #     data_provider=data_provider,
+    #     auto_restart_thresh=args.auto_restart_thresh,
+    # )
+    # # initialization
+    # setup.init_model(
+    #     trainer.network,
+    #     rand_init=args.rand_init,
+    #     last_gamma=args.last_gamma,
+    # )
 
-    # resume
-    if args.resume:
-        trainer.load_model()
-        data_provider = setup.setup_data_provider(config, [ImageNetDataProviderSubset], is_distributed=True)
-    else:
-        trainer.sync_model()
+    # # prep for training
+    # trainer.prep_for_training(run_config, config["ema_decay"], args.fp16)
 
-    # launch training
-    trainer.train(save_freq=args.save_freq)
+    # # resume
+    # if args.resume:
+    #     trainer.load_model()
+    #     data_provider = setup.setup_data_provider(config, [ImageNetDataProviderSubset], is_distributed=True)
+    # else:
+    #     trainer.sync_model()
+
+    # # launch training
+    # trainer.train(save_freq=args.save_freq)
 
 
 if __name__ == "__main__":
