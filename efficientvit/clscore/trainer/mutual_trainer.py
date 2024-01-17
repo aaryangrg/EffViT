@@ -20,7 +20,7 @@ from efficientvit.models.utils import list_join, list_mean, torch_random_choices
 __all__ = ["ClsMutualTrainer"]
 LOG_SOFTMAX_CONST = 1e-6
 # PREDEFINED_WIDTHS = [0.25, 0.50, 0.75, 1.0]
-PREDEFINED_WIDTHS = [0.25, 1.0]
+PREDEFINED_WIDTHS = [1.0]
 
 class ClsMutualTrainer(Trainer):
     def __init__(
