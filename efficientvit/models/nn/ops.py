@@ -31,7 +31,7 @@ __all__ = [
 #################################################################################
 #                             Basic Layers                                      #
 #################################################################################
-
+total_conv_macs = 0
 def calculate_macs_conv(in_channels, out_channels, kernel_width, kernel_height, out_width, out_height, groups, batch) :
         return (in_channels * out_channels * kernel_width * kernel_height * out_width * out_height // groups ) * batch
 
@@ -78,7 +78,8 @@ class ConvLayer(nn.Module):
         if self.dropout is not None:
             x = self.dropout(x)
         x = self.conv(x)
-        print("MACs : ", calculate_macs_conv(self.in_channels, self.out_channels, self.kernel_dim, self.kernel_dim, x.shape[2], x.shape[3], self.groups, x.shape[0]))
+        total_conv_macs += calculate_macs_conv(self.in_channels, self.out_channels, self.kernel_dim, self.kernel_dim, x.shape[2], x.shape[3], self.groups, x.shape[0])
+        print("total so far : ", total_conv_macs)
         if self.norm:
             x = self.norm(x)
         if self.act:
