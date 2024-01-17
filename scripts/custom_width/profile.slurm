@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=group3
-#SBATCH --output=/home/aaryang/experiments/EffViT/outs/profile/macs/b3_convolutions_total.out
+#SBATCH --output=/home/aaryang/experiments/EffViT/outs/profile/macs/convolution_macs_b1_b3_l3.out
 #SBATCH --nodes=1   # Get one node
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:1           # And two GPU
@@ -30,6 +30,9 @@ resolutions=("128" "160" "192" "224")
 #     done
 # done
 
-python3 ../../model_profile.py --image_size 224 \
+for model in "${models[@]}"; do
+    echo "$model - convolutions"
+    python3 ../../model_profile.py --image_size 224 \
             --width_multiplier 1.0 \
-            --student_model b3_custom \
+            --student_model $model
+done
