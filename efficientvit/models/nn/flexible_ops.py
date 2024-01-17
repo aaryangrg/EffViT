@@ -87,32 +87,33 @@ class FlexibleConvLayer(nn.Module):
         self.act = build_act(act_func)
     
     def forward(self, input):
-        if self.dropout is not None :
-            input = self.dropout(input)
-        in_channels = self.in_channels_basic
-        out_channels = self.out_channels_basic
-        # Removed Scaling by ratio
-        if self.flex[0] :
-            in_channels = int(make_divisible(self.in_channels_basic * self.width_mult))
-        if self.flex[1] : 
-            out_channels = int(make_divisible(self.out_channels_basic * self.width_mult))
-        # Slicing default (max width) conv layer weights
-        weight = self.conv.weight[:out_channels, :in_channels, :, :]
-        if self.use_bias :
-            bias = self.conv.bias[:out_channels]
-        else:
-            bias = self.conv.bias
-        out = nn.functional.conv2d(
-            input, weight, bias, self.stride, self.padding,
-            self.dilation, self.groups_desc if self.groups_desc == 1 else in_channels)
-        # What is this exactly?
-        # if getattr(FLAGS, 'conv_averaged', False):
-            # out = out * (max(self.in_channels_list)/self.in_channels)
-        if self.norm :
-            out = self.norm(out)
-        if self.act :
-            out = self.act(out)
-        return out 
+        with torch.autograd.profiler.record_function("model_specific"):
+            if self.dropout is not None :
+                input = self.dropout(input)
+            in_channels = self.in_channels_basic
+            out_channels = self.out_channels_basic
+            # Removed Scaling by ratio
+            if self.flex[0] :
+                in_channels = int(make_divisible(self.in_channels_basic * self.width_mult))
+            if self.flex[1] : 
+                out_channels = int(make_divisible(self.out_channels_basic * self.width_mult))
+            # Slicing default (max width) conv layer weights
+            weight = self.conv.weight[:out_channels, :in_channels, :, :]
+            if self.use_bias :
+                bias = self.conv.bias[:out_channels]
+            else:
+                bias = self.conv.bias
+            out = nn.functional.conv2d(
+                input, weight, bias, self.stride, self.padding,
+                self.dilation, self.groups_desc if self.groups_desc == 1 else in_channels)
+            # What is this exactly?
+            # if getattr(FLAGS, 'conv_averaged', False):
+                # out = out * (max(self.in_channels_list)/self.in_channels)
+            if self.norm :
+                out = self.norm(out)
+            if self.act :
+                out = self.act(out)
+            return out 
     
 # Adapted from USBatchNorm2D
 class FlexibleBatchNorm2d(nn.BatchNorm2d):
@@ -139,33 +140,34 @@ class FlexibleBatchNorm2d(nn.BatchNorm2d):
 
     # Why are some widths explicitly pre-defined? --> for test / val purposes?
     def forward(self, input):
-        weight = self.weight
-        bias = self.bias
-        # If its the last layer --> use the original number of features
-        c = int(make_divisible(self.num_features_basic * self.width_mult)) if self.flex else self.num_features_basic
-        if self.width_mult in WIDTH_LIST:
-            # If its the last layer --> use the original width (multiple of 1)
-            idx = WIDTH_LIST.index(self.width_mult) if self.flex else len(WIDTH_LIST)-1
-            y = nn.functional.batch_norm(
-                input,
-                self.bn[idx].running_mean[:c],
-                self.bn[idx].running_var[:c],
-                weight[:c],
-                bias[:c],
-                self.training,
-                self.momentum,
-                self.eps)
-        else:
-            y = nn.functional.batch_norm(
-                input,
-                self.running_mean[:c],
-                self.running_var[:c],
-                weight[:c],
-                bias[:c],
-                self.training,
-                self.momentum,
-                self.eps)
-        return y
+        with torch.autograd.profiler.record_function("model_specific"):
+            weight = self.weight
+            bias = self.bias
+            # If its the last layer --> use the original number of features
+            c = int(make_divisible(self.num_features_basic * self.width_mult)) if self.flex else self.num_features_basic
+            if self.width_mult in WIDTH_LIST:
+                # If its the last layer --> use the original width (multiple of 1)
+                idx = WIDTH_LIST.index(self.width_mult) if self.flex else len(WIDTH_LIST)-1
+                y = nn.functional.batch_norm(
+                    input,
+                    self.bn[idx].running_mean[:c],
+                    self.bn[idx].running_var[:c],
+                    weight[:c],
+                    bias[:c],
+                    self.training,
+                    self.momentum,
+                    self.eps)
+            else:
+                y = nn.functional.batch_norm(
+                    input,
+                    self.running_mean[:c],
+                    self.running_var[:c],
+                    weight[:c],
+                    bias[:c],
+                    self.training,
+                    self.momentum,
+                    self.eps)
+            return y
     
 
 class FlexibleDSConv(nn.Module):
@@ -380,17 +382,18 @@ class FlexibleLiteMLA(nn.Module):
     
     # Reduced in-channels + Reduced out-channels (internal attention hidden dimension unchanged)
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        # generate multi-scale q, k, v
-        qkv = self.qkv(x)
-        multi_scale_qkv = [qkv]
-        for op in self.aggreg:
-            multi_scale_qkv.append(op(qkv))
-        multi_scale_qkv = torch.cat(multi_scale_qkv, dim=1)
+        with torch.autograd.profiler.record_function("model_specific"):
+            # generate multi-scale q, k, v
+            qkv = self.qkv(x)
+            multi_scale_qkv = [qkv]
+            for op in self.aggreg:
+                multi_scale_qkv.append(op(qkv))
+            multi_scale_qkv = torch.cat(multi_scale_qkv, dim=1)
 
-        out = self.relu_linear_att(multi_scale_qkv)
-        out = self.proj(out)
+            out = self.relu_linear_att(multi_scale_qkv)
+            out = self.proj(out)
 
-        return out
+            return out
 
     @staticmethod
     def configure_litemla(model: nn.Module, **kwargs) -> None:
