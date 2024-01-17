@@ -144,7 +144,7 @@ class FlexibleBatchNorm2d(nn.BatchNorm2d):
         weight = self.weight
         bias = self.bias
         # If its the last layer --> use the original number of features
-        c = int(make_divisible(self.num_features_basic * self.width_mult)) if self.flex else self.
+        c = int(make_divisible(self.num_features_basic * self.width_mult)) if self.flex else self.num_features_basic
         with torch.autograd.profiler.record_function("model_specific"):
             if self.width_mult in WIDTH_LIST:
                 # If its the last layer --> use the original width (multiple of 1)
