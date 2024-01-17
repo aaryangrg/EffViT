@@ -44,6 +44,7 @@ class ClsMutualTrainer(Trainer):
         for param in self.p_model.parameters():
             param.requires_grad = False
         self.p_model.eval()
+        self.model.apply(lambda m: setattr(m, 'width_mult', 1.0))
 
     def _validate(self, model, data_loader, epoch) -> dict[str, any]:
 
@@ -141,13 +142,13 @@ class ClsMutualTrainer(Trainer):
                 # p_output = self.p_model(images)
 
                 # Max-width
-                self.model.apply(lambda m: setattr(m, 'width_mult', PREDEFINED_WIDTHS[-1]))
+                # self.model.apply(lambda m: setattr(m, 'width_mult', PREDEFINED_WIDTHS[-1]))
                 max_width_output = self.model(images)
 
                 #Task Loss - Max-width
                 loss = self.train_criterion(max_width_output, labels) 
                 
-                self.scaler.scale(loss/2).backward()
+                self.scaler.scale(loss).backward()
                 max_width_output_detached = max_width_output.detach()
                 
                 ce_loss = loss
