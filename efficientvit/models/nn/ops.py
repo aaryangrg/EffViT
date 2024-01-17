@@ -47,7 +47,7 @@ class ConvLayer(nn.Module):
         dropout=0,
         norm="bn2d",
         act_func="relu",
-        output_macs = True
+        output_macs = False
     ):
         super(ConvLayer, self).__init__()
 
