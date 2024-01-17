@@ -47,6 +47,7 @@ class ConvLayer(nn.Module):
         dropout=0,
         norm="bn2d",
         act_func="relu",
+        output_macs = True
     ):
         super(ConvLayer, self).__init__()
 
@@ -69,6 +70,7 @@ class ConvLayer(nn.Module):
         self.out_channels = out_channels
         self.kernel_dim = kernel_size
         self.groups = groups
+        self.output_macs = output_macs
 
         self.norm = build_norm(norm, num_features=out_channels)
         self.act = build_act(act_func)
@@ -77,7 +79,8 @@ class ConvLayer(nn.Module):
         if self.dropout is not None:
             x = self.dropout(x)
         x = self.conv(x)
-        print("MACs : ", calculate_macs_conv(self.in_channels, self.out_channels, self.kernel_dim, self.kernel_dim, x.shape[2], x.shape[3], self.groups, x.shape[0]))
+        if self.output_macs :
+            print("MACs : ", calculate_macs_conv(self.in_channels, self.out_channels, self.kernel_dim, self.kernel_dim, x.shape[2], x.shape[3], self.groups, x.shape[0]))
         if self.norm:
             x = self.norm(x)
         if self.act:
@@ -371,6 +374,7 @@ class LiteMLA(nn.Module):
             use_bias=use_bias[0],
             norm=norm[0],
             act_func=act_func[0],
+            output_macs=False
         )
         self.aggreg = nn.ModuleList(
             [
@@ -397,6 +401,7 @@ class LiteMLA(nn.Module):
             use_bias=use_bias[1],
             norm=norm[1],
             act_func=act_func[1],
+            output_macs = False
         )
 
     @autocast(enabled=False)
@@ -585,3 +590,4 @@ class OpSequential(nn.Module):
         for op in self.op_list:
             x = op(x)
         return x
+
