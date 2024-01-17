@@ -38,7 +38,7 @@ def main():
     parser.add_argument("--depth_multiplier", type = float, default=1.0)
     parser.add_argument("--student_model", type = str, default = "b1_custom")
     parser.add_argument("--find_macs", type = bool, default = True)
-    parser.add_argument("--profile", type = bool, default = False)
+    parser.add_argument("--profile", type = bool, default = True)
 
     args = parser.parse_args()
     if args.gpu == "all":
@@ -58,18 +58,17 @@ def main():
 
     # # Print GPU memory summary
     # print(torch.cuda.memory_summary(device=None, abbreviated=False))
-
-    # if args.profile :
-    #     for i in range(5) :
-    #         input = input.cuda()
-    #         # Batch recorded
-    #         with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True, profile_memory=True) as prof:
-    #             model(input)
-    #         print(prof.key_averages().table(sort_by="self_cuda_time_total"))
-        # MACS calculation & Params (single image)
-    if args.find_macs : 
-        macs, params = profile(model, inputs = (input,))
-        print(f"MACSs: {macs}, Params: {params}")
+    if args.profile :
+        for i in range(5) :
+            input = input.cuda()
+            # Batch recorded
+            with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True, profile_memory=True) as prof:
+                model(input)
+            print(prof.key_averages().table(sort_by="self_cuda_time_total"))
+        #MACS calculation & Params (single image)
+    # if args.find_macs : 
+    #     macs, params = profile(model, inputs = (input,))
+    #     print(f"MACSs: {macs}, Params: {params}")
 
 if __name__ == "__main__":
     main()
