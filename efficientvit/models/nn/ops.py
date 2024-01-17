@@ -78,7 +78,7 @@ class ConvLayer(nn.Module):
         if self.dropout is not None:
             x = self.dropout(x)
         x = self.conv(x)
-        print("MACs : ", calculate_macs_conv(self.in_channels, self.out_channels, self.kernel_dim, self.kernel_dim, len(x[2]), len(x[3]), self.groups, len(x[0])))
+        print("MACs : ", calculate_macs_conv(self.in_channels, self.out_channels, self.kernel_dim, self.kernel_dim, x.shape[2], x.shape[3], self.groups, x.shape[0]))
         if self.norm:
             x = self.norm(x)
         if self.act:
