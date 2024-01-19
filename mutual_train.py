@@ -87,10 +87,12 @@ def main():
         if torch.equal(param_a, param_b):
             pass
         else :
+            print("##########")
             print("A : ")
             print(param_a)
             print("B : ")
             print(param_b)
+            print("##########")
     # print(model)
 
     # print("Flexible model ")
