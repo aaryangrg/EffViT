@@ -19,9 +19,7 @@ from efficientvit.models.utils import list_join, list_mean, torch_random_choices
 
 __all__ = ["ClsMutualTrainer"]
 LOG_SOFTMAX_CONST = 1e-6
-# PREDEFINED_WIDTHS = [0.25, 0.50, 0.75, 1.0]
-# PREDEFINED_WIDTHS = [1.0]
-PREDEFINED_WIDTHS = []
+PREDEFINED_WIDTHS = [0.25, 0.50, 0.75, 1.0]
 
 class ClsMutualTrainer(Trainer):
     def __init__(
@@ -138,6 +136,7 @@ class ClsMutualTrainer(Trainer):
         # else:
         #     ema_output = None
 
+        # If throws error --> do autocast twice
         with torch.autograd.set_detect_anomaly(True) :
             with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16):
                 # p_output = self.p_model(images)
@@ -147,28 +146,26 @@ class ClsMutualTrainer(Trainer):
                 max_width_output = self.model(images)
 
                 #Task Loss - Max-width
-                loss = self.train_criterion(max_width_output, labels) 
-                
-            self.scaler.scale(loss).backward()
-                # max_width_output_detached = max_width_output.detach()
-                
-            ce_loss = loss
-            total_kd_loss = 0
+                loss = self.train_criterion(max_width_output, labels)
+                ce_loss = loss
+                total_kd_loss = 0
+                max_width_output_detached = max_width_output.detach()
 
-                # # KLD for each width, added back to total loss func
-                # for width_mult in (PREDEFINED_WIDTHS[:len(PREDEFINED_WIDTHS)-1])[::-1]:
-                #     with torch.no_grad():
-                #         self.model.apply(lambda m: setattr(m, 'width_mult', width_mult))
-                #     output = self.model(images)
-                #     kd_loss = self.get_kld_loss(output + LOG_SOFTMAX_CONST, max_width_output_detached + LOG_SOFTMAX_CONST)
-                #     total_kd_loss += kd_loss.detach()
-
+                for width_mult in (PREDEFINED_WIDTHS[:len(PREDEFINED_WIDTHS)-1])[::-1]:
+                    with torch.no_grad():
+                        self.model.apply(lambda m: setattr(m, 'width_mult', width_mult))
+                    output = self.model(images)
+                    kd_loss = self.get_kld_loss(output + LOG_SOFTMAX_CONST, max_width_output_detached + LOG_SOFTMAX_CONST)
+                    total_kd_loss += kd_loss
+                
+            self.scaler.scale(loss + total_kd_loss).backward()
                 # mesa loss (Not included by default)
                 # if ema_output is not None:
                 #     mesa_loss = self.train_criterion(output, ema_output) # Calculated only on CrossEntropy loss
                 #     loss = loss + total_kd_loss + self.run_config.mesa["ratio"] * mesa_loss
                 # else :
                 #     pass
+            
         # calc train top1 acc
         if self.run_config.mixup_config is None:
             top1 = accuracy(max_width_output_detached, torch.argmax(labels, dim=1), topk=(1,))[0][0]
