@@ -136,7 +136,6 @@ class ClsMutualTrainer(Trainer):
         # else:
         #     ema_output = None
 
-        # If throws error --> do autocast twice
         with torch.autograd.set_detect_anomaly(True) :
             with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16):
                 # p_output = self.p_model(images)
@@ -150,15 +149,19 @@ class ClsMutualTrainer(Trainer):
                 ce_loss = loss
                 total_kd_loss = 0
                 max_width_output_detached = max_width_output.detach()
-
-                for width_mult in (PREDEFINED_WIDTHS[:len(PREDEFINED_WIDTHS)-1])[::-1]:
+            self.scaler.scale(loss).backward()
+            
+            # Bears significant computational overhead
+            for width_mult in (PREDEFINED_WIDTHS[:len(PREDEFINED_WIDTHS)-1])[::-1]:
+                with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16):
                     with torch.no_grad():
                         self.model.apply(lambda m: setattr(m, 'width_mult', width_mult))
                     output = self.model(images)
                     kd_loss = self.get_kld_loss(output + LOG_SOFTMAX_CONST, max_width_output_detached + LOG_SOFTMAX_CONST)
                     total_kd_loss += kd_loss
-                
-            self.scaler.scale(loss + total_kd_loss).backward()
+                self.scaler.scale(kd_loss).backward()
+
+            
                 # mesa loss (Not included by default)
                 # if ema_output is not None:
                 #     mesa_loss = self.train_criterion(output, ema_output) # Calculated only on CrossEntropy loss
