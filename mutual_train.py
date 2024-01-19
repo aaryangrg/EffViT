@@ -83,19 +83,19 @@ def main():
         last_gamma=args.last_gamma,
     )
 
-    # for param_a, param_b in zip(model.parameters(), p_model.parameters()):
-    #     if torch.equal(param_a, param_b):
-    #         pass
-    #     else :
-    #         print("A : ")
-    #         print(param_a)
-    #         print("B : ")
-    #         print(param_b)
-    print(model)
+    for param_a, param_b in zip(model.parameters(), p_model.parameters()):
+        if torch.equal(param_a, param_b):
+            pass
+        else :
+            print("A : ")
+            print(param_a)
+            print("B : ")
+            print(param_b)
+    # print(model)
 
-    print("Flexible model ")
+    # print("Flexible model ")
 
-    print(p_model)
+    # print(p_model)
     # # setup trainer
     # trainer = ClsMutualTrainer(
     #     path=args.path,

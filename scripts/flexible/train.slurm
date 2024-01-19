@@ -23,4 +23,4 @@ python3 ../../mutual_train.py ../../configs/cls/imagenet/b1.yaml  --fp16 \
     --data_provider.train_batch_size 512 \
     --data_provider.n_worker 12 \
     --student_model b1 \
-    --run_config.base_lr 0.00005
+    --run_config.base_lr 0.00025
