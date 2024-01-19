@@ -149,19 +149,19 @@ class ClsMutualTrainer(Trainer):
                 #Task Loss - Max-width
                 loss = self.train_criterion(max_width_output, labels) 
                 
-                self.scaler.scale(loss).backward()
-                max_width_output_detached = max_width_output.detach()
+            self.scaler.scale(loss).backward()
+                # max_width_output_detached = max_width_output.detach()
                 
-                ce_loss = loss
-                total_kd_loss = 0
+            ce_loss = loss
+            total_kd_loss = 0
 
-                # KLD for each width, added back to total loss func
-                for width_mult in (PREDEFINED_WIDTHS[:len(PREDEFINED_WIDTHS)-1])[::-1]:
-                    with torch.no_grad():
-                        self.model.apply(lambda m: setattr(m, 'width_mult', width_mult))
-                    output = self.model(images)
-                    kd_loss = self.get_kld_loss(output + LOG_SOFTMAX_CONST, max_width_output_detached + LOG_SOFTMAX_CONST)
-                    total_kd_loss += kd_loss.detach()
+                # # KLD for each width, added back to total loss func
+                # for width_mult in (PREDEFINED_WIDTHS[:len(PREDEFINED_WIDTHS)-1])[::-1]:
+                #     with torch.no_grad():
+                #         self.model.apply(lambda m: setattr(m, 'width_mult', width_mult))
+                #     output = self.model(images)
+                #     kd_loss = self.get_kld_loss(output + LOG_SOFTMAX_CONST, max_width_output_detached + LOG_SOFTMAX_CONST)
+                #     total_kd_loss += kd_loss.detach()
 
                 # mesa loss (Not included by default)
                 # if ema_output is not None:
