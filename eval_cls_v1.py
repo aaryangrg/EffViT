@@ -52,7 +52,7 @@ def main():
     parser.add_argument("--flexible_width", type = bool, default = False)
     parser.add_argument("--width_multiplier", type = float, default=1.0)
     parser.add_argument("--depth_multiplier", type = float, default=1.0)
-    
+
     args = parser.parse_args()
     if args.gpu == "all":
         device_list = range(torch.cuda.device_count())
@@ -93,6 +93,9 @@ def main():
     else :
         model = create_cls_model(args.model, weight_url=args.weight_url)
 
+    model = torch.nn.DataParallel(model).cuda()
+    model.eval()
+    
     top1 = AverageMeter(is_distributed=False)
     top5 = AverageMeter(is_distributed=False)
     with torch.inference_mode():
