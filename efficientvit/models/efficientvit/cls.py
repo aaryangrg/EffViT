@@ -266,7 +266,7 @@ def flexible_efficientvit_cls_b1(**kwargs) -> EfficientViTCls:
     head = FlexibleClsHead(
         in_channels=256,
         width_list=[1536, 1600],
-        **build_kwargs_from_config(kwargs, ClsHead),
+        **build_kwargs_from_config(kwargs, FlexibleClsHead),
     )
     model = EfficientViTCls(backbone, head)
     return model
@@ -279,7 +279,8 @@ def flexible_efficientvit_cls_b3(**kwargs) -> EfficientViTCls:
     head = FlexibleClsHead(
         in_channels=256,
         width_list=[2304, 2560],
-        **build_kwargs_from_config(kwargs, ClsHead),
+        **build_kwargs_from_config(kwargs, FlexibleClsHead),
     )
     model = EfficientViTCls(backbone, head)
     return model
+
