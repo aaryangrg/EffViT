@@ -10,6 +10,7 @@ import math
 import os
 from efficientvit.clscore.data_provider.MiniImageNet import MiniImageNet
 from efficientvit.clscore.data_provider.CustomDataset import CustomImageDataset
+from efficientvit.cls_model_zoo import create_cls_model, create_custom_cls_model , create_flexible_cls_model
 
 import torch.utils.data
 from torchvision import datasets, transforms
@@ -46,6 +47,12 @@ def main():
     parser.add_argument("--model", type=str)
     parser.add_argument("--weight_url", type=str, default=None)
 
+
+    parser.add_argument("--reduced_width", type = bool, default = False)
+    parser.add_argument("--flexible_width", type = bool, default = False)
+    parser.add_argument("--width_multiplier", type = float, default=1.0)
+    parser.add_argument("--depth_multiplier", type = float, default=1.0)
+    
     args = parser.parse_args()
     if args.gpu == "all":
         device_list = range(torch.cuda.device_count())
@@ -78,9 +85,13 @@ def main():
         drop_last=False,
     )
 
-    model = create_cls_model(args.model, weight_url=args.weight_url)
-    model = torch.nn.DataParallel(model).cuda()
-    model.eval()
+    if args.flexible_width : 
+        model = create_flexible_cls_model(args.model, True, weight_url=args.weight_url)
+        model.apply(lambda m: setattr(m, 'width_mult', args.width_multiplier))
+    elif args.reduced_width : 
+        model = create_custom_cls_model(args.model, True, weight_url = args.weight_url, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
+    else :
+        model = create_cls_model(args.model, weight_url=args.weight_url)
 
     top1 = AverageMeter(is_distributed=False)
     top5 = AverageMeter(is_distributed=False)
