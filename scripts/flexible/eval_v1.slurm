@@ -20,7 +20,7 @@ for width in "${width_multipliers[@]}"; do
     python3 ../../eval_cls_v1.py --model b1 --image_size 224 \
         --weight_url ../../pretrained/b1-r224.pt \
         --batch_size 128 \
-        --path /home/c3-0/datasets/ImageNet/validation \
+        --path /home/c3-0/datasets/ImageNet/train \
         --width_multiplier $width \
         --flexible_width true
 done
