@@ -7,12 +7,12 @@ data_provider:
 run_config:
   mixup_config:
     op:
-    - - mixup
-      - 0.3
-      - 1.0
-    - - cutmix
-      - 0.3
-      - 1.0
+      - - mixup
+        - 0.3
+        - 1.0
+      - - cutmix
+        - 0.3
+        - 1.0
 
 backbone_drop:
   drop_prob: 0.1

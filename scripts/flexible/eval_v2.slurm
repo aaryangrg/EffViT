@@ -18,10 +18,10 @@ width_multipliers=("0.25" "0.50" "0.75" "1.0")
 for width in "${width_multipliers[@]}"; 
     echo "$width x"
     python3 ../../eval_cls_v2.py --model b1 --image_size 224 \
-        --weight_url ../../exp/train/miniimgnet/b1_pretrained_r224_mini_finetune/checkpoint/model_best.pt \
+        --weight_url ../../pretrained/b1-r224.pt \
         --batch_size 128 \
         --path /home/c3-0/datasets/ImageNet/validation \
         --width_multiplier $width \
         --flexible_width true \
-        
+
 done
