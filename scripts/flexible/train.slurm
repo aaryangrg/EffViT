@@ -14,7 +14,7 @@ echo CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
 
 nvidia-smi
 
-torchpack dist-run -np 2 \
+torchpack dist-run -np 1 \
 python3 ../../mutual_train.py ../../configs/cls/imagenet/b1.yaml \
     --path ../exp/flexible/distillation/miniimgnet/b1_4ths_mutliway_training_fp32_distributed/ \
     --parent_model b3 \
