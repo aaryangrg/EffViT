@@ -261,7 +261,7 @@ class ClsMutualTrainer(Trainer):
             # eval
             val_info_res_dicts = self.multires_validate(epoch=epoch) # rResolution :  List of dicts --> smallest to largest width
             # Assuming single resolution
-            max_info_widths_list = val_info_res_dicts.values()[0]
+            max_info_widths_list = list(val_info_res_dicts.values())[0]
           
             avg_top1 = max_info_widths_list[-1][f"val_top1_{PREDEFINED_WIDTHS[-1]}"]
             is_best = avg_top1 > self.best_val
