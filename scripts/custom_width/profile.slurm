@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH --account=group3
-#SBATCH --output=/home/aaryang/experiments/EffViT/outs/profile/macs/convolution_macs_b1_b3_l3.out
+#SBATCH --output=/home/aaryang/experiments/EffViT/outs/profile/throughput/b1_b3_l3_4multiples_224.out
 #SBATCH --nodes=1   # Get one node
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:1           # And two GPU
 #SBATCH --cpus-per-task=8            # Two cores per task
-#SBATCH --job-name=B1Profile
+#SBATCH --job-name=Throughput
 #SBATCH --constraint=gmem12
 
 source /home/aaryang/anaconda3/bin/activate
@@ -30,9 +30,9 @@ resolutions=("128" "160" "192" "224")
 #     done
 # done
 
-for model in "${models[@]}"; do
-    echo "$model - convolutions"
+for width in "${width_multipliers[@]}"; do
+    echo "$width x"
     python3 ../../model_profile.py --image_size 224 \
-            --width_multiplier 1.0 \
+            --width_multiplier $width \
             --student_model $model
 done

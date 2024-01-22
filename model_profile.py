@@ -8,6 +8,7 @@
 import argparse
 import math
 import os
+from tracemalloc import start
 from efficientvit.clscore.data_provider.MiniImageNet import MiniImageNetV2
 from torch.profiler import profile as profiler, record_function, ProfilerActivity
 from thop import profile
@@ -16,7 +17,7 @@ import torch.utils.data
 from torchvision import datasets, transforms
 from torchvision.transforms.functional import InterpolationMode
 from tqdm import tqdm
-
+import time
 from efficientvit.apps.utils import AverageMeter
 from efficientvit.cls_model_zoo import create_cls_model, create_custom_cls_model 
 
@@ -39,6 +40,7 @@ def main():
     parser.add_argument("--student_model", type = str, default = "b1_custom")
     parser.add_argument("--find_macs", type = bool, default = True)
     parser.add_argument("--profile", type = bool, default = True)
+    parser.add_argument("--num_iterations", type = int, default = 5)
 
     args = parser.parse_args()
     if args.gpu == "all":
@@ -52,27 +54,33 @@ def main():
     input.to(dtype=torch.float16)
     input = input.cuda()
     model = create_custom_cls_model(args.student_model, False, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
-        
+    
+    total_inference_time = 0
+
     model.to("cuda:0")
     model.eval()
 
     # # Print GPU memory summary
     # print(torch.cuda.memory_summary(device=None, abbreviated=False))
 
-    # if args.profile :
-    #     for i in range(5) :
-    #         input = input.cuda()
-    #         # Batch recorded
-    #         with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], profile_memory=True) as prof:
-    #             with record_function("model_specific") :
-    #                 model(input)
-    #         print(prof.key_averages().table(sort_by="self_cuda_time_total"))
+    if args.profile :
+        for i in range(args.num_iterations) :
+            start_time = time.time()
+            # Batch recorded
+            with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], profile_memory=True) as prof:
+                    model(input)
+            end_time = time.time()
+            total_inference_time += end_time - start_time
+    
+    avg_inference_time = total_inference_time / args.num_iterations
+    print(f"Average inference time : {avg_inference_time} seconds")
+            # print(prof.key_averages().table(sort_by="self_cuda_time_total"))
 
     # MACS calculation & Params (single image)
-    if args.find_macs : 
-        macs, params = profile(model, inputs = (input,))
-        print(f"MACSs: {macs}, Params: {params}")
-
+    # if args.find_macs : 
+    #     macs, params = profile(model, inputs = (input,))
+    #     print(f"MACSs: {macs}, Params: {params}")
+# 
 if __name__ == "__main__":
     main()
 
