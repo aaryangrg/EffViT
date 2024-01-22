@@ -5,6 +5,7 @@
 import os
 import sys
 
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -16,6 +17,7 @@ from efficientvit.apps.trainer import Trainer
 from efficientvit.apps.utils import AverageMeter, sync_tensor
 from efficientvit.clscore.trainer.utils import accuracy, apply_mixup, label_smooth
 from efficientvit.models.utils import list_join, list_mean, torch_random_choices
+from efficientvit.apps.data_provider.base import parse_image_size
 
 __all__ = ["ClsMutualTrainer"]
 LOG_SOFTMAX_CONST = 1e-6
@@ -46,50 +48,55 @@ class ClsMutualTrainer(Trainer):
         self.model.apply(lambda m: setattr(m, 'width_mult', 1.0))
 
     def _validate(self, model, data_loader, epoch) -> dict[str, any]:
+        results = []
+        for width in PREDEFINED_WIDTHS :
 
-        val_loss = AverageMeter()
-        val_top1 = AverageMeter()
-        val_top5 = AverageMeter()
-        
-        #Validate on max-width
-        self.model.apply(lambda m: setattr(m, 'width_mult', PREDEFINED_WIDTHS[-1]))
-        
-        with torch.no_grad():
-            with tqdm(
-                total=len(data_loader),
-                desc=f"Validate Epoch #{epoch + 1}",
-                disable=not dist.is_master(),
-                file=sys.stdout,
-            ) as t:
-                for images, labels in data_loader:
-                    images, labels = images.cuda(), labels.cuda()
-                    # compute output
-                    output = model(images)
-                    loss = self.test_criterion(output, labels)
-                    val_loss.update(loss, images.shape[0])
-                    if self.data_provider.n_classes >= 100:
-                        acc1, acc5 = accuracy(output, labels, topk=(1, 5))
-                        val_top5.update(acc5[0], images.shape[0])
-                    else:
-                        acc1 = accuracy(output, labels, topk=(1,))[0]
-                    val_top1.update(acc1[0], images.shape[0])
+            with torch.no_grad() :
+                model.apply(lambda m: setattr(m, 'width_mult', width))
 
-                    t.set_postfix(
-                        {
-                            "loss": val_loss.avg,
-                            "top1": val_top1.avg,
-                            "top5": val_top5.avg,
-                            "#samples": val_top1.get_count(),
-                            "bs": images.shape[0],
-                            "res": images.shape[2],
-                        }
-                    )
-                    t.update()
-        return {
-            "val_top1": val_top1.avg,
-            "val_loss": val_loss.avg,
-            **({"val_top5": val_top5.avg} if val_top5.count > 0 else {}),
-        }
+            val_loss = AverageMeter()
+            val_top1 = AverageMeter()
+            val_top5 = AverageMeter()
+            
+            # Validate on all widths
+            with torch.no_grad():
+                with tqdm(
+                    total=len(data_loader),
+                    desc=f"Validate Epoch #{epoch + 1} - {width}x",
+                    disable=not dist.is_master(),
+                    file=sys.stdout,
+                ) as t:
+                    for images, labels in data_loader:
+                        images, labels = images.cuda(), labels.cuda()
+                        # compute output
+                        output = model(images)
+                        loss = self.test_criterion(output, labels)
+                        val_loss.update(loss, images.shape[0])
+                        if self.data_provider.n_classes >= 100:
+                            acc1, acc5 = accuracy(output, labels, topk=(1, 5))
+                            val_top5.update(acc5[0], images.shape[0])
+                        else:
+                            acc1 = accuracy(output, labels, topk=(1,))[0]
+                        val_top1.update(acc1[0], images.shape[0])
+
+                        t.set_postfix(
+                            {
+                                "loss": val_loss.avg,
+                                "top1": val_top1.avg,
+                                "top5": val_top5.avg,
+                                "#samples": val_top1.get_count(),
+                                "bs": images.shape[0],
+                                "res": images.shape[2],
+                            }
+                        )
+                        t.update()
+            results.append({
+                f"val_top1_{width}": val_top1.avg,
+                f"val_loss_{width}": val_loss.avg,
+                **({f'val_top5_{width}': val_top5.avg} if val_top5.count > 0 else {}),
+            })
+        
+        return results
 
     def before_step(self, feed_dict: dict[str, any]) -> dict[str, any]:
         images = feed_dict["data"].cuda()
@@ -252,8 +259,11 @@ class ClsMutualTrainer(Trainer):
         for epoch in range(self.start_epoch, self.run_config.n_epochs + self.run_config.warmup_epochs):
             train_info_dict = self.train_one_epoch(epoch)
             # eval
-            val_info_dict = self.multires_validate(epoch=epoch)
-            avg_top1 = list_mean([info_dict["val_top1"] for info_dict in val_info_dict.values()])
+            val_info_res_dicts = self.multires_validate(epoch=epoch) # rResolution :  List of dicts --> smallest to largest width
+            # Assuming single resolution
+            max_info_widths_list = val_info_res_dicts.values()[0]
+          
+            avg_top1 = max_info_widths_list[-1][f"val_top1_{PREDEFINED_WIDTHS[-1]}"]
             is_best = avg_top1 > self.best_val
             self.best_val = max(avg_top1, self.best_val)
 
@@ -267,10 +277,11 @@ class ClsMutualTrainer(Trainer):
             val_log = self.run_config.epoch_format(epoch)
             val_log += f"\tval_top1={avg_top1:.2f}({self.best_val:.2f})"
             val_log += "\tVal("
-            for key in list(val_info_dict.values())[0]:
-                if key == "val_top1":
-                    continue
-                val_log += f"{key}={list_mean([info_dict[key] for info_dict in val_info_dict.values()]):.2f},"
+            for idx, width in enumerate(PREDEFINED_WIDTHS):
+                val_log += f"mult : {width} || "
+                for key in max_info_widths_list[idx] :
+                    val_log += f"{key}={max_info_widths_list[idx][key]:.2f},"
+                val_log += "\n"
             val_log += ")\tTrain("
             for key, val in train_info_dict.items():
                 val_log += f"{key}={val:.2E},"
@@ -286,3 +297,31 @@ class ClsMutualTrainer(Trainer):
                     epoch=epoch,
                     model_name="model_best.pt" if is_best else "checkpoint.pt",
                 )
+
+    def multires_validate(
+        self,
+        model=None,
+        data_loader=None,
+        is_test=True,
+        epoch=0,
+        eval_image_size=None,
+    ) -> dict[str, dict[str, any]]:
+        eval_image_size = eval_image_size or self.run_config.eval_image_size
+        eval_image_size = eval_image_size or self.data_provider.image_size
+        model = model or self.eval_network
+
+        if not isinstance(eval_image_size, list):
+            eval_image_size = [eval_image_size]
+
+        output_dict = {}
+        for r in eval_image_size:
+            self.data_provider.assign_active_image_size(parse_image_size(r))
+            if self.run_config.reset_bn:
+                self.reset_bn(
+                    network=model,
+                    subset_size=self.run_config.reset_bn_size,
+                    subset_batch_size=self.run_config.reset_bn_batch_size,
+                    progress_bar=True,
+                )
+            output_dict[f"r{r}"] = self.validate(model, data_loader, is_test, epoch)
+        return output_dict
