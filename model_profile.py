@@ -54,8 +54,6 @@ def main():
     input.to(dtype=torch.float16)
     input = input.cuda()
     model = create_custom_cls_model(args.student_model, False, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
-    
-    total_inference_time = 0
 
     model.to("cuda:0")
     model.eval()
@@ -65,16 +63,10 @@ def main():
 
     if args.profile :
         for i in range(args.num_iterations) :
-            start_time = time.time()
             # Batch recorded
-            # with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], profile_memory=True) as prof:
-            model(input)
-            end_time = time.time()
-            total_inference_time += end_time - start_time
-    
-    avg_inference_time = total_inference_time / args.num_iterations
-    print(f"Average inference time : {avg_inference_time} seconds")
-            # print(prof.key_averages().table(sort_by="self_cuda_time_total"))
+            with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], profile_memory=True) as prof:
+                model(input)
+            print(prof.key_averages().table(sort_by="self_cuda_time_total"), row_limit = 10)
 
     # MACS calculation & Params (single image)
     # if args.find_macs : 
