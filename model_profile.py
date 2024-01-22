@@ -53,7 +53,6 @@ def main():
     inputs = []
     for _ in range(args.num_iterations) :
         input = torch.randn(1, 3, args.image_size, args.image_size)
-        input = input.to(torch.float16)
         input = input.cuda()
         inputs.append(input)
         
