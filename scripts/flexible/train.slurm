@@ -5,7 +5,7 @@
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:1         # And two GPU
 #SBATCH --cpus-per-task=10            # Two cores per task
-#SBATCH --job-name=Fp32Flex
+#SBATCH --job-name=LRFlex
 #SBATCH --constraint=gmem32
 
 source /home/aaryang/anaconda3/bin/activate
