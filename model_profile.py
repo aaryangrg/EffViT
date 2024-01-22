@@ -53,8 +53,8 @@ def main():
     inputs = []
     for _ in range(args.num_iterations) :
         input = torch.randn(1, 3, args.image_size, args.image_size)
-        input.cuda()
-        input.to(dtype = torch.float16)
+        input = input.cuda()
+        input = input.half()
         inputs.append(input)
         
     model = create_custom_cls_model(args.student_model, False, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
