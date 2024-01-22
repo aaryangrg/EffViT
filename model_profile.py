@@ -67,8 +67,8 @@ def main():
         for i in range(args.num_iterations) :
             start_time = time.time()
             # Batch recorded
-            with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], profile_memory=True) as prof:
-                    model(input)
+            # with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], profile_memory=True) as prof:
+            model(input)
             end_time = time.time()
             total_inference_time += end_time - start_time
     
