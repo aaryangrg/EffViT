@@ -19,7 +19,7 @@ python3 ../../mutual_train.py ../../configs/cls/imagenet/b1.yaml \
     --path ../exp/flexible/distillation/miniimgnet/b1_4ths_mutliway_training_fp32_distributed/ \
     --parent_model b3 \
     --parent_weights_url /home/aaryang/experiments/EffViT/pretrained/b3-r224.pt \
-    --data_provider.train_batch_size 512 \
-    --data_provider.n_worker 10 \
+    --data_provider.train_batch_size 1024 \
+    --data_provider.n_worker 12 \
     --student_model b1 \
     --run_config.base_lr 0.00025
