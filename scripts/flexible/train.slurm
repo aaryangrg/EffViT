@@ -1,7 +1,6 @@
 #!/bin/bash
 #SBATCH --account=group3
 #SBATCH --output=/home/aaryang/experiments/EffViT/outs/flexible/dist/b1_4ths_mutliway_training_fp32_distributed.out
-#SBATCH --nodes=1   # Get one node
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:2         # And two GPU
 #SBATCH --cpus-per-task=10            # Two cores per task
