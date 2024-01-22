@@ -30,9 +30,11 @@ resolutions=("128" "160" "192" "224")
 #     done
 # done
 
-for width in "${width_multipliers[@]}"; do
-    echo "$width x"
-    python3 ../../model_profile.py --image_size 224 \
-            --width_multiplier $width \
-            --student_model $model
+for $model in "${models[@]}"; do 
+    for width in "${width_multipliers[@]}"; do
+        echo "$model - $width x"
+        python3 ../../model_profile.py --image_size 224 \
+                --width_multiplier $width \
+                --student_model $model
+    done
 done
