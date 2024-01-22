@@ -42,8 +42,6 @@ def main():
     parser.add_argument("--profile", type = bool, default = True)
     parser.add_argument("--num_iterations", type = int, default = 5)
 
-    parser.add_argument("--batch_size", type =  int, default = 1)
-
     args = parser.parse_args()
     if args.gpu == "all":
         device_list = range(torch.cuda.device_count())
