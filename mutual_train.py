@@ -67,6 +67,7 @@ def main():
     # Set-up student model
 
     model = create_flexible_cls_model(args.student_model, False, dropout=config["net_config"]["dropout"])
+    model = torch.nn.DataParallel(model)
     apply_drop_func(model.backbone.stages, config["backbone_drop"])
     # p_model = create_cls_model(args.parent_model ,pretrained = True, weight_url = "/home/aaryang/experiments/EffViT/pretrained/b3-r224.pt")
     p_model = create_cls_model("b1" ,pretrained = False, dropout=config["net_config"]["dropout"])
