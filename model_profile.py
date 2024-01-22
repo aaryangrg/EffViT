@@ -69,7 +69,7 @@ def main():
         for i in range(args.num_iterations) :
             # Batch recorded
             with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], profile_memory=True) as prof:
-                model(input[i])
+                model(inputs[i])
             print(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit = 10))
 
     # MACS calculation & Params (single image)
