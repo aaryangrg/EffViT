@@ -50,9 +50,13 @@ def main():
         device_list = [int(_) for _ in args.gpu.split(",")]
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
 
-    input = torch.randn(1, 3, args.image_size, args.image_size)
-    input.to(dtype=torch.float16)
-    input = input.cuda()
+    inputs = []
+    for _ in range(args.num_iterations) :
+        input = torch.randn(1, 3, args.image_size, args.image_size)
+        input.cuda()
+        input.to(dtype = torch.float16)
+        inputs.append(input)
+        
     model = create_custom_cls_model(args.student_model, False, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
 
     model.to("cuda:0")
@@ -65,7 +69,7 @@ def main():
         for i in range(args.num_iterations) :
             # Batch recorded
             with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], profile_memory=True) as prof:
-                model(input)
+                model(input[i])
             print(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit = 10))
 
     # MACS calculation & Params (single image)
