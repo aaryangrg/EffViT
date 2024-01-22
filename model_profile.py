@@ -42,6 +42,8 @@ def main():
     parser.add_argument("--profile", type = bool, default = True)
     parser.add_argument("--num_iterations", type = int, default = 5)
 
+    parser.add_argument("--batch_size", type =  int, default = 1)
+
     args = parser.parse_args()
     if args.gpu == "all":
         device_list = range(torch.cuda.device_count())
@@ -52,7 +54,7 @@ def main():
 
     inputs = []
     for _ in range(args.num_iterations) :
-        input = torch.randn(1, 3, args.image_size, args.image_size)
+        input = torch.randn(args.batch_size, 3, args.image_size, args.image_size)
         input = input.cuda()
         inputs.append(input)
         
@@ -69,7 +71,7 @@ def main():
             # Batch recorded
             with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], profile_memory=True) as prof:
                 model(inputs[i])
-            print(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit = 10))
+            print(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit = 5))
 
     # MACS calculation & Params (single image)
     # if args.find_macs : 
