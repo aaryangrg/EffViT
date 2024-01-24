@@ -21,6 +21,7 @@ from efficientvit.models.efficientvit import (
 from efficientvit.models.efficientvit.cls import flexible_efficientvit_cls_b3
 from efficientvit.models.nn.norm import set_norm_eps
 from efficientvit.models.utils import load_state_dict_from_file
+import torch
 
 __all__ = ["create_cls_model", "create_custom_cls_model", "create_flexible_cls_model"]
 
@@ -129,6 +130,12 @@ def create_flexible_cls_model(name: str, pretrained=True, weight_url: str or Non
             raise ValueError(f"Do not find the pretrained weight of {name}.")
         else:
             print("Loading weights")
+            original_params = model.state_dict()
             weight = load_state_dict_from_file(weight_url)
             model.load_state_dict(weight)
+            new_params = model.state_dict()
+            for key, value in original_params.items():
+                if not torch.equal(value, new_params[key]):
+                    print(f"Parameters mismatch for key: {key}")
+
     return model

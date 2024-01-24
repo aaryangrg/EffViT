@@ -39,13 +39,7 @@ class ClsMutualTrainer(Trainer):
         )
         self.auto_restart_thresh = auto_restart_thresh
         self.test_criterion = nn.CrossEntropyLoss()
-        self.p_model = p_model
-        self.p_model.cuda()
-        # Freeze the parameters of the pre-trained model
-        for param in self.p_model.parameters():
-            param.requires_grad = False
-        self.p_model.eval()
-        self.model.apply(lambda m: setattr(m, 'width_mult', 1.0))
+        # self.model.apply(lambda m: setattr(m, 'width_mult', 1.0))
 
     def _validate(self, model, data_loader, epoch) -> dict[str, any]:
         results = []
@@ -145,10 +139,9 @@ class ClsMutualTrainer(Trainer):
 
         with torch.autograd.set_detect_anomaly(True) :
             with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16):
-                # p_output = self.p_model(images)
-
                 # Max-width
-                # self.model.apply(lambda m: setattr(m, 'width_mult', PREDEFINED_WIDTHS[-1]))
+                with torch.no_grad() :
+                    self.model.apply(lambda m: setattr(m, 'width_mult', PREDEFINED_WIDTHS[-1]))
                 max_width_output = self.model(images)
 
                 #Task Loss - Max-width
@@ -165,16 +158,8 @@ class ClsMutualTrainer(Trainer):
                         self.model.apply(lambda m: setattr(m, 'width_mult', width_mult))
                     output = self.model(images)
                     kd_loss = self.get_kld_loss(output + LOG_SOFTMAX_CONST, max_width_output_detached + LOG_SOFTMAX_CONST)
-                    total_kd_loss += kd_loss
                 self.scaler.scale(kd_loss).backward()
-
-            
-                # mesa loss (Not included by default)
-                # if ema_output is not None:
-                #     mesa_loss = self.train_criterion(output, ema_output) # Calculated only on CrossEntropy loss
-                #     loss = loss + total_kd_loss + self.run_config.mesa["ratio"] * mesa_loss
-                # else :
-                #     pass
+                total_kd_loss += kd_loss
             
         # calc train top1 acc
         if self.run_config.mixup_config is None:
