@@ -95,7 +95,7 @@ def main():
         model = create_cls_model(args.model, weight_url=args.weight_url)
         
     model = torch.nn.DataParallel(model).cuda()
-    model.eval()
+    # model.eval()
 
     top1 = AverageMeter(is_distributed=False)
     top5 = AverageMeter(is_distributed=False)

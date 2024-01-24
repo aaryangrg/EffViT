@@ -139,35 +139,34 @@ class FlexibleBatchNorm2d(nn.BatchNorm2d):
         self.ignore_model_profiling = True
         self.flex = flex
 
-    # Why are some widths explicitly pre-defined? --> for test / val purposes?
     def forward(self, input):
         weight = self.weight
         bias = self.bias
         # If its the last layer --> use the original number of features
         c = int(make_divisible(self.num_features_basic * self.width_mult)) if self.flex else self.num_features_basic
         with torch.autograd.profiler.record_function("model_specific"):
-            if self.width_mult in WIDTH_LIST:
-                # If its the last layer --> use the original width (multiple of 1)
-                idx = WIDTH_LIST.index(self.width_mult) if self.flex else len(WIDTH_LIST)-1
-                y = nn.functional.batch_norm(
-                    input,
-                    self.bn[idx].running_mean[:c],
-                    self.bn[idx].running_var[:c],
-                    weight[:c],
-                    bias[:c],
-                    self.training,
-                    self.momentum,
-                    self.eps)
-            else:
-                y = nn.functional.batch_norm(
-                    input,
-                    self.running_mean[:c],
-                    self.running_var[:c],
-                    weight[:c],
-                    bias[:c],
-                    self.training,
-                    self.momentum,
-                    self.eps)
+            # if self.width_mult in WIDTH_LIST:
+            #     # If its the last layer --> use the original width (multiple of 1)
+            #     idx = WIDTH_LIST.index(self.width_mult) if self.flex else len(WIDTH_LIST)-1
+            #     y = nn.functional.batch_norm(
+            #         input,
+            #         self.bn[idx].running_mean[:c],
+            #         self.bn[idx].running_var[:c],
+            #         weight[:c],
+            #         bias[:c],
+            #         self.training,
+            #         self.momentum,
+            #         self.eps)
+            # else:
+            y = nn.functional.batch_norm(
+                input,
+                self.running_mean[:c],
+                self.running_var[:c],
+                weight[:c],
+                bias[:c],
+                self.training,
+                self.momentum,
+                self.eps)
             return y
         
 
