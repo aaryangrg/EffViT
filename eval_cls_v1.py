@@ -95,11 +95,11 @@ def main():
         model = create_cls_model(args.model, weight_url=args.weight_url)
 
     model = torch.nn.DataParallel(model).cuda()
-    # model.eval()
+    model.eval()
     
     top1 = AverageMeter(is_distributed=False)
     top5 = AverageMeter(is_distributed=False)
-    with torch.no_grad():
+    with torch.inference_mode():
         with tqdm(total=len(data_loader), desc=f"Eval {args.model} on Mini-ImageNet Validation Set (100 classes)") as t:
             for images, labels in data_loader:
                 images, labels = images.cuda(), labels.cuda()
