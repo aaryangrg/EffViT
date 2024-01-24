@@ -134,6 +134,7 @@ def create_flexible_cls_model(name: str, pretrained=True, weight_url: str or Non
             weight = load_state_dict_from_file(weight_url)
             model.load_state_dict(weight)
             new_params = model.state_dict()
+            print("Checking mismatch")
             for key, value in original_params.items():
                 if not torch.equal(value, new_params[key]):
                     print(f"Parameters mismatch for key: {key}")
