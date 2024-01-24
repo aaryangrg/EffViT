@@ -86,10 +86,11 @@ def main():
 
     # Flexible model evaluated at a pre-defined width
     if args.flexible_width : 
-        model = create_flexible_cls_model(args.model, True, weight_url=args.weight_url)
+        print("Flexible model")
+        model = create_flexible_cls_model(args.model, pretrained = True, weight_url=args.weight_url)
         model.apply(lambda m: setattr(m, 'width_mult', args.width_multiplier))
     elif args.reduced_width : 
-        model = create_custom_cls_model(args.model, True, weight_url = args.weight_url, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
+        model = create_custom_cls_model(args.model, pretrained = True, weight_url = args.weight_url, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
     else :
         model = create_cls_model(args.model, weight_url=args.weight_url)
         
