@@ -109,7 +109,7 @@ class FlexibleConvLayer(nn.Module):
         # What is this exactly?
         # if getattr(FLAGS, 'conv_averaged', False):
         # Added scaling of output
-        out = out * (self.in_channels_basic/in_channels)
+        # out = out * (self.in_channels_basic/in_channels)
         if self.norm :
             out = self.norm(out)
         if self.act :
