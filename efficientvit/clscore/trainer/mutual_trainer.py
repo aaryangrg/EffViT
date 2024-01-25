@@ -29,7 +29,6 @@ class ClsMutualTrainer(Trainer):
         self,
         path: str,
         model: nn.Module,
-        p_model : nn.Module,
         data_provider,
         auto_restart_thresh: float or None = None,
     ) -> None:

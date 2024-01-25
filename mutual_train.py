@@ -31,9 +31,6 @@ parser.add_argument("--last_gamma", type=float, default=0)
 parser.add_argument("--auto_restart_thresh", type=float, default=1.0)
 parser.add_argument("--save_freq", type=int, default=1)
 
-# Parent model
-parser.add_argument("--parent_weights_url", type =str, default = "Parent Weights")
-parser.add_argument("--parent_model", type =str, default = "Parent Model")
 parser.add_argument("--student_weights", type = str, default = None)
 
 # Width and Depth customization
@@ -69,44 +66,16 @@ def main():
     model = create_flexible_cls_model(args.student_model, False, dropout=config["net_config"]["dropout"])
     apply_drop_func(model.backbone.stages, config["backbone_drop"])
     
-    # p_model = create_cls_model(args.parent_model ,pretrained = True, weight_url = "/home/aaryang/experiments/EffViT/pretrained/b3-r224.pt")
-    p_model = create_cls_model("b1" ,pretrained = False, dropout=config["net_config"]["dropout"])
-    
-    # setup.init_model(
-    #     model,
-    #     rand_init=args.rand_init,
-    #     last_gamma=args.last_gamma,
-    # )
-    
-    # setup.init_model(
-    #     p_model,
-    #     rand_init=args.rand_init,
-    #     last_gamma=args.last_gamma,
-    # )
+    model = torch.nn.DataParallel(model).cuda()
 
-    # for param_a, param_b in zip(model.parameters(), p_model.parameters()):
-    #     if torch.equal(param_a, param_b):
-    #         pass
-    #     else :
-    #         print("##########")
-    #         print("A : ")
-    #         print(param_a)
-    #         print("B : ")
-    #         print(param_b)
-    #         print("##########")
-    # print(model)
-
-    # print("Flexible model ")
-
-    # print(p_model)
     # # setup trainer
     trainer = ClsMutualTrainer(
         path=args.path,
         model=model,
-        p_model = p_model,
         data_provider=data_provider,
         auto_restart_thresh=args.auto_restart_thresh,
     )
+
     # initialization
     setup.init_model(
         trainer.network,
