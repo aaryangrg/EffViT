@@ -3,6 +3,7 @@
 # International Conference on Computer Vision (ICCV), 2023
 
 import os
+from re import M
 import sys
 
 
@@ -39,7 +40,6 @@ class ClsMutualTrainer(Trainer):
         )
         self.auto_restart_thresh = auto_restart_thresh
         self.test_criterion = nn.CrossEntropyLoss()
-        # self.model.apply(lambda m: setattr(m, 'width_mult', 1.0))
 
     def _validate(self, model, data_loader, epoch) -> dict[str, any]:
         results = []
@@ -47,12 +47,22 @@ class ClsMutualTrainer(Trainer):
 
             with torch.no_grad() :
                 model.apply(lambda m: setattr(m, 'width_mult', width))
+                # Reset bn & set to eval mode
+                if self.run_config.reset_bn :
+                    self.reset_bn(
+                        network=model,
+                        subset_size=self.run_config.reset_bn_size,
+                        subset_batch_size=self.run_config.reset_bn_batch_size,
+                        progress_bar=True,
+                    )
+
+            # All validation performed on val
+            model.eval()
 
             val_loss = AverageMeter()
             val_top1 = AverageMeter()
             val_top5 = AverageMeter()
             
-            # Validate on all widths
             with torch.no_grad():
                 with tqdm(
                     total=len(data_loader),
@@ -126,16 +136,9 @@ class ClsMutualTrainer(Trainer):
     def run_step(self, feed_dict: dict[str, any]) -> dict[str, any]:
         images = feed_dict["data"]
         labels = feed_dict["label"]
-        
-        # Mesa --> null by default
-        # if self.run_config.mesa is not None and self.run_config.mesa["thresh"] <= self.run_config.progress:
-        #     ema_model = self.ema.shadows
-        #     with torch.inference_mode():
-        #         ema_output = ema_model(images).detach()
-        #     ema_output = torch.clone(ema_output)
-        #     ema_output = F.sigmoid(ema_output).detach()
-        # else:
-        #     ema_output = None
+
+        # Put model to train
+        self.model.train()
 
         with torch.autograd.set_detect_anomaly(True) :
             with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16):
@@ -144,7 +147,7 @@ class ClsMutualTrainer(Trainer):
                     self.model.apply(lambda m: setattr(m, 'width_mult', PREDEFINED_WIDTHS[-1]))
                 max_width_output = self.model(images)
 
-                #Task Loss - Max-width
+                #task loss calculated on max-width
                 loss = self.train_criterion(max_width_output, labels)
                 ce_loss = loss
                 total_kd_loss = 0
@@ -181,6 +184,7 @@ class ClsMutualTrainer(Trainer):
         return loss
 
     def _train_one_epoch(self, epoch: int) -> dict[str, any]:
+    
         train_loss = AverageMeter()
         train_top1 = AverageMeter()
         task_loss = AverageMeter()
@@ -245,6 +249,7 @@ class ClsMutualTrainer(Trainer):
             train_info_dict = self.train_one_epoch(epoch)
             # eval
             val_info_res_dicts = self.multires_validate(epoch=epoch) # rResolution :  List of dicts --> smallest to largest width
+            
             # Assuming single resolution
             max_info_widths_list = list(val_info_res_dicts.values())[0]
           
@@ -283,6 +288,17 @@ class ClsMutualTrainer(Trainer):
                     model_name="model_best.pt" if is_best else "checkpoint.pt",
                 )
 
+    def validate(self, model=None, data_loader=None, is_test=True, epoch=0, reset_bn = False) -> dict[str, any]:
+        model = model or self.eval_network
+        if data_loader is None:
+            if is_test:
+                data_loader = self.data_provider.test
+            else:
+                data_loader = self.data_provider.valid
+        model.eval()
+        return self._validate(model, data_loader, epoch)
+
+
     def multires_validate(
         self,
         model=None,
@@ -301,12 +317,6 @@ class ClsMutualTrainer(Trainer):
         output_dict = {}
         for r in eval_image_size:
             self.data_provider.assign_active_image_size(parse_image_size(r))
-            if self.run_config.reset_bn:
-                self.reset_bn(
-                    network=model,
-                    subset_size=self.run_config.reset_bn_size,
-                    subset_batch_size=self.run_config.reset_bn_batch_size,
-                    progress_bar=True,
-                )
+            # Batch Norm reset performed inside validation loop
             output_dict[f"r{r}"] = self.validate(model, data_loader, is_test, epoch)
         return output_dict

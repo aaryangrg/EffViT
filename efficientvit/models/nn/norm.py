@@ -131,6 +131,7 @@ def reset_bn(
                 )
                 t.update()
 
+    # Updating original model running mean and sd with - val set mean and sd
     for name, m in model.named_modules():
         if name in bn_mean and bn_mean[name].count > 0:
             feature_dim = bn_mean[name].avg.size(0)
