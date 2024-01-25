@@ -17,7 +17,7 @@ nvidia-smi
 torchpack dist-run -np 1 \
 python3 ../../mutual_train.py ../../configs/cls/imagenet/b1.yaml \
     --path ../exp/flexible/distillation/miniimgnet/b1_4widths_224_fp32_distributeds/ \
-    --data_provider.train_batch_size 512 \
+    --data_provider.train_batch_size 384 \
     --data_provider.n_worker 10 \
     --student_model b1 \
     --run_config.base_lr 0.00025
