@@ -62,12 +62,12 @@ def main():
     run_config = setup.setup_run_config(config, ClsRunConfig)
 
     # Set-up student model
-
-    model = create_flexible_cls_model(args.student_model, False, dropout=config["net_config"]["dropout"])
-    apply_drop_func(model.backbone.stages, config["backbone_drop"])
     
+    model = create_flexible_cls_model(args.student_model, False, dropout=config["net_config"]["dropout"])
     model = torch.nn.DataParallel(model).cuda()
-
+    apply_drop_func(model.module.backbone.stages, config["backbone_drop"])
+    
+    
     # # setup trainer
     trainer = ClsMutualTrainer(
         path=args.path,
