@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=group3
-#SBATCH --output=/home/aaryang/experiments/EffViT/outs/custom_width/valv2/b1_0.25w_train_r224.out
+#SBATCH --output=/home/aaryang/experiments/EffViT/outs/custom_width/valv2/b1_width_res.out
 #SBATCH --nodes=1   # Get one node
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:2            # And two GPU
@@ -15,9 +15,19 @@ echo CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
 
 nvidia-smi
 
-python3 ../../eval_cls_v2.py --model b1_custom --image_size 224 \
-    --weight_url ../../exp/custom_width/train/b1_r224_train_0.25w/checkpoint/model_best.pt \
-    --batch_size 128 \
-    --path /home/c3-0/datasets/ImageNet/validation \
-    --reduced_width true \
-    --width_multiplier 0.25 \
+width_multipliers=("0.25" "0.50" "0.75")
+resolutions=("128" "160" "192" "224")
+
+
+for width in "${width_multipliers[@]}"; do
+    for res in "${resolutions[@]}"; do
+
+        python3 ../../eval_cls_v2.py --model b1_custom --image_size $res \
+            --weight_url ../../exp/custom_width/train/b1_r224_train_${width}w/checkpoint/model_best.pt \
+            --batch_size 128 \
+            --path /home/c3-0/datasets/ImageNet/train \
+            --reduced_width true \
+            --width_multiplier $width \
+
+    done
+done
