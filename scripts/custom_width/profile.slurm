@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=group3
-#SBATCH --output=/home/aaryang/experiments/EffViT/outs/profile/throughput/batchsize/b1_1x.out
+#SBATCH --output=/home/aaryang/experiments/EffViT/outs/profile/throughput/batchsize/b3_1x.out
 #SBATCH --nodes=1   # Get one node
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:1           # And two GPU
@@ -43,3 +43,4 @@ python3 ../../model_profile.py --image_size 224 \
         --width_multiplier 1.0 \
         --student_model b3_custom \
         --batch_size 64 \
+        --fp16 false 
