@@ -125,6 +125,9 @@ class ClsMutualTrainer(Trainer):
             lam = float(sync_tensor(lam, reduce="root"))
 
             images, labels = apply_mixup(images, labels, lam, mixup_type)
+        
+        # Zero grad if any accumulates
+        self.optimizer.zero_grad()
 
         return {
             "data": images,
