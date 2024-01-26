@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=group3
-#SBATCH --output=/home/aaryang/experiments/EffViT/outs/flexible/dist/b1_4ths_mutliway_training_fp32_noavg.out
+#SBATCH --output=/home/aaryang/experiments/EffViT/outs/flexible/dist/b1_mutualv1_224.out
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:2      # And two GPU
 #SBATCH --cpus-per-task=10            # Two cores per task
