@@ -42,4 +42,4 @@ resolutions=("128" "160" "192" "224")
 python3 ../../model_profile.py --image_size 224 \
         --width_multiplier 1.0 \
         --student_model b3_custom \
-        --batch_size 128 \
+        --batch_size 64 \
