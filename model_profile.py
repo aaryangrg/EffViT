@@ -59,7 +59,7 @@ def main():
         
     model = create_custom_cls_model(args.student_model, False, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
 
-    model.to("cuda:0")
+    model.cuda()
     model.eval()
 
     #Includes data-transfer time
