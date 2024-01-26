@@ -19,6 +19,7 @@ from tqdm import tqdm
 
 from efficientvit.apps.utils import AverageMeter
 from efficientvit.cls_model_zoo import create_cls_model
+from efficientvit.models.nn.norm import reset_bn
 
 
 def accuracy(output: torch.Tensor, target: torch.Tensor, topk=(1,)) -> list[torch.Tensor]:
@@ -89,6 +90,8 @@ def main():
         print("Flexible model")
         model = create_flexible_cls_model(args.model, pretrained = True, weight_url=args.weight_url)
         model.apply(lambda m: setattr(m, 'width_mult', args.width_multiplier))
+        # Reset batch norm
+        reset_bn(network=model,progress_bar=True, data_loader=data_loader)
     elif args.reduced_width : 
         model = create_custom_cls_model(args.model, True, weight_url = args.weight_url, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
     else :
