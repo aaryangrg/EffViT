@@ -5,7 +5,7 @@
 #SBATCH --gres=gpu:2      # And two GPU
 #SBATCH --cpus-per-task=10            # Two cores per task
 #SBATCH --job-name=Distributed
-#SBATCH --constraint=gmem32
+#SBATCH --constraint=gmem24
 
 source /home/aaryang/anaconda3/bin/activate
 conda activate evit
@@ -16,8 +16,8 @@ nvidia-smi
 
 torchpack dist-run -np 1 \
 python3 ../../mutual_train.py ../../configs/cls/imagenet/b1.yaml \
-    --path ../exp/flexible/distillation/miniimgnet/b1_4ths_mutliway_training_fp32_noavg/ \
-    --data_provider.train_batch_size 256 \
+    --path ../exp/flexible/distillation/miniimgnet/b1_mutualv1_224/ \
+    --data_provider.train_batch_size 128 \
     --data_provider.n_worker 10 \
     --student_model b1 \
     --run_config.base_lr 0.00025
