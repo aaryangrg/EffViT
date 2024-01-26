@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=group3
-#SBATCH --output=/home/aaryang/experiments/EffViT/outs/flexible/dist/b1_mutualv1_224.out
+#SBATCH --output=/home/aaryang/experiments/EffViT/outs/flexible/dist/b1_mutualv1_224_batchchange.out
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:2      # And two GPU
 #SBATCH --cpus-per-task=10            # Two cores per task
@@ -16,8 +16,8 @@ nvidia-smi
 
 torchpack dist-run -np 1 \
 python3 ../../mutual_train.py ../../configs/cls/imagenet/b1.yaml \
-    --path ../exp/flexible/distillation/miniimgnet/b1_mutualv1_224/ \
-    --data_provider.base_batch_size 256 \
-    --data_provider.n_worker 10 \
+    --path ../exp/flexible/distillation/miniimgnet/b1_mutualv1_224_batchchange/ \
+    --data_provider.base_batch_size 384 \
+    --data_provider.n_worker 12 \
     --student_model b1 \
     --run_config.base_lr 0.00025
