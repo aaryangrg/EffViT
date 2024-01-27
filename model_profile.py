@@ -51,7 +51,7 @@ def main():
     else:
         device_list = [int(_) for _ in args.gpu.split(",")]
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
-    
+
     model = create_custom_cls_model(args.student_model, False, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
 
     model.to("cuda:0")
@@ -59,13 +59,13 @@ def main():
 
     # Includes data-transfer time
     if args.profile :
-        # with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=args.fp16):
-        for i in range(args.num_iterations) :
-            with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], profile_memory=True) as prof:
-                input = torch.randn(args.batch_size, 3, args.image_size, args.image_size)
-                input = input.cuda()
-                model(input)
-            print(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit = 5))
+        with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=args.fp16):
+            for i in range(args.num_iterations) :
+                with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], profile_memory=True) as prof:
+                    input = torch.randn(args.batch_size, 3, args.image_size, args.image_size)
+                    input = input.cuda()
+                    model(input)
+                print(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit = 5))
 
     # MACS calculation & Params (single image)
     # if args.find_macs : 
