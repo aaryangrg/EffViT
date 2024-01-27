@@ -55,18 +55,18 @@ def main():
     inputs = []
     for _ in range(args.num_iterations) :
         input = torch.randn(args.batch_size, 3, args.image_size, args.image_size)
+        input.to("cuda:0")
         inputs.append(input)
         
     model = create_custom_cls_model(args.student_model, False, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
 
-    model.cuda()
+    model.to("cuda:0")
     model.eval()
 
-    #Includes data-transfer time
+    # Includes data-transfer time
     if args.profile :
         with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=args.fp16):
             for i in range(args.num_iterations) :
-                input = inputs[i].cuda()
                 with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], profile_memory=True) as prof:
                     model(inputs[i])
                 print(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit = 5))
