@@ -68,9 +68,6 @@ def evaluate(model, batch_size: int, img_size, total_steps: int = 10, fp16 = Fal
     Return:
         Median throughput in samples / sec.
     """
-    if fp16 :
-        model.to("cuda")
-        model = model.half()
     durations = []
     with torch.no_grad():
         for rep in range(total_steps):
@@ -92,6 +89,13 @@ def evaluate(model, batch_size: int, img_size, total_steps: int = 10, fp16 = Fal
         return float("inf")
 
     return batch_size / med_duration_s
+
+
+def cast_to_fp16(module):
+    for child in module.children():
+        cast_to_fp16(child)
+    for param in module.parameters():
+        param.data = param.data.half()
 
 def main():
     parser = argparse.ArgumentParser()
@@ -118,7 +122,8 @@ def main():
 
     model.to("cuda")
     model.eval()
-
+    if args.fp16 : 
+        cast_to_fp16(model)
     # Warm-up iterations
     evaluate(model, 2, args.image_size, total_steps=20, fp16=args.fp16)
 
