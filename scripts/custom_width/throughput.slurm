@@ -22,6 +22,8 @@ resolutions=("128" "160" "192" "224")
 for model in "${models[@]}"; do 
     for width in "${width_multipliers[@]}"; do
         for res in  "${resolutions[@]}"; do
+
+        echo "$model || w : $width || res : $res"
         python3 ../../find_max_throughput.py \
             --image_size $res \
             --width_multiplier $width \
