@@ -126,7 +126,7 @@ def main():
     model.to("cuda")
 
     if args.fp16 : 
-        cast_to_fp16(model)
+        model = model.to(torch.float16)
     # Warm-up iterations
     evaluate(model, 2, args.image_size, total_steps=20, fp16=args.fp16)
 
