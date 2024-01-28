@@ -15,7 +15,7 @@ echo CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
 
 nvidia-smi
 
-width_multipliers=("0.25" "0.50" "0.75")
+width_multipliers=("0.25" "0.5" "0.75")
 resolutions=("128" "160" "192" "224")
 
 
