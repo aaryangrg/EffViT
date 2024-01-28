@@ -77,7 +77,8 @@ def evaluate(model, batch_size: int, img_size, total_steps: int = 10, fp16 = Fal
             starter.record()
             input = input.cuda()
             if fp16 :
-                input.to(torch.float16)
+                print("triggered")
+                input = input.to(torch.float16)
             _ = model(input)
             ender.record()
             torch.cuda.synchronize()
