@@ -20,10 +20,6 @@ def select_best_batch_size(model, img_size, max_trials: int = 30) -> int:
         try:
             samples_per_sec = evaluate(model, batch_size, img_size)
             print(f"Throughput at batch_size={batch_size}: {samples_per_sec:.5f} samples/s")
-            # if samples_per_sec < best_samples_per_sec:
-            #     # We assume that once the throughput starts degrading, it won't go up again ---> Faulty (can't determine trade-off)
-            #     print(f"Throughput dropped at batch {batch_size}")
-            #     break
             if samples_per_sec > best_samples_per_sec :
                 best_samples_per_sec = samples_per_sec
                 best_batch_size = batch_size
@@ -66,7 +62,7 @@ def binary_search(model, low, hi, img_size) :
     return best_throughput, best_batch_size
         
 
-def evaluate(model, batch_size: int, img_size, total_steps: int = 5) -> float:
+def evaluate(model, batch_size: int, img_size, total_steps: int = 10) -> float:
     """Evaluates throughput of the given batch size.
 
     Return:
@@ -120,7 +116,7 @@ def main():
     model.eval()
 
     # Warm-up iterations
-    evaluate(model, 2, args.image_size, total_steps=10)
+    evaluate(model, 2, args.image_size, total_steps=20)
 
     # Synchronized Throughput calculation
     select_best_batch_size(model, args.image_size)
