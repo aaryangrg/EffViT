@@ -77,10 +77,7 @@ def evaluate(model, batch_size: int, img_size, total_steps: int = 10, fp16 = Fal
             starter.record()
             input = input.cuda()
             if fp16 :
-                print("triggered")
-                print(input.dtype)
                 input = input.to(torch.float16)
-                print(input.dtype)
             _ = model(input)
             ender.record()
             torch.cuda.synchronize()
@@ -98,7 +95,9 @@ def cast_to_fp16(module):
     for child in module.children():
         cast_to_fp16(child)
     for param in module.parameters():
+        print(param.data.dtype)
         param.data = param.data.to(torch.float16)
+        print(param.data.dtype)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -124,8 +123,8 @@ def main():
     model = create_custom_cls_model(args.student_model, False, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
 
     model.eval()
-
     model.to("cuda")
+
     if args.fp16 : 
         cast_to_fp16(model)
     # Warm-up iterations
