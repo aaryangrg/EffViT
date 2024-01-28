@@ -21,10 +21,11 @@ def select_best_batch_size(model, img_size, max_trials: int = 30) -> int:
             samples_per_sec = evaluate(model, batch_size, img_size)
             print(f"Throughput at batch_size={batch_size}: {samples_per_sec:.5f} samples/s")
             # if samples_per_sec < best_samples_per_sec:
-            #     # We assume that once the throughput starts degrading, it won't go up again
+            #     # We assume that once the throughput starts degrading, it won't go up again ---> Faulty (can't determine trade-off)
             #     print(f"Throughput dropped at batch {batch_size}")
             #     break
-            best_samples_per_sec = samples_per_sec
+            if samples_per_sec > best_samples_per_sec :
+                best_samples_per_sec = samples_per_sec
             best_batch_size = batch_size
             count += 1
             # double batch size
@@ -33,13 +34,36 @@ def select_best_batch_size(model, img_size, max_trials: int = 30) -> int:
         except RuntimeError as e:
             if "CUDA out of memory" in str(e) or isinstance(e, torch.cuda.OutOfMemoryError):
                 print(f"OOM at batch_size={batch_size}")
+                print("Discovering optimal batch-size")
+                best_throughput, best_batch = binary_search(model, batch_size // 2, batch_size, img_size)
             else:
                 # Not a CUDA error
                 raise
             break
-        
+    
     if best_batch_size is None:
         print(f"Could not tune batch size, using minimum batch size of {batch_size}")
+        return
+    
+    true_max_samples_per_sec = max(best_throughput, samples_per_sec)
+    print("Maximum : ", true_max_samples_per_sec)
+
+def binary_search(model, low, hi, img_size) :
+    best_throughput, best_batch_size = 0, 0
+    while low <= hi :
+        mid = (hi + low) // 2
+        try :
+            cur_throughput = evaluate(model, mid, img_size)
+            if cur_throughput > best_throughput :
+                best_throughput = cur_throughput
+                best_batch_size = mid
+            low = mid + 1
+        except RuntimeError as e :
+            if "CUDA out of memory" in str(e) or isinstance(e, torch.cuda.OutOfMemoryError):
+                print(f"OOM at batch_size={mid}")
+            hi = mid - 1
+    return best_throughput, best_batch_size
+        
 
 def evaluate(model, batch_size: int, img_size, total_steps: int = 5) -> float:
     """Evaluates throughput of the given batch size.
