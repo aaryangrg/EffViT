@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=group3
-#SBATCH --output=/home/aaryang/experiments/EffViT/outs/profile/throughput/b1_b3_l3_res_width_fp16_autocast.out
+#SBATCH --output=/home/aaryang/experiments/EffViT/outs/profile/throughput/l3_all_fp32.out
 #SBATCH --nodes=1   # Get one node
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:1           # And two GPU
@@ -15,7 +15,7 @@ echo CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
 
 nvidia-smi
 
-models=("b1_custom" "b3_custom" "l3_custom")
+models=("l3_custom")
 width_multipliers=("0.25" "0.50" "0.75" "1.0")
 resolutions=("128" "160" "192" "224")
 
@@ -28,7 +28,7 @@ for model in "${models[@]}"; do
             --image_size $res \
             --width_multiplier $width \
             --student_model $model \
-            --fp16 true
+            --fp16 false
     
         done
     done
