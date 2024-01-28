@@ -68,21 +68,23 @@ def evaluate(model, batch_size: int, img_size, total_steps: int = 10, fp16 = Fal
     Return:
         Median throughput in samples / sec.
     """
-
+    if fp16 :
+        model = model.half()
     durations = []
     with torch.no_grad():
-        with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=fp16):
-            for rep in range(total_steps):
-                input = torch.randn(batch_size, 3, img_size, img_size)
-                #Including data-transfer time (CPU --> GPU)
-                starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
-                starter.record()
-                input = input.cuda()
-                _ = model(input)
-                ender.record()
-                torch.cuda.synchronize()
-                curr_time = starter.elapsed_time(ender)/1000 
-                durations.append(curr_time)
+        for rep in range(total_steps):
+            input = torch.randn(batch_size, 3, img_size, img_size)
+            if fp16 :
+                input = input.half()
+            #Including data-transfer time (CPU --> GPU)
+            starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+            starter.record()
+            input = input.cuda()
+            _ = model(input)
+            ender.record()
+            torch.cuda.synchronize()
+            curr_time = starter.elapsed_time(ender)/1000 
+            durations.append(curr_time)
 
     med_duration_s = statistics.median(durations)
     if med_duration_s == 0.0:
