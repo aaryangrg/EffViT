@@ -69,6 +69,7 @@ def evaluate(model, batch_size: int, img_size, total_steps: int = 10, fp16 = Fal
         Median throughput in samples / sec.
     """
     if fp16 :
+        model.to("cuda")
         model = model.half()
     durations = []
     with torch.no_grad():
