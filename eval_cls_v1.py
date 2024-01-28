@@ -99,7 +99,8 @@ def main():
     else :
         model = create_cls_model(args.model, weight_url=args.weight_url)
 
-    model = torch.nn.DataParallel(model).cuda()
+    # model = torch.nn.DataParallel(model).cuda()
+    model.cuda()
        
     model.eval()
     

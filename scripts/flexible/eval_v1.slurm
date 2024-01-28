@@ -3,7 +3,7 @@
 #SBATCH --output=/home/aaryang/experiments/EffViT/outs/flexible/valv1/b1_mutualv1_224.out
 #SBATCH --nodes=1   # Get one node
 #SBATCH --partition=gpu
-#SBATCH --gres=gpu:2            # And two GPUs
+#SBATCH --gres=gpu:1          # And two GPUs
 #SBATCH --cpus-per-task=8            # Eight cores per task
 #SBATCH --job-name=B1MutualV1
 #SBATCH --constraint=gmem12
