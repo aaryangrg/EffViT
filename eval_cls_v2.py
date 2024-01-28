@@ -91,7 +91,7 @@ def main():
         model = create_flexible_cls_model(args.model, pretrained = True, weight_url=args.weight_url)
         model.apply(lambda m: setattr(m, 'width_mult', args.width_multiplier))
         # Reset Batch Norm
-        reset_bn(network=model,progress_bar=True, data_loader=data_loader)
+        reset_bn(model=model,progress_bar=True, data_loader=data_loader)
     elif args.reduced_width : 
         model = create_custom_cls_model(args.model, pretrained = True, weight_url = args.weight_url, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
     else :
