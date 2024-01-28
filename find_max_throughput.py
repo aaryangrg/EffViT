@@ -96,6 +96,7 @@ def cast_to_fp16(module):
         cast_to_fp16(child)
     for param in module.parameters():
         param.data = param.data.half()
+        print(param.device)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -120,8 +121,9 @@ def main():
 
     model = create_custom_cls_model(args.student_model, False, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
 
-    model.to("cuda")
     model.eval()
+
+    model.to("cuda")
     if args.fp16 : 
         cast_to_fp16(model)
     # Warm-up iterations
