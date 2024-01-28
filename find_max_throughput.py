@@ -20,10 +20,10 @@ def select_best_batch_size(model, img_size, max_trials: int = 30) -> int:
         try:
             samples_per_sec = evaluate(model, batch_size, img_size)
             print(f"Throughput at batch_size={batch_size}: {samples_per_sec:.5f} samples/s")
-            if samples_per_sec < best_samples_per_sec:
-                # We assume that once the throughput starts degrading, it won't go up again
-                print(f"Throughput dropped at batch {batch_size}")
-                break
+            # if samples_per_sec < best_samples_per_sec:
+            #     # We assume that once the throughput starts degrading, it won't go up again
+            #     print(f"Throughput dropped at batch {batch_size}")
+            #     break
             best_samples_per_sec = samples_per_sec
             best_batch_size = batch_size
             count += 1
