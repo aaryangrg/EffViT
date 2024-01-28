@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=group3
-#SBATCH --output=/home/aaryang/experiments/EffViT/outs/profile/throughput/b1_1x.out
+#SBATCH --output=/home/aaryang/experiments/EffViT/outs/profile/throughput/b1_0.75x.out
 #SBATCH --nodes=1   # Get one node
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:1           # And two GPU
@@ -20,5 +20,5 @@ width_multipliers=("0.25" "0.50" "0.75" "1.0")
 
 python3 ../../find_max_throughput.py \
     --image_size 224 \
-    --width_multiplier 1.0 \
+    --width_multiplier 0.75 \
     --student_model b1_custom \
