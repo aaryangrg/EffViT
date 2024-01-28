@@ -76,9 +76,8 @@ def evaluate(model, batch_size: int, img_size, total_steps: int = 10, fp16 = Fal
             starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
             starter.record()
             if fp16 :
-                input = input.half()
+                input = input.to(torch.float16)
             input = input.cuda()
-            print(input.device)
             _ = model(input)
             ender.record()
             torch.cuda.synchronize()
@@ -96,7 +95,7 @@ def cast_to_fp16(module):
     for child in module.children():
         cast_to_fp16(child)
     for param in module.parameters():
-        param.data = param.data.half()
+        param.data = param.data.float16()
 
 def main():
     parser = argparse.ArgumentParser()
