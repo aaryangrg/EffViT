@@ -8,7 +8,7 @@ from efficientvit.cls_model_zoo import create_custom_cls_model
 import torch
 import statistics
 
-def select_best_batch_size(model, img_size, max_trials: int = 10) -> int:
+def select_best_batch_size(model, img_size, max_trials: int = 30) -> int:
     """Returns optimal batch size as measured by throughput (samples / sec)."""
 
     batch_size = 1
