@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH --account=group3
-#SBATCH --output=/home/aaryang/experiments/EffViT/outs/valv2/b1_finetuned_224.out
+#SBATCH --output=/home/aaryang/experiments/EffViT/outs/valv2/b1_mutualv1_224_batchchange.out
 #SBATCH --nodes=1   # Get one node
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:2            # And two GPU
 #SBATCH --cpus-per-task=8            # Two cores per task
-#SBATCH --job-name=B1Val2
+#SBATCH --job-name=FEvalv2
 #SBATCH --constraint=gmem12
 
 source /home/aaryang/anaconda3/bin/activate
