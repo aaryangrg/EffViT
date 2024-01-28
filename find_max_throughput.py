@@ -95,10 +95,10 @@ def main():
     model.eval()
 
     # Warm-up iterations
-    evaluate(model, 2, args.img_size, total_steps=10)
+    evaluate(model, 2, args.image_size, total_steps=10)
 
     # Synchronized Throughput calculation
-    select_best_batch_size(model, args.img_size)
+    select_best_batch_size(model, args.image_size)
 
 if __name__ == "__main__":
     main()
