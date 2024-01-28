@@ -78,6 +78,7 @@ def evaluate(model, batch_size: int, img_size, total_steps: int = 10, fp16 = Fal
             input.to("cuda")
             if fp16 :
                 input = input.half()
+            print(input.device)
             _ = model(input)
             ender.record()
             torch.cuda.synchronize()
@@ -96,7 +97,6 @@ def cast_to_fp16(module):
         cast_to_fp16(child)
     for param in module.parameters():
         param.data = param.data.half()
-        print(param.device)
 
 def main():
     parser = argparse.ArgumentParser()
