@@ -98,7 +98,7 @@ def main():
     model = torch.nn.DataParallel(model).cuda()
 
     if args.flexible_width : 
-        reset_bn(model=model.module,progress_bar=True, data_loader=data_loader)
+        reset_bn(model=model.module,progress_bar=True, data_loader=data_loader[0])
     model.eval()
     
     top1 = AverageMeter(is_distributed=False)
