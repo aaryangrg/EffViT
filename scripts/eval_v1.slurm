@@ -28,5 +28,6 @@ for width in "${width_multipliers[@]}"; do
             --path /home/c3-0/datasets/ImageNet/train \
             --flexible_width true \
             --width_multiplier $width \
+            
     done 
 done
