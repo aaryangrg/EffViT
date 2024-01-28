@@ -77,7 +77,7 @@ def evaluate(model, batch_size: int, img_size, total_steps: int = 10, fp16 = Fal
             #Including data-transfer time (CPU --> GPU)
             starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
             starter.record()
-            input = input.cuda()
+            input.to("cuda:0")
             if fp16 :
                 input = input.half()
             _ = model(input)
