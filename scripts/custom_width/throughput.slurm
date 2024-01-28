@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=group3
-#SBATCH --output=/home/aaryang/experiments/EffViT/outs/profile/throughput/b1_b3_l3_res_width.out
+#SBATCH --output=/home/aaryang/experiments/EffViT/outs/profile/throughput/b1_b3_l3_res_width_fp16_autocast.out
 #SBATCH --nodes=1   # Get one node
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:1           # And two GPU
@@ -28,6 +28,7 @@ for model in "${models[@]}"; do
             --image_size $res \
             --width_multiplier $width \
             --student_model $model \
+            --fp16 true
     
         done
     done
