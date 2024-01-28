@@ -95,7 +95,7 @@ def cast_to_fp16(module):
     for child in module.children():
         cast_to_fp16(child)
     for param in module.parameters():
-        param.data = param.data.float16()
+        param.data = param.data.to(torch.float16)
 
 def main():
     parser = argparse.ArgumentParser()
