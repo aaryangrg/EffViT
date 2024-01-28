@@ -93,9 +93,7 @@ def main():
         dloader = []
         for data in data_loader :
             dloader.append(data[0])
-        if not torch.distributed.is_initialized():
-            dist.init()
-        reset_bn(model=model,progress_bar=True, data_loader=dloader)
+        reset_bn(model=model,progress_bar=True, data_loader=dloader, sync = False)
     elif args.reduced_width : 
         model = create_custom_cls_model(args.model, True, weight_url = args.weight_url, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
     else :
