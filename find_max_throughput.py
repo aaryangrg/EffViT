@@ -74,12 +74,12 @@ def evaluate(model, batch_size: int, img_size, total_steps: int = 10, fp16 = Fal
     with torch.no_grad():
         for rep in range(total_steps):
             input = torch.randn(batch_size, 3, img_size, img_size)
-            if fp16 :
-                input = input.half()
             #Including data-transfer time (CPU --> GPU)
             starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
             starter.record()
             input = input.cuda()
+            if fp16 :
+                input = input.half()
             _ = model(input)
             ender.record()
             torch.cuda.synchronize()
