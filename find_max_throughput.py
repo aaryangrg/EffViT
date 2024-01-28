@@ -26,7 +26,7 @@ def select_best_batch_size(model, img_size, max_trials: int = 30) -> int:
             #     break
             if samples_per_sec > best_samples_per_sec :
                 best_samples_per_sec = samples_per_sec
-            best_batch_size = batch_size
+                best_batch_size = batch_size
             count += 1
             # double batch size
             batch_size *= 2
@@ -34,13 +34,14 @@ def select_best_batch_size(model, img_size, max_trials: int = 30) -> int:
         except RuntimeError as e:
             if "CUDA out of memory" in str(e) or isinstance(e, torch.cuda.OutOfMemoryError):
                 print(f"OOM at batch_size={batch_size}")
-                print("Discovering optimal batch-size")
-                best_throughput, best_batch = binary_search(model, batch_size // 2, batch_size, img_size)
             else:
                 # Not a CUDA error
                 raise
             break
-    
+
+    print("Discovering optimal batch-size")
+    best_throughput, best_batch = binary_search(model, batch_size // 2, batch_size, img_size)
+
     if best_batch_size is None:
         print(f"Could not tune batch size, using minimum batch size of {batch_size}")
         return
