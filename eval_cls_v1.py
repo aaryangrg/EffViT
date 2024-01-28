@@ -11,6 +11,7 @@ import os
 from efficientvit.clscore.data_provider.MiniImageNet import MiniImageNet
 from efficientvit.clscore.data_provider.CustomDataset import CustomImageDataset
 from efficientvit.cls_model_zoo import create_cls_model, create_custom_cls_model , create_flexible_cls_model
+from torchpack import distributed as dist
 
 import torch.utils.data
 from torchvision import datasets, transforms
@@ -87,19 +88,20 @@ def main():
     )
 
     if args.flexible_width : 
-        print("Flexible model")
         model = create_flexible_cls_model(args.model, pretrained = True, weight_url=args.weight_url)
         model.apply(lambda m: setattr(m, 'width_mult', args.width_multiplier))
         dloader = []
         for data in data_loader :
             dloader.append(data[0])
+        if not torch.distributed.is_initialized():
+            dist.init()
         reset_bn(model=model,progress_bar=True, data_loader=dloader)
     elif args.reduced_width : 
         model = create_custom_cls_model(args.model, True, weight_url = args.weight_url, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
     else :
         model = create_cls_model(args.model, weight_url=args.weight_url)
 
-    # model = torch.nn.DataParallel(model).cuda()
+    model = torch.nn.DataParallel(model).cuda()
     model.cuda()
        
     model.eval()
