@@ -25,7 +25,7 @@ for width in "${width_multipliers[@]}"; do
         python3 ../../eval_cls_v2.py --model b1_custom --image_size $res \
             --weight_url ../../exp/custom_width/train/b1_r224_train_${width}w/checkpoint/model_best.pt \
             --batch_size 128 \
-            --path /home/c3-0/datasets/ImageNet/train \
+            --path /home/c3-0/datasets/ImageNet/validation \
             --reduced_width true \
             --width_multiplier $width \
 

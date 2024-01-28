@@ -15,7 +15,18 @@ echo CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
 
 nvidia-smi
 
-python3 ../eval_cls_v2.py --model b1-r224 --image_size 224 \
-    --weight_url ../exp/train/miniimgnet/b1_pretrained_r224_mini_finetune/checkpoint/model_best.pt \
-    --batch_size 128 \
-    --path /home/c3-0/datasets/ImageNet/validation
+width_multipliers=("0.25" "0.50" "0.75")
+resolutions=("128" "160" "192" "224")
+
+
+for width in "${width_multipliers[@]}"; do
+    for res in "${resolutions[@]}"; do
+        echo "WIDTH : $width x || RES : $res"
+        python3 ../eval_cls_v1.py --model b1 --image_size $res \
+            --weight_url ../exp/flexible/distillation/miniimgnet/b1_mutualv1_224/checkpoint/model_best.pt \
+            --batch_size 128 \
+            --path /home/c3-0/datasets/ImageNet/train \
+            --flexible_width true \
+            --width_multiplier $width \
+    done 
+done
