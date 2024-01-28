@@ -129,14 +129,14 @@ def create_flexible_cls_model(name: str, pretrained=True, weight_url: str or Non
         if weight_url is None:
             raise ValueError(f"Do not find the pretrained weight of {name}.")
         else:
-            print("Loading weights")
-            original_params = model.state_dict()
             weight = load_state_dict_from_file(weight_url)
-            model.load_state_dict(weight)
-            new_params = model.state_dict()
-            print("Checking mismatch")
-            for key, value in original_params.items():
-                if not torch.equal(value, new_params[key]):
-                    print(f"Parameters mismatch for key: {key}")
-
+            from collections import OrderedDict
+            new_state_dict = OrderedDict()
+            for k, v in weight.items():
+                if "module." in k :
+                    name = k[7:]  # Remove "module." (from data-parallel training)
+                    new_state_dict[name] = v
+                else :
+                    new_state_dict[k] = v
+            model.load_state_dict(new_state_dict)
     return model
