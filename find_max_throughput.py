@@ -77,7 +77,7 @@ def evaluate(model, batch_size: int, img_size, total_steps: int = 10, fp16 = Fal
             #Including data-transfer time (CPU --> GPU)
             starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
             starter.record()
-            input.to("cuda:0")
+            input.to("cuda")
             if fp16 :
                 input = input.half()
             _ = model(input)
@@ -115,7 +115,7 @@ def main():
 
     model = create_custom_cls_model(args.student_model, False, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
 
-    model.to("cuda:0")
+    model.to("cuda")
     model.eval()
 
     # Warm-up iterations
