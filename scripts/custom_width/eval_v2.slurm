@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=group3
-#SBATCH --output=/home/aaryang/experiments/EffViT/outs/custom_width/valv2/b1_width_res.out
+#SBATCH --output=/home/aaryang/experiments/EffViT/outs/custom_width/valv2/dist_b1_width_res.out
 #SBATCH --nodes=1   # Get one node
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:2            # And two GPU
