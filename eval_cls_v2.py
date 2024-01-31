@@ -89,10 +89,10 @@ def main():
     if args.flexible_width : 
         model = create_flexible_cls_model(args.model, pretrained = True, weight_url=args.weight_url)
         model.apply(lambda m: setattr(m, 'width_mult', args.width_multiplier))
-        dloader = []
-        for data in data_loader :
-            dloader.append(data[0])
-        reset_bn(model=model,progress_bar=True, data_loader=dloader, sync = False)
+        # dloader = []
+        # for data in data_loader :
+        #     dloader.append(data[0])
+        # reset_bn(model=model,progress_bar=True, data_loader=dloader, sync = False)
     elif args.reduced_width : 
         model = create_custom_cls_model(args.model, pretrained = True, weight_url = args.weight_url, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
     else :

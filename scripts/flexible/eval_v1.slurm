@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=group3
-#SBATCH --output=/home/aaryang/experiments/EffViT/outs/flexible/valv1/b1_mutualv1_224.out
+#SBATCH --output=/home/aaryang/experiments/EffViT/outs/flexible/valv1/b1_mutualv1_224_no_bn_reset.out
 #SBATCH --nodes=1   # Get one node
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:1          # And two GPUs
