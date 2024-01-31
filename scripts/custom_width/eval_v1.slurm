@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=group3
-#SBATCH --output=/home/aaryang/experiments/EffViT/outs/custom_width/valv1/dist_b1_res_width.out
+#SBATCH --output=/home/aaryang/experiments/EffViT/outs/custom_width/valv1/dist_b1_res_width_with_reset_bn.out
 #SBATCH --nodes=1   # Get one node
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:2            # And two GPU
@@ -15,21 +15,21 @@ echo CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
 
 nvidia-smi
 
-# width_multipliers=("0.25" "0.5" "0.75")
+width_multipliers=("0.25" "0.5" "0.75")
 resolutions=("128" "160" "192" "224")
 
-# for width in "${width_multipliers[@]}"; do
-#     for res in "${resolutions[@]}"; do
+for width in "${width_multipliers[@]}"; do
+    for res in "${resolutions[@]}"; do
+        echo "Train || width : $width || res : $res "
+        python3 ../../eval_cls_v1.py --model b1_custom --image_size $res \
+            --weight_url ../../exp/custom_width/train/b1_r224_train_${width}w/checkpoint/model_best.pt \
+            --batch_size 128 \
+            --path /home/c3-0/datasets/ImageNet/train \
+            --reduced_width true \
+            --width_multiplier $width \
 
-#         python3 ../../eval_cls_v1.py --model b1_custom --image_size $res \
-#             --weight_url ../../exp/custom_width/train/b1_r224_train_${width}w/checkpoint/model_best.pt \
-#             --batch_size 128 \
-#             --path /home/c3-0/datasets/ImageNet/train \
-#             --reduced_width true \
-#             --width_multiplier $width \
-
-#     done
-# done
+    done
+done
 
 # Distillation - subwidths
 combinations=("0.25 b3_b1_0.25w_450epochs_r224" "0.50 b3_b1_0.5w_450epochs_r224" "0.75 b3_b1_0.75w_r224")
@@ -49,7 +49,7 @@ for combination in "${combinations[@]}"; do
     done
 done
 
-#Distillation - 1x
+# Distillation - 1x
 for res in "${resolutions[@]}"; do
     echo "Dist || width : 1x || res : $res "
     python3 ../../eval_cls_v1.py --model b1_custom --image_size $res \
@@ -61,7 +61,7 @@ for res in "${resolutions[@]}"; do
 
 done
 
-#Training - 1x
+# Training - 1x
 for res in "${resolutions[@]}"; do
     echo "Train || width : 1x || res : $res "
     python3 ../../eval_cls_v1.py --model b1_custom --image_size $res \
@@ -73,7 +73,7 @@ for res in "${resolutions[@]}"; do
 
 done
 
-#Pre-trained - Only resolution change
+# Pre-trained - Only resolution change
 for res in "${resolutions[@]}"; do
     echo "Pretrained || width : 1x || res : $res "
     python3 ../../eval_cls_v1.py --model b1_custom --image_size $res \

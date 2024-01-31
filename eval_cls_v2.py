@@ -90,21 +90,16 @@ def main():
         model = create_flexible_cls_model(args.model, pretrained = True, weight_url=args.weight_url)
         model.apply(lambda m: setattr(m, 'width_mult', args.width_multiplier))
         # Resetting Batch Norm using train dataset (no extra augmentation)
-        bn_reset_dataset = MiniImageNet("/home/c3-0/datasets/ImageNet/train", transform = transform, type = "train")
-        reset_data_loader = torch.utils.data.DataLoader(
-            bn_reset_dataset,
-            batch_size=2*args.batch_size,
-            shuffle=True,
-            num_workers=args.workers,
-            pin_memory=True,
-            drop_last=False,
-        )
         dloader = []
-        for data in reset_data_loader :
+        for data in data_loader :
             dloader.append(data[0])
         reset_bn(model=model,progress_bar=True, data_loader=dloader, sync = False)
     elif args.reduced_width : 
         model = create_custom_cls_model(args.model, pretrained = True, weight_url = args.weight_url, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
+        dloader = []
+        for data in data_loader :
+            dloader.append(data[0])
+        reset_bn(model=model,progress_bar=True, data_loader=dloader, sync = False)
     else :
         model = create_cls_model(args.model, weight_url=args.weight_url)
         

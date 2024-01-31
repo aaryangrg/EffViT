@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=group3
-#SBATCH --output=/home/aaryang/experiments/EffViT/outs/custom_width/valv2/dist_b1_width_res.out
+#SBATCH --output=/home/aaryang/experiments/EffViT/outs/custom_width/valv2/dist_b1_width_res_with_reset_bn.out
 #SBATCH --nodes=1   # Get one node
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:2            # And two GPU
@@ -15,64 +15,64 @@ echo CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
 
 nvidia-smi
 
-# width_multipliers=("0.25" "0.5" "0.75")
+width_multipliers=("0.25" "0.5" "0.75")
 resolutions=("128" "160" "192" "224")
 
 
-# for width in "${width_multipliers[@]}"; do
-#     for res in "${resolutions[@]}"; do
+for width in "${width_multipliers[@]}"; do
+    for res in "${resolutions[@]}"; do
+        echo "Train || width : $width || res : $res "
+        python3 ../../eval_cls_v2.py --model b1_custom --image_size $res \
+            --weight_url ../../exp/custom_width/train/b1_r224_train_${width}w/checkpoint/model_best.pt \
+            --batch_size 128 \
+            --path /home/c3-0/datasets/ImageNet/validation \
+            --reduced_width true \
+            --width_multiplier $width \
 
-#         python3 ../../eval_cls_v2.py --model b1_custom --image_size $res \
-#             --weight_url ../../exp/custom_width/train/b1_r224_train_${width}w/checkpoint/model_best.pt \
-#             --batch_size 128 \
-#             --path /home/c3-0/datasets/ImageNet/validation \
-#             --reduced_width true \
-#             --width_multiplier $width \
-
-#     done
-# done
+    done
+done
 
 # Distillation - subwidths
-# combinations=("0.25 b3_b1_0.25w_450epochs_r224" "0.50 b3_b1_0.5w_450epochs_r224" "0.75 b3_b1_0.75w_r224")
-# for combination in "${combinations[@]}"; do
-#     IFS=' ' read -ra params <<< "$combination"
-#     width=${params[0]}
-#     path=${params[1]}
-#     for res in "${resolutions[@]}"; do
-#         echo "Dist || width : $width || res : $res "
-#         python3 ../../eval_cls_v2.py --model b1_custom --image_size $res \
-#             --weight_url ../../exp/custom_width/distillation/$path/checkpoint/model_best.pt \
-#             --batch_size 128 \
-#             --path /home/c3-0/datasets/ImageNet/validation \
-#             --reduced_width true \
-#             --width_multiplier $width \
+combinations=("0.25 b3_b1_0.25w_450epochs_r224" "0.50 b3_b1_0.5w_450epochs_r224" "0.75 b3_b1_0.75w_r224")
+for combination in "${combinations[@]}"; do
+    IFS=' ' read -ra params <<< "$combination"
+    width=${params[0]}
+    path=${params[1]}
+    for res in "${resolutions[@]}"; do
+        echo "Dist || width : $width || res : $res "
+        python3 ../../eval_cls_v2.py --model b1_custom --image_size $res \
+            --weight_url ../../exp/custom_width/distillation/$path/checkpoint/model_best.pt \
+            --batch_size 128 \
+            --path /home/c3-0/datasets/ImageNet/validation \
+            --reduced_width true \
+            --width_multiplier $width \
 
-#     done
-# done
+    done
+done
 
-# #Distillation - 1x
-# for res in "${resolutions[@]}"; do
-#     echo "Dist || width : 1x || res : $res "
-#     python3 ../../eval_cls_v2.py --model b1_custom --image_size $res \
-#         --weight_url ../../exp/distillation/miniimgnet/b3_b1_r224/checkpoint/model_best.pt \
-#         --batch_size 128 \
-#         --path /home/c3-0/datasets/ImageNet/validation \
-#         --reduced_width true \
-#         --width_multiplier 1.0 \
+Distillation - 1x
+for res in "${resolutions[@]}"; do
+    echo "Dist || width : 1x || res : $res "
+    python3 ../../eval_cls_v2.py --model b1_custom --image_size $res \
+        --weight_url ../../exp/distillation/miniimgnet/b3_b1_r224/checkpoint/model_best.pt \
+        --batch_size 128 \
+        --path /home/c3-0/datasets/ImageNet/validation \
+        --reduced_width true \
+        --width_multiplier 1.0 \
 
-# done
+done
 
 #Training - 1x
-# for res in "${resolutions[@]}"; do
-#     echo "Train || width : 1x || res : $res "
-#     python3 ../../eval_cls_v2.py --model b1_custom --image_size $res \
-#         --weight_url ../../exp/train/miniimgnet/b1_r224_train/checkpoint/model_best.pt \
-#         --batch_size 128 \
-#         --path /home/c3-0/datasets/ImageNet/validation \
-#         --reduced_width true \
-#         --width_multiplier 1.0 \
+for res in "${resolutions[@]}"; do
+    echo "Train || width : 1x || res : $res "
+    python3 ../../eval_cls_v2.py --model b1_custom --image_size $res \
+        --weight_url ../../exp/train/miniimgnet/b1_r224_train/checkpoint/model_best.pt \
+        --batch_size 128 \
+        --path /home/c3-0/datasets/ImageNet/validation \
+        --reduced_width true \
+        --width_multiplier 1.0 \
 
-# done
+done
 
 #Pre-trained - Only resolution change
 for res in "${resolutions[@]}"; do
