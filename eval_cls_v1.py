@@ -94,7 +94,7 @@ def main():
         bn_reset_dataset = MiniImageNet(args.path, transform = transform, type = "train")
         reset_data_loader = torch.utils.data.DataLoader(
             bn_reset_dataset,
-            batch_size=args.batch_size,
+            batch_size=2*args.batch_size,
             shuffle=True,
             num_workers=args.workers,
             pin_memory=True,
