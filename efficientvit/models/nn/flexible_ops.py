@@ -180,6 +180,7 @@ class FlexibleDSConv(nn.Module):
         use_bias=False,
         norm=("bn2d", "bn2d"),
         act_func=("relu6", None),
+        flex = [True, True]
     ):
         super(FlexibleDSConv, self).__init__()
 
@@ -196,7 +197,7 @@ class FlexibleDSConv(nn.Module):
             norm=norm[0],
             act_func=act_func[0],
             use_bias=use_bias[0],
-            flex = [True, True]
+            flex = [flex[0], True]
         )
         self.point_conv = FlexibleConvLayer(
             in_channels,
@@ -205,7 +206,7 @@ class FlexibleDSConv(nn.Module):
             norm=norm[1],
             act_func=act_func[1],
             use_bias=use_bias[1],
-            flex = [True, True]
+            flex = [True, flex[1]]
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -226,6 +227,7 @@ class FlexibleMBConv(nn.Module):
         use_bias=False,
         norm=("bn2d", "bn2d", "bn2d"),
         act_func=("relu6", "relu6", None),
+        flex = [True, True]
     ):
         super(FlexibleMBConv, self).__init__()
 
@@ -242,7 +244,7 @@ class FlexibleMBConv(nn.Module):
             norm=norm[0],
             act_func=act_func[0],
             use_bias=use_bias[0],
-            flex = [True, True]
+            flex = [flex[0], True]
         )
         self.depth_conv = FlexibleConvLayer(
             mid_channels,
@@ -262,7 +264,7 @@ class FlexibleMBConv(nn.Module):
             norm=norm[2],
             act_func=act_func[2],
             use_bias=use_bias[2],
-            flex = [True, True]
+            flex = [True, flex[1]]
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -413,6 +415,7 @@ class FlexibleEfficientViTBlock(nn.Module):
         expand_ratio: float = 4,
         norm="bn2d",
         act_func="hswish",
+        flex_out = True
     ):
         super(FlexibleEfficientViTBlock, self).__init__()
         self.context_module = ResidualBlock(
@@ -432,6 +435,7 @@ class FlexibleEfficientViTBlock(nn.Module):
             use_bias=(True, True, False),
             norm=(None, None, norm),
             act_func=(act_func, act_func, None),
+            flex = [True, flex_out]
         )
         self.local_module = ResidualBlock(local_module, IdentityLayer())
 
