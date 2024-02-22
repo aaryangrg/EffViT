@@ -10,6 +10,7 @@ from efficientvit.apps.utils import dump_config, parse_unknown_args
 from efficientvit.clscore.trainer import ClsRunConfig
 from efficientvit.models.nn.drop import apply_drop_func
 from efficientvit.models.efficientvit.dino_backbone import flexible_efficientvit_backbone_swin_t_224_1k
+import torch 
 
 parser = argparse.ArgumentParser()
 parser.add_argument("config", metavar="FILE", help="config file") # Student Model YAML
