@@ -16,5 +16,5 @@ echo CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
 nvidia-smi
 
 torchpack dist-run -np 1 \
-python ../../gdino_backbone_distill.py ../configs/cls/imagenet/b1.yaml \
-    --path ../exp/gdino/backbone/test/ \
+python ../../gdino_back_distill.py ../../configs/cls/imagenet/b1.yaml \
+    --path ../../exp/gdino/backbone/test/ \
