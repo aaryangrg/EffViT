@@ -54,6 +54,7 @@ def main():
         # setup model
     effvit_backbone = flexible_efficientvit_backbone_swin_t_224_1k()
     effvit_backbone.cuda()
+    effvit_backbone.apply(lambda m: setattr(m, 'width_mult', 1.0))
     # Dummy input
     dummy = torch.rand(2,3,1024,1024)
     dummy = dummy.to("cuda")
