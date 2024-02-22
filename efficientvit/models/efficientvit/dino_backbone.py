@@ -91,21 +91,21 @@ class FlexibleGDINOBackbone(nn.Module):
                 flex = [False, True]
             )
         ]
-        # for _ in range(depth_list[0]):
-        #     if _ == depth_list[0]-1:
-        #         flex_vals = [True, False]
-        #     else :
-        #         flex_vals = [True, True]
-        block = self.build_local_block(
-            in_channels=width_list[0],
-            out_channels=width_list[0],
-            stride=1,
-            expand_ratio=1,
-            norm=norm,
-            act_func=act_func,
-            flex = [True, False]
-        )
-        self.input_stem.append(ResidualBlock(block, IdentityLayer()))
+        for _ in range(depth_list[0]):
+            if _ == depth_list[0]-1:
+                flex_vals = [True, False]
+            else :
+                flex_vals = [True, True]
+            block = self.build_local_block(
+                in_channels=width_list[0],
+                out_channels=width_list[0],
+                stride=1,
+                expand_ratio=1,
+                norm=norm,
+                act_func=act_func,
+                flex = [True, False]
+            )
+            self.input_stem.append(ResidualBlock(block, None))
         in_channels = width_list[0]
         self.input_stem = OpSequential(self.input_stem)
         self.width_list.append(in_channels)
