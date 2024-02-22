@@ -54,10 +54,30 @@ def main():
         # setup model
     effvit_backbone = flexible_efficientvit_backbone_swin_t_224_1k()
     effvit_backbone.cuda()
-    effvit_backbone.apply(lambda m: setattr(m, 'width_mult', 1.0))
+    
     # Dummy input
     dummy = torch.rand(2,3,1024,1024)
     dummy = dummy.to("cuda")
+
+    print("1x")
+    effvit_backbone.apply(lambda m: setattr(m, 'width_mult', 1.0))
+    outs = effvit_backbone(dummy)
+    for i in range(len(outs)) :
+        print(outs[i].shape)
+
+    print("0.75x")
+    effvit_backbone.apply(lambda m: setattr(m, 'width_mult', 0.75))
+    outs = effvit_backbone(dummy)
+    for i in range(len(outs)) :
+        print(outs[i].shape)
+
+    print("0.50x")
+    effvit_backbone.apply(lambda m: setattr(m, 'width_mult', 0.50))
+    outs = effvit_backbone(dummy)
+    for i in range(len(outs)) :
+        print(outs[i].shape)
+    print("0.25x")
+    effvit_backbone.apply(lambda m: setattr(m, 'width_mult', 0.25))
     outs = effvit_backbone(dummy)
     for i in range(len(outs)) :
         print(outs[i].shape)
