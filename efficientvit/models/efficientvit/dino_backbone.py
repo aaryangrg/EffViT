@@ -91,21 +91,21 @@ class FlexibleGDINOBackbone(nn.Module):
                 flex = [False, True]
             )
         ]
-        for _ in range(depth_list[0]):
-            if _ == depth_list[0]-1:
-                flex_vals = [True, False]
-            else :
-                flex_vals = [True, True]
-            block = self.build_local_block(
-                in_channels=width_list[0],
-                out_channels=width_list[0],
-                stride=1,
-                expand_ratio=1,
-                norm=norm,
-                act_func=act_func,
-                flex = flex_vals
-            )
-            self.input_stem.append(ResidualBlock(block, IdentityLayer()))
+        # for _ in range(depth_list[0]):
+        #     if _ == depth_list[0]-1:
+        #         flex_vals = [True, False]
+        #     else :
+        #         flex_vals = [True, True]
+        #     block = self.build_local_block(
+        #         in_channels=width_list[0],
+        #         out_channels=width_list[0],
+        #         stride=1,
+        #         expand_ratio=1,
+        #         norm=norm,
+        #         act_func=act_func,
+        #         flex = flex_vals
+        #     )
+        #     self.input_stem.append(ResidualBlock(block, IdentityLayer()))
         in_channels = width_list[0]
         self.input_stem = OpSequential(self.input_stem)
         self.width_list.append(in_channels)
@@ -212,10 +212,10 @@ class FlexibleGDINOBackbone(nn.Module):
         print(x.shape, " At patch")
         x = self.input_stem(x)
         print(x.shape, " At stem")
-        for stage_id, stage in enumerate(self.stages, 1):
-            x = stage(x)
-            print(x.shape, " at stage : ", stage_id)
-            outs.append(x)
+        # for stage_id, stage in enumerate(self.stages, 1):
+        #     x = stage(x)
+        #     print(x.shape, " at stage : ", stage_id)
+        #     outs.append(x)
         return outs
 
 
