@@ -14,7 +14,7 @@ from efficientvit.models.nn.flexible_ops import (
     FlexibleMBConv,
 )
 from efficientvit.models.utils import build_kwargs_from_config
-from timm.model.layers import to_2tuple
+from timm.models.layers import to_2tuple
 
 __all__ = [
     "FlexibleGDINOBackbone",
