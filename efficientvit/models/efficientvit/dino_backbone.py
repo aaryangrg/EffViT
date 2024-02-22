@@ -105,7 +105,7 @@ class FlexibleGDINOBackbone(nn.Module):
                 act_func=act_func,
                 flex = [True, False]
             )
-            self.input_stem.append(ResidualBlock(block, None))
+            # self.input_stem.append(ResidualBlock(block, None))
         in_channels = width_list[0]
         self.input_stem = OpSequential(self.input_stem)
         self.width_list.append(in_channels)
