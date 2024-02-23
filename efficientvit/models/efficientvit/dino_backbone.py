@@ -135,8 +135,7 @@ class FlexibleGDINOBackbone(nn.Module):
                 )
                 # block = ResidualBlock(block, IdentityLayer() if stride == 1 else None)
                 # block = ResidualBlock(block, None)
-                # stage.append(ResidualBlock(block, None))
-                stage.append(block)
+                stage.append(ResidualBlock(block, None))
                 in_channels = w
             self.stages.append(OpSequential(stage))
             self.width_list.append(in_channels)
@@ -154,8 +153,7 @@ class FlexibleGDINOBackbone(nn.Module):
                 fewer_norm=True,
                 flex = [False, True]
             )
-            # stage.append(ResidualBlock(block, None))
-            stage.append(block)
+            stage.append(ResidualBlock(block, None))
             in_channels = w
             for _ in range(d):
                 if _ == d-1 :

@@ -438,7 +438,8 @@ class FlexibleEfficientViTBlock(nn.Module):
             act_func=(act_func, act_func, None),
             flex = [True, flex_out]
         )
-        self.local_module = ResidualBlock(local_module, IdentityLayer())
+        # self.local_module = ResidualBlock(local_module, IdentityLayer())
+        self.local_module = ResidualBlock(local_module, None)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.context_module(x)
