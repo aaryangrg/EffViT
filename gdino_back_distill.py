@@ -16,8 +16,9 @@ import torch
 
 import sys
 sys.path.append('/home/aaryang/experiments/Open-GDINO/')
+sys.path.append('/home/aaryang/experiments/Open-GDINO/models/')
 
-from models.GroundingDINO.groundingdino import build_groundingdino
+from GroundingDINO.groundingdino import build_groundingdino
 from datasets import build_dataset
 from main import build_model_main
 
