@@ -66,9 +66,9 @@ def main():
     effvit_backbone.cuda()
 
     # Load GDINO model
-    # model, criterion, postprocessors = build_model_main(args)
-    # model.to(device)
-    # logger.debug("build model, done.")
+    model, criterion, postprocessors = build_model_main(args)
+    model.cuda()
+    print("build model, done.")
 
 
     # model_without_ddp = model
@@ -79,33 +79,33 @@ def main():
     # SET MODEL TO EVAL
     
     # Dummy input
-    dummy = torch.rand(2,3,1024,1024)
-    dummy = dummy.to("cuda")
+    # dummy = torch.rand(2,3,1024,1024)
+    # dummy = dummy.to("cuda")
 
-    effvit_backbone.eval()
-    with torch.no_grad() :
-        print("1x")
-        effvit_backbone.apply(lambda m: setattr(m, 'width_mult', 1.0))
-        outs = effvit_backbone(dummy)
-        for i in range(len(outs)) :
-            print(outs[i].shape)
+    # effvit_backbone.eval()
+    # with torch.no_grad() :
+    #     print("1x")
+    #     effvit_backbone.apply(lambda m: setattr(m, 'width_mult', 1.0))
+    #     outs = effvit_backbone(dummy)
+    #     for i in range(len(outs)) :
+    #         print(outs[i].shape)
 
-        print("0.75x")
-        effvit_backbone.apply(lambda m: setattr(m, 'width_mult', 0.75))
-        outs = effvit_backbone(dummy)
-        for i in range(len(outs)) :
-            print(outs[i].shape)
+    #     print("0.75x")
+    #     effvit_backbone.apply(lambda m: setattr(m, 'width_mult', 0.75))
+    #     outs = effvit_backbone(dummy)
+    #     for i in range(len(outs)) :
+    #         print(outs[i].shape)
 
-        print("0.50x")
-        effvit_backbone.apply(lambda m: setattr(m, 'width_mult', 0.50))
-        outs = effvit_backbone(dummy)
-        for i in range(len(outs)) :
-            print(outs[i].shape)
-        print("0.25x")
-        effvit_backbone.apply(lambda m: setattr(m, 'width_mult', 0.25))
-        outs = effvit_backbone(dummy)
-        for i in range(len(outs)) :
-            print(outs[i].shape)
+    #     print("0.50x")
+    #     effvit_backbone.apply(lambda m: setattr(m, 'width_mult', 0.50))
+    #     outs = effvit_backbone(dummy)
+    #     for i in range(len(outs)) :
+    #         print(outs[i].shape)
+    #     print("0.25x")
+    #     effvit_backbone.apply(lambda m: setattr(m, 'width_mult', 0.25))
+    #     outs = effvit_backbone(dummy)
+    #     for i in range(len(outs)) :
+    #         print(outs[i].shape)
     
     # dataset_train = build_dataset(image_set='train', args=args, datasetinfo=dataset_meta["train"][0])
     # if args.distributed:
