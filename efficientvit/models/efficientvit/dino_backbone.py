@@ -105,7 +105,7 @@ class FlexibleGDINOBackbone(nn.Module):
                 expand_ratio=1,
                 norm=norm,
                 act_func=act_func,
-                flex = [True, False]
+                flex = flex_vals
             )
             self.input_stem.append(ResidualBlock(block, None))
         in_channels = width_list[0]
@@ -134,7 +134,8 @@ class FlexibleGDINOBackbone(nn.Module):
                     flex = flex_vals
                 )
                 # block = ResidualBlock(block, IdentityLayer() if stride == 1 else None)
-                block = ResidualBlock(block, None)
+                # block = ResidualBlock(block, None)
+                # stage.append(ResidualBlock(block, None))
                 stage.append(block)
                 in_channels = w
             self.stages.append(OpSequential(stage))
@@ -153,7 +154,8 @@ class FlexibleGDINOBackbone(nn.Module):
                 fewer_norm=True,
                 flex = [False, True]
             )
-            stage.append(ResidualBlock(block, None))
+            # stage.append(ResidualBlock(block, None))
+            stage.append(block)
             in_channels = w
             for _ in range(d):
                 if _ == d-1 :
