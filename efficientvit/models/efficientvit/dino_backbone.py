@@ -16,6 +16,8 @@ from efficientvit.models.nn.flexible_ops import (
 from efficientvit.models.utils import build_kwargs_from_config
 from timm.models.layers import to_2tuple
 
+# from Open-GDINO.groundingdino.misc import NestedTensor, nested_tensor_from_tensor_list
+
 __all__ = [
     "FlexibleGDINOBackbone",
     "flexible_efficientvit_backbone_swin_t_224_1k"
@@ -131,7 +133,8 @@ class FlexibleGDINOBackbone(nn.Module):
                     act_func=act_func,
                     flex = flex_vals
                 )
-                block = ResidualBlock(block, IdentityLayer() if stride == 1 else None)
+                # block = ResidualBlock(block, IdentityLayer() if stride == 1 else None)
+                block = ResidualBlock(block, None)
                 stage.append(block)
                 in_channels = w
             self.stages.append(OpSequential(stage))
@@ -218,7 +221,26 @@ class FlexibleGDINOBackbone(nn.Module):
             outs.append(x)
         return outs
 
+    # def forward_raw(self, x: NestedTensor):
+    #     images = x.tensors
+    #     masks = x.mask
+    #     outs = []
+    #     images = self.patch_embed(images)
+    #     images = self.input_stem(images)
+    #     for stage_id, stage in enumerate(self.stages, 1):
+    #         images = stage(images)
+    #         outs.append(images)
+    #     # Images processed
+            
+    #     # Reshaping masks
+    #     outs_dict = {}
+    #     for idx, out_i in enumerate(outs):
+    #         m = masks
+    #         assert m is not None
+    #         mask = torch.nn.functional.interpolate(m[None].float(), size=out_i.shape[-2:]).to(torch.bool)[0]
+    #         outs_dict[idx] = NestedTensor(out_i, mask)
 
+    #     return outs_dict
 
 def flexible_efficientvit_backbone_swin_t_224_1k(**kwargs) -> FlexibleGDINOBackbone:
     # in:

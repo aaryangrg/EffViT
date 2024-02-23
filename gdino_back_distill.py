@@ -8,11 +8,17 @@ import os
 from efficientvit.apps import setup
 from efficientvit.apps.utils import dump_config, parse_unknown_args
 from efficientvit.clscore.trainer import ClsRunConfig
+from efficientvit.clscore.trainer.gdino_backbone import GdinoBackboneTrainer
 from efficientvit.models.nn.drop import apply_drop_func
 from efficientvit.models.efficientvit.dino_backbone import flexible_efficientvit_backbone_swin_t_224_1k
+
 import torch 
 
+# from Open-GDINO.datasets import build_dataset
+# from Open-GDINO.main import build_model_main
+
 parser = argparse.ArgumentParser()
+# Add GDINO args / file paths
 parser.add_argument("config", metavar="FILE", help="config file") # Student Model YAML
 parser.add_argument("--path", type=str, metavar="DIR", help="run directory") # Path for training outs --> checkpoints + logs
 parser.add_argument("--gpu", type=str, default=None)  # used in single machine experiments
@@ -53,7 +59,21 @@ def main():
 
         # setup model
     effvit_backbone = flexible_efficientvit_backbone_swin_t_224_1k()
+    # apply_drop_func(effvit_backbone.stages, config["backbone_drop"])
     effvit_backbone.cuda()
+
+    # Load GDINO model
+    # model, criterion, postprocessors = build_model_main(args)
+    # model.to(device)
+    # logger.debug("build model, done.")
+
+
+    # model_without_ddp = model
+    # if args.distributed:
+    #     model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu], find_unused_parameters=args.find_unused_params)
+    #     model._set_static_graph()
+    #     model_without_ddp = model.module
+    # SET MODEL TO EVAL
     
     # Dummy input
     dummy = torch.rand(2,3,1024,1024)
@@ -82,8 +102,31 @@ def main():
     for i in range(len(outs)) :
         print(outs[i].shape)
     
-    # apply_drop_func(model.backbone.stages, config["backbone_drop"])
+    # dataset_train = build_dataset(image_set='train', args=args, datasetinfo=dataset_meta["train"][0])
+    # if args.distributed:
+    #     sampler_val = DistributedSampler(dataset_val, shuffle=False)
+    #     if not args.eval:
+    #         sampler_train = DistributedSampler(dataset_train)
+    # else:
+    #     sampler_val = torch.utils.data.SequentialSampler(dataset_val)
+    #     if not args.eval:
+    #         sampler_train = torch.utils.data.RandomSampler(dataset_train)
 
+    # if not args.eval:
+    #     batch_sampler_train = torch.utils.data.BatchSampler(
+    #         sampler_train, args.batch_size, drop_last=True)
+    #     data_loader_train = DataLoader(dataset_train, batch_sampler=batch_sampler_train,
+    #                                 collate_fn=utils.collate_fn, num_workers=args.num_workers)
+        
+    # trainer = GdinoBackboneTrainer(
+    #     path=args.path,
+    #     model=effvit_backbone,
+    #     dino_backbone=dino_model,
+    #     data_provider=data_loader_train,
+    #     auto_restart_thresh=args.auto_restart_thresh,
+    # )
+
+    # initialization
     # setup.init_model(
     #     trainer.network,
     #     rand_init=args.rand_init,
@@ -92,13 +135,6 @@ def main():
 
     # prep for training
     # trainer.prep_for_training(run_config, config["ema_decay"], args.fp16)
-
-    # resume
-    # if args.resume:
-    #     trainer.load_model()
-    #     data_provider = setup.setup_data_provider(config, [ImageNetDataProviderSubset], is_distributed=True)
-    # else:
-    #     trainer.sync_model()
 
     # # launch training
     # trainer.train(save_freq=args.save_freq)
