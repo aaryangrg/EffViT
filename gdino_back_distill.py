@@ -79,6 +79,8 @@ def main():
     dummy = torch.rand(2,3,1024,1024)
     dummy = dummy.to("cuda")
 
+    effvit_backbone.eval()
+    
     print("1x")
     effvit_backbone.apply(lambda m: setattr(m, 'width_mult', 1.0))
     outs = effvit_backbone(dummy)
