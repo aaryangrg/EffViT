@@ -96,8 +96,10 @@ class FlexibleGDINOBackbone(nn.Module):
         for _ in range(depth_list[0]):
             if _ == depth_list[0]-1:
                 flex_vals = [True, False]
+                residual_func = None
             else :
                 flex_vals = [True, True]
+                residual_func = IdentityLayer()
             block = self.build_local_block(
                 in_channels=width_list[0],
                 out_channels=width_list[0],
@@ -107,7 +109,7 @@ class FlexibleGDINOBackbone(nn.Module):
                 act_func=act_func,
                 flex = flex_vals
             )
-            self.input_stem.append(ResidualBlock(block, None))
+            self.input_stem.append(ResidualBlock(block, residual_func))
         in_channels = width_list[0]
         self.input_stem = OpSequential(self.input_stem)
         self.width_list.append(in_channels)
@@ -119,10 +121,13 @@ class FlexibleGDINOBackbone(nn.Module):
             for i in range(d):
                 if i == 0 :
                     flex_vals = [False, True]
+                    residual_func = None
                 elif i == d-1 :
                     flex_vals = [True, False]
+                    residual_func = None
                 else :
                     flex_vals = [True, True]
+                    residual_func = IdentityLayer()
                 stride = 2 if i == 0 else 1
                 block = self.build_local_block(
                     in_channels=in_channels,
@@ -133,9 +138,7 @@ class FlexibleGDINOBackbone(nn.Module):
                     act_func=act_func,
                     flex = flex_vals
                 )
-                # block = ResidualBlock(block, IdentityLayer() if stride == 1 else None)
-                # block = ResidualBlock(block, None)
-                stage.append(ResidualBlock(block, None))
+                stage.append(ResidualBlock(block, residual_func))
                 in_channels = w
             self.stages.append(OpSequential(stage))
             self.width_list.append(in_channels)
@@ -167,7 +170,8 @@ class FlexibleGDINOBackbone(nn.Module):
                         expand_ratio=expand_ratio,
                         norm=norm,
                         act_func=act_func,
-                        flex_out = flex_out
+                        flex_out = flex_out,
+                        disable_residual= not flex_out
                     )
                 )
             self.stages.append(OpSequential(stage))
