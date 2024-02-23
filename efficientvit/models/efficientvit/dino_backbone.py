@@ -217,7 +217,7 @@ class FlexibleGDINOBackbone(nn.Module):
         print(x.shape, " At patch")
         x = self.input_stem(x)
         print(x.shape, " At stem")
-        for stage_id, stage in enumerate(self.stages, 1):
+        for stage_id, stage in enumerate(self.stages, 0):
             x = stage(x)
             print(x.shape, " at stage : ", stage_id)
             outs.append(x)
