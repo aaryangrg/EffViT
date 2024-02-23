@@ -105,7 +105,7 @@ class FlexibleGDINOBackbone(nn.Module):
                 act_func=act_func,
                 flex = [True, False]
             )
-            # self.input_stem.append(ResidualBlock(block, None))
+            self.input_stem.append(ResidualBlock(block, None))
         in_channels = width_list[0]
         self.input_stem = OpSequential(self.input_stem)
         self.width_list.append(in_channels)
@@ -212,10 +212,10 @@ class FlexibleGDINOBackbone(nn.Module):
         print(x.shape, " At patch")
         x = self.input_stem(x)
         print(x.shape, " At stem")
-        # for stage_id, stage in enumerate(self.stages, 1):
-        #     x = stage(x)
-        #     print(x.shape, " at stage : ", stage_id)
-        #     outs.append(x)
+        for stage_id, stage in enumerate(self.stages, 1):
+            x = stage(x)
+            print(x.shape, " at stage : ", stage_id)
+            outs.append(x)
         return outs
 
 
