@@ -19,7 +19,7 @@ from efficientvit.models.utils import list_join, list_mean, torch_random_choices
 from efficientvit.apps.data_provider.base import parse_image_size
 
 sys.path.append('/home/aaryang/experiments/Open-GDINO/')
-from groundingdino.misc import NestedTensor, nested_tensor_from_tensor_list
+from groundingdino.util.misc import NestedTensor, nested_tensor_from_tensor_list
 
 __all__ = ["GdinoBackboneTrainer"]
 LOG_SOFTMAX_CONST = 1e-6
