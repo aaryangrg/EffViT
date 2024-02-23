@@ -216,12 +216,9 @@ class FlexibleGDINOBackbone(nn.Module):
     def forward(self, x: torch.Tensor) -> list[torch.Tensor]:
         outs = []
         x = self.patch_embed(x)
-        print(x.shape, " At patch")
         x = self.input_stem(x)
-        print(x.shape, " At stem")
         for stage_id, stage in enumerate(self.stages, 0):
             x = stage(x)
-            print(x.shape, " at stage : ", stage_id)
             outs.append(x)
         return outs
 
