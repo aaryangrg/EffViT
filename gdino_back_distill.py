@@ -15,10 +15,10 @@ from efficientvit.models.efficientvit.dino_backbone import flexible_efficientvit
 import torch 
 
 import sys
-sys.path.append('/home/aaryang/experiments/')
+sys.path.append('/home/aaryang/experiments/Open-GDINO/')
 
-from Open_GDINO.datasets import build_dataset
-from Open_GDINO.main import build_model_main
+from datasets import build_dataset
+from main import build_model_main
 
 parser = argparse.ArgumentParser()
 # Add GDINO args / file paths
