@@ -17,8 +17,8 @@ import torch
 import sys
 sys.path.append('/home/aaryang/experiments/')
 
-from Open-GDINO.datasets import build_dataset
-from Open-GDINO.main import build_model_main
+from Open_GDINO.datasets import build_dataset
+from Open_GDINO.main import build_model_main
 
 parser = argparse.ArgumentParser()
 # Add GDINO args / file paths
