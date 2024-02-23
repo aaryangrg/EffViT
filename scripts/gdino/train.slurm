@@ -9,7 +9,7 @@
 #SBATCH --constraint=gmem11
 
 source /home/aaryang/anaconda3/bin/activate
-conda activate evit
+conda activate effdino
 
 echo CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
 
