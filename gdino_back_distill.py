@@ -20,7 +20,7 @@ import torch
 from torch.utils.data import DataLoader, DistributedSampler
 import json
 
-gdino_models = importlib.import_module("Open-GDINO.models")
+# gdino_models = importlib.import_module("Open-GDINO.models")
 gdino_utils_slconfig = importlib.import_module("Open-GDINO.util.slconfig")
 gdino_util_misc = importlib.import_module("Open-GDINO.util.misc")
 gdino_datasets = importlib.import_module("Open-GDINO.datasets")
