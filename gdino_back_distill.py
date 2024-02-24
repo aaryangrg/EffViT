@@ -17,6 +17,7 @@ import torch
 import sys
 sys.path.append('/home/aaryang/experiments/')
 gdino = importlib.import_module("Open-GDINO")
+gdino_models = importlib.import_module("Open-GDINO.models")
 
 # from Open_GDINO.models.GroundingDINO.groundingdino import build_groundingdino
 # from Open_GDINO.datasets import build_dataset
@@ -68,7 +69,7 @@ def main():
     effvit_backbone.cuda()
 
     # Load GDINO model
-    model, criterion, postprocessors = gdino.models.build_groundingdino(args)
+    model, criterion, postprocessors = gdino_models.build_groundingdino(args)
     model.cuda()
     print("build model, done.")
 
