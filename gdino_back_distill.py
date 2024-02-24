@@ -140,7 +140,7 @@ def main():
     #         print(outs[i].shape)
     
     # Make this a dataloader somehow??
-    dataset_train = gdino_datasets.build_dataset(image_set='train', args=args, datasetinfo=dataset_meta["train"][0])
+    dataset_train = gdino_datasets.bbuild_dataset(image_set='train', args=args, datasetinfo=dataset_meta["train"][0])
     # if args.distributed:
     #     sampler_val = DistributedSampler(dataset_val, shuffle=False)
     #     if not args.eval:
