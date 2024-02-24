@@ -18,7 +18,6 @@ from timm.models.layers import to_2tuple
 import importlib
 import sys
 
-gdino_util_misc = importlib.import_module("Open-GDINO.util.misc")
 
 __all__ = [
     "FlexibleGDINOBackbone",

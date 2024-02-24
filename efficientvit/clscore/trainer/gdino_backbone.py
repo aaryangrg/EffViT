@@ -107,10 +107,10 @@ class GdinoBackboneTrainer(Trainer):
         
     #     return results
 
-    def prestep(self, samples : gdino_misc.NestedTensor) :
+    def prestep(self, samples) :
         
-        if isinstance(samples, (list, torch.Tensor)):
-            samples = gdino_misc.nested_tensor_from_tensor_list(samples)
+        # if isinstance(samples, (list, torch.Tensor)):
+        #     samples = gdino_misc.nested_tensor_from_tensor_list(samples)
 
         # Zero grad if any accumulates
         self.optimizer.zero_grad()
@@ -118,7 +118,7 @@ class GdinoBackboneTrainer(Trainer):
         return samples
     
     # # Using pre-defined fixed widths (0.25, 0.50, 0.75, 1.0)
-    def runstep(self,  samples : gdino_misc.NestedTensor) -> dict[str, any]:
+    def runstep(self,  samples) -> dict[str, any]:
 
         # Put model to train
         self.model.train()
