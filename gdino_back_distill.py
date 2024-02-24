@@ -11,15 +11,17 @@ from efficientvit.clscore.trainer import ClsRunConfig
 from efficientvit.clscore.trainer.gdino_backbone import GdinoBackboneTrainer
 from efficientvit.models.nn.drop import apply_drop_func
 from efficientvit.models.efficientvit.dino_backbone import flexible_efficientvit_backbone_swin_t_224_1k
-
+import importlib
 import torch 
 
 import sys
 sys.path.append('/home/aaryang/experiments/')
-
-from Open_GDINO.models.GroundingDINO.groundingdino import build_groundingdino
-from Open_GDINO.datasets import build_dataset
-from Open_GDINO.main import build_model_main
+gdino = importlib.import_module("Open-GDINO")
+from gdino.datasets import build_dataset
+from gdino.main import build_model_main
+# from Open_GDINO.models.GroundingDINO.groundingdino import build_groundingdino
+# from Open_GDINO.datasets import build_dataset
+# from Open_GDINO.main import build_model_main
 
 parser = argparse.ArgumentParser()
 # Add GDINO args / file paths
