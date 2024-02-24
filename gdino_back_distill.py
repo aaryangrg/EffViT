@@ -18,13 +18,17 @@ import torch
 from torch.utils.data import DataLoader, DistributedSampler
 import json
 
+from gdino.models import build_groundingdino
+from gdino.util.slconfig import SLConfig
+from gdino.util.misc import collate_fn
+from gdino.datasets import bbuild_dataset
 
-sys.path.append('/home/aaryang/experiments/')
-gdino = importlib.import_module("Open-GDINO")
-gdino_models = importlib.import_module("Open-GDINO.models")
-gdino_utils_slconfig = importlib.import_module("Open-GDINO.util.slconfig")
-gdino_util_misc = importlib.import_module("Open-GDINO.util.misc")
-gdino_datasets = importlib.import_module("Open-GDINO.datasets")
+# sys.path.append('/home/aaryang/experiments/')
+# gdino = importlib.import_module("Open-GDINO")
+# gdino_models = importlib.import_module("Open-GDINO.models")
+# gdino_utils_slconfig = importlib.import_module("Open-GDINO.util.slconfig")
+# gdino_util_misc = importlib.import_module("Open-GDINO.util.misc")
+# gdino_datasets = importlib.import_module("Open-GDINO.datasets")
 
 # from Open_GDINO.models.GroundingDINO.groundingdino import build_groundingdino
 # from Open_GDINO.datasets import build_dataset
@@ -68,7 +72,7 @@ def main():
     dump_config(args.__dict__, os.path.join(args.path, "args.yaml"))
 
     # Parse GDINO args (config)
-    cfg = gdino_utils_slconfig.SLConfig.fromfile(args.config_file)
+    cfg = SLConfig.fromfile(args.config_file)
     cfg_dict = cfg._cfg_dict.to_dict()
     args_vars = vars(args)
     for k,v in cfg_dict.items():
@@ -101,7 +105,7 @@ def main():
     effvit_backbone.cuda()
 
     # Load GDINO model
-    model, criterion, postprocessors = gdino_models.build_groundingdino(args)
+    model, criterion, postprocessors = build_groundingdino(args)
     model.cuda()
     print("build model, done.")
 
@@ -143,10 +147,10 @@ def main():
     #         print(outs[i].shape)
     
     # Make this a dataloader somehow??
-    dataset_train = gdino_datasets.bbuild_dataset(image_set='train', args=args, datasetinfo=dataset_meta["train"][0])
+    dataset_train = bbuild_dataset(image_set='train', args=args, datasetinfo=dataset_meta["train"][0])
     sampler_train = torch.utils.data.RandomSampler(dataset_train)
     batch_sampler_train = torch.utils.data.BatchSampler(sampler_train, args.batch_size, drop_last=True)
-    data_loader_train = DataLoader(dataset_train, batch_sampler=batch_sampler_train,collate_fn=gdino_util_misc.collate_fn, num_workers=8)
+    data_loader_train = DataLoader(dataset_train, batch_sampler=batch_sampler_train,collate_fn= collate_fn, num_workers=8)
 
     # if args.distributed:
     #     sampler_val = DistributedSampler(dataset_val, shuffle=False)
