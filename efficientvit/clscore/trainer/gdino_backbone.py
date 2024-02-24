@@ -19,7 +19,6 @@ from efficientvit.models.utils import list_join, list_mean, torch_random_choices
 from efficientvit.apps.data_provider.base import parse_image_size
 import importlib
 
-sys.path.append('/home/aaryang/experiments/')
 gdino_util_misc = importlib.import_module("Open-GDINO.util.misc")
 
 __all__ = ["GdinoBackboneTrainer"]
