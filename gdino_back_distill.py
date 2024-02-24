@@ -163,10 +163,11 @@ def main():
         
     trainer = GdinoBackboneTrainer(
         path=args.path,
-        model=effvit_backbone,
-        dino_backbone=dino_model,
+        vit_backbone=effvit_backbone,
+        dino_backbone=model,
         data_provider=data_loader_train,
         auto_restart_thresh=args.auto_restart_thresh,
+        gdino_misc = gdino_util_misc
     )
 
     # initialization

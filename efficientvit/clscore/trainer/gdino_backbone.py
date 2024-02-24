@@ -17,10 +17,7 @@ from efficientvit.apps.utils import AverageMeter, sync_tensor
 from efficientvit.clscore.trainer.utils import accuracy, apply_mixup, label_smooth
 from efficientvit.models.utils import list_join, list_mean, torch_random_choices
 from efficientvit.apps.data_provider.base import parse_image_size
-import importlib
 
-gdino = importlib.import_module("Open-GDINO")
-gdino_util_misc = importlib.import_module("Open-GDINO.util.misc")
 
 __all__ = ["GdinoBackboneTrainer"]
 LOG_SOFTMAX_CONST = 1e-6
@@ -34,6 +31,7 @@ class GdinoBackboneTrainer(Trainer):
         dino_backbone : nn.Module,
         data_provider,
         auto_restart_thresh: float or None = None,
+        gdino_misc = None
     ) -> None:
         super().__init__(
             path=path,
@@ -109,10 +107,10 @@ class GdinoBackboneTrainer(Trainer):
         
     #     return results
 
-    def prestep(self, samples : gdino_util_misc.NestedTensor) :
+    def prestep(self, samples : gdino_misc.NestedTensor) :
         
         if isinstance(samples, (list, torch.Tensor)):
-            samples = gdino_util_misc.nested_tensor_from_tensor_list(samples)
+            samples = gdino_misc.nested_tensor_from_tensor_list(samples)
 
         # Zero grad if any accumulates
         self.optimizer.zero_grad()
@@ -120,7 +118,7 @@ class GdinoBackboneTrainer(Trainer):
         return samples
     
     # # Using pre-defined fixed widths (0.25, 0.50, 0.75, 1.0)
-    def runstep(self,  samples : gdino_util_misc.NestedTensor) -> dict[str, any]:
+    def runstep(self,  samples : gdino_misc.NestedTensor) -> dict[str, any]:
 
         # Put model to train
         self.model.train()
