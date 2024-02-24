@@ -4,6 +4,7 @@
 # International Conference on Computer Vision (ICCV), 2023
 
 import argparse
+from distutils.command import build
 import os
 import importlib
 import sys
@@ -18,10 +19,9 @@ import torch
 from torch.utils.data import DataLoader, DistributedSampler
 import json
 
-# from gdino.main import build_model_main
 from gdino.util.slconfig import SLConfig
 from gdino.util.misc import collate_fn
-from gdino.datasets import bbuild_dataset
+from gdino.datasets.coco import build as build_coco
 
 # sys.path.append('/home/aaryang/experiments/')
 # gdino = importlib.import_module("Open-GDINO")
@@ -58,6 +58,16 @@ parser.add_argument("--datasets", type=str, required=True, help='path to dataset
 parser.add_argument('--device', default='cuda',
                     help='device to use for training / testing')
 parser.add_argument('--pretrain_model_path', help='load from other checkpoint')
+
+
+def build_model_main(args):
+    # we use register to maintain models from catdet6 on.
+    from gdino.models.registry import MODULE_BUILD_FUNCS
+    assert args.modelname in MODULE_BUILD_FUNCS._module_dict
+
+    build_func = MODULE_BUILD_FUNCS.get(args.modelname)
+    model, criterion, postprocessors = build_func(args)
+    return model, criterion, postprocessors
 
 def main():
     # parse args
@@ -105,7 +115,7 @@ def main():
     effvit_backbone.cuda()
 
     # Load GDINO model
-    # model, criterion, postprocessors = build_model_main(args)
+    model, criterion, postprocessors = build_model_main(args)
     # model.cuda()
     # print("build model, done.")
     model = None
@@ -148,7 +158,7 @@ def main():
     #         print(outs[i].shape)
     
     # Make this a dataloader somehow??
-    dataset_train = bbuild_dataset(image_set='train', args=args, datasetinfo=dataset_meta["train"][0])
+    dataset_train = build_coco(image_set='train', args=args, datasetinfo=dataset_meta["train"][0])
     sampler_train = torch.utils.data.RandomSampler(dataset_train)
     batch_sampler_train = torch.utils.data.BatchSampler(sampler_train, args.batch_size, drop_last=True)
     data_loader_train = DataLoader(dataset_train, batch_sampler=batch_sampler_train,collate_fn= collate_fn, num_workers=8)
