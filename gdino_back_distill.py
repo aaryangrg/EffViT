@@ -21,7 +21,7 @@ import json
 
 from gdino.util.slconfig import SLConfig
 from gdino.util.misc import collate_fn
-# from gdino.datasets import build_dataset
+from gdino.datasets.coco  import build as build_coco
 
 # sys.path.append('/home/aaryang/experiments/')
 # gdino = importlib.import_module("Open-GDINO")
@@ -158,10 +158,10 @@ def main():
     #         print(outs[i].shape)
     
     # Make this a dataloader somehow??
-    # dataset_train = build_dataset(image_set='train', args=args, datasetinfo=dataset_meta["train"][0])
-    # sampler_train = torch.utils.data.RandomSampler(dataset_train)
-    # batch_sampler_train = torch.utils.data.BatchSampler(sampler_train, args.batch_size, drop_last=True)
-    # data_loader_train = DataLoader(dataset_train, batch_sampler=batch_sampler_train,collate_fn= collate_fn, num_workers=8)
+    dataset_train = build_coco(image_set='train', args=args, datasetinfo=dataset_meta["train"][0])
+    sampler_train = torch.utils.data.RandomSampler(dataset_train)
+    batch_sampler_train = torch.utils.data.BatchSampler(sampler_train, args.batch_size, drop_last=True)
+    data_loader_train = DataLoader(dataset_train, batch_sampler=batch_sampler_train,collate_fn= collate_fn, num_workers=8)
 
     # if args.distributed:
     #     sampler_val = DistributedSampler(dataset_val, shuffle=False)
