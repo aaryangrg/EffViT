@@ -5,21 +5,23 @@
 
 import argparse
 import os
+import importlib
+import sys
+sys.path.append('/home/aaryang/experiments/')
+gdino = importlib.import_module("Open-GDINO")
+
 from efficientvit.apps import setup
 from efficientvit.apps.utils import dump_config, parse_unknown_args
 from efficientvit.clscore.trainer import ClsRunConfig
 from efficientvit.clscore.trainer.gdino_backbone import GdinoBackboneTrainer
 from efficientvit.models.nn.drop import apply_drop_func
 from efficientvit.models.efficientvit.dino_backbone import flexible_efficientvit_backbone_swin_t_224_1k
-import importlib
 import torch 
 from torch.utils.data import DataLoader, DistributedSampler
 import json
 
-import sys
-sys.path.append('/home/aaryang/experiments/')
-gdino = importlib.import_module("Open-GDINO")
-gdino_models = importlib.import_module("Open-GDINO.models")
+from gdino import models as gdino_models
+# gdino_models = importlib.import_module("Open-GDINO.models")
 gdino_utils_slconfig = importlib.import_module("Open-GDINO.util.slconfig")
 gdino_util_misc = importlib.import_module("Open-GDINO.util.misc")
 gdino_datasets = importlib.import_module("Open-GDINO.datasets")

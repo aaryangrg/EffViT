@@ -15,8 +15,6 @@ from efficientvit.models.nn.flexible_ops import (
 )
 from efficientvit.models.utils import build_kwargs_from_config
 from timm.models.layers import to_2tuple
-import importlib
-import sys
 
 
 __all__ = [
