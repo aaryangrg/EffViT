@@ -18,7 +18,7 @@ import torch
 from torch.utils.data import DataLoader, DistributedSampler
 import json
 
-from gdino.models import build_groundingdino
+from gdino.main import build_model_main
 from gdino.util.slconfig import SLConfig
 from gdino.util.misc import collate_fn
 from gdino.datasets import bbuild_dataset
@@ -105,7 +105,7 @@ def main():
     effvit_backbone.cuda()
 
     # Load GDINO model
-    model, criterion, postprocessors = build_groundingdino(args)
+    model, criterion, postprocessors = build_model_main(args)
     model.cuda()
     print("build model, done.")
 
