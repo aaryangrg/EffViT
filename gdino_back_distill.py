@@ -13,6 +13,7 @@ from efficientvit.models.nn.drop import apply_drop_func
 from efficientvit.models.efficientvit.dino_backbone import flexible_efficientvit_backbone_swin_t_224_1k
 import importlib
 import torch 
+import json
 
 import sys
 sys.path.append('/home/aaryang/experiments/')
@@ -62,6 +63,7 @@ def main():
     os.makedirs(args.path, exist_ok=True)
     dump_config(args.__dict__, os.path.join(args.path, "args.yaml"))
 
+    # Parse GDINO args (config)
     cfg = gdino_utils_slconfig.SLConfig.fromfile(args.config_file)
     cfg_dict = cfg._cfg_dict.to_dict()
     args_vars = vars(args)
@@ -70,6 +72,12 @@ def main():
             setattr(args, k, v)
         else:
             raise ValueError("Key {} can used by args only".format(k))
+    
+    # Extracting val path from dataset file (GDINO)
+    with open(args.datasets) as f:
+        dataset_meta = json.load(f)
+    if args.use_coco_eval:
+        args.coco_val_path = dataset_meta["val"][0]["anno"]
 
     # setup random seed
     setup.setup_seed(args.manual_seed, args.resume)
