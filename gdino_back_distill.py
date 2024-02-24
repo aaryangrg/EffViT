@@ -20,6 +20,7 @@ sys.path.append('/home/aaryang/experiments/')
 gdino = importlib.import_module("Open-GDINO")
 gdino_models = importlib.import_module("Open-GDINO.models")
 gdino_utils_slconfig = importlib.import_module("Open-GDINO.util.slconfig")
+gdino_datasets = importlib.import_module("Open-GDINO.datasets")
 
 # from Open_GDINO.models.GroundingDINO.groundingdino import build_groundingdino
 # from Open_GDINO.datasets import build_dataset
@@ -138,7 +139,8 @@ def main():
     #     for i in range(len(outs)) :
     #         print(outs[i].shape)
     
-    # dataset_train = build_dataset(image_set='train', args=args, datasetinfo=dataset_meta["train"][0])
+    # Make this a dataloader somehow??
+    dataset_train = gdino_datasets.build_dataset(image_set='train', args=args, datasetinfo=dataset_meta["train"][0])
     # if args.distributed:
     #     sampler_val = DistributedSampler(dataset_val, shuffle=False)
     #     if not args.eval:
