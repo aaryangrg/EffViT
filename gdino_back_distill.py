@@ -44,12 +44,11 @@ parser.add_argument("--save_freq", type=int, default=1)
 
 # GROUNDING DINO ARGS
 parser.add_argument('--config_file', '-c', type=str, required=True)
-
+parser.add_argument('--fix_size', action='store_true')
 # dataset parameters
 parser.add_argument("--datasets", type=str, required=True, help='path to datasets json')
 parser.add_argument('--device', default='cuda',
                     help='device to use for training / testing')
-
 parser.add_argument('--pretrain_model_path', help='load from other checkpoint')
 
 def main():
