@@ -8,8 +8,6 @@ import os
 import importlib
 import sys
 sys.path.append('/home/aaryang/experiments/')
-gdino = importlib.import_module("Open-GDINO")
-
 from efficientvit.apps import setup
 from efficientvit.apps.utils import dump_config, parse_unknown_args
 from efficientvit.clscore.trainer import ClsRunConfig
@@ -20,6 +18,7 @@ import torch
 from torch.utils.data import DataLoader, DistributedSampler
 import json
 
+gdino = importlib.import_module("Open-GDINO")
 # gdino_models = importlib.import_module("Open-GDINO.models")
 gdino_utils_slconfig = importlib.import_module("Open-GDINO.util.slconfig")
 gdino_util_misc = importlib.import_module("Open-GDINO.util.misc")
@@ -67,7 +66,8 @@ def main():
     dump_config(args.__dict__, os.path.join(args.path, "args.yaml"))
 
     # Parse GDINO args (config)
-    cfg = gdino_utils_slconfig.SLConfig.fromfile(args.config_file)
+    # cfg = gdino_utils_slconfig.SLConfig.fromfile(args.config_file)
+    cfg = gdino.util.misc.SLConfig.fromfile(args.config_file)
     cfg_dict = cfg._cfg_dict.to_dict()
     args_vars = vars(args)
     for k,v in cfg_dict.items():
@@ -100,7 +100,7 @@ def main():
     effvit_backbone.cuda()
 
     # Load GDINO model
-    model, criterion, postprocessors = gdino_models.build_groundingdino(args)
+    model, criterion, postprocessors = gdino.models.groundingdino.build_groundingdino(args)
     model.cuda()
     print("build model, done.")
 
