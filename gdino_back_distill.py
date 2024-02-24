@@ -16,11 +16,10 @@ import torch
 
 import sys
 sys.path.append('/home/aaryang/experiments/Open-GDINO/')
-sys.path.append('/home/aaryang/experiments/Open-GDINO/models/')
 
-from GroundingDINO.groundingdino import build_groundingdino
-from datasets import build_dataset
-from main import build_model_main
+from .models.GroundingDINO.groundingdino import build_groundingdino
+from .datasets import build_dataset
+from .main import build_model_main
 
 parser = argparse.ArgumentParser()
 # Add GDINO args / file paths
