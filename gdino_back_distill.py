@@ -20,8 +20,7 @@ import torch
 from torch.utils.data import DataLoader, DistributedSampler
 import json
 
-from gdino import models as gdino_models
-# gdino_models = importlib.import_module("Open-GDINO.models")
+gdino_models = importlib.import_module("Open-GDINO.models")
 gdino_utils_slconfig = importlib.import_module("Open-GDINO.util.slconfig")
 gdino_util_misc = importlib.import_module("Open-GDINO.util.misc")
 gdino_datasets = importlib.import_module("Open-GDINO.datasets")
@@ -169,7 +168,6 @@ def main():
         dino_backbone=model,
         data_provider=data_loader_train,
         auto_restart_thresh=args.auto_restart_thresh,
-        gdino_misc = gdino_util_misc
     )
 
     # initialization

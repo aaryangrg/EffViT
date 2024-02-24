@@ -31,7 +31,6 @@ class GdinoBackboneTrainer(Trainer):
         dino_backbone : nn.Module,
         data_provider,
         auto_restart_thresh: float or None = None,
-        gdino_misc = None
     ) -> None:
         super().__init__(
             path=path,
