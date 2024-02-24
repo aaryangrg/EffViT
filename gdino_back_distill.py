@@ -20,7 +20,7 @@ import json
 
 # gdino = importlib.import_module("Open-GDINO")
 sys.path.append('/home/aaryang/experiments/')
-gdino_models = importlib.import_module("/home/aaryang/experiments/Open-GDINO.models")
+gdino_models = importlib.import_module("/home/aaryang/experiments.Open-GDINO.models")
 gdino_utils_slconfig = importlib.import_module("Open-GDINO.util.slconfig")
 gdino_util_misc = importlib.import_module("Open-GDINO.util.misc")
 gdino_datasets = importlib.import_module("Open-GDINO.datasets")
