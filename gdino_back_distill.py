@@ -18,6 +18,7 @@ import sys
 sys.path.append('/home/aaryang/experiments/')
 gdino = importlib.import_module("Open-GDINO")
 gdino_models = importlib.import_module("Open-GDINO.models")
+gdino_utils_slconfig = importlib.import_module("Open-GDINO.util.slconfig")
 
 # from Open_GDINO.models.GroundingDINO.groundingdino import build_groundingdino
 # from Open_GDINO.datasets import build_dataset
@@ -60,6 +61,15 @@ def main():
     # setup path, update args, and save args to path
     os.makedirs(args.path, exist_ok=True)
     dump_config(args.__dict__, os.path.join(args.path, "args.yaml"))
+
+    cfg = gdino_utils_slconfig.SLConfig.fromfile(args.config_file)
+    cfg_dict = cfg._cfg_dict.to_dict()
+    args_vars = vars(args)
+    for k,v in cfg_dict.items():
+        if k not in args_vars:
+            setattr(args, k, v)
+        else:
+            raise ValueError("Key {} can used by args only".format(k))
 
     # setup random seed
     setup.setup_seed(args.manual_seed, args.resume)
