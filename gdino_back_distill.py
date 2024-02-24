@@ -144,7 +144,7 @@ def main():
     dataset_train = gdino_datasets.bbuild_dataset(image_set='train', args=args, datasetinfo=dataset_meta["train"][0])
     sampler_train = torch.utils.data.RandomSampler(dataset_train)
     batch_sampler_train = torch.utils.data.BatchSampler(sampler_train, args.batch_size, drop_last=True)
-    data_loader_train = DataLoader(dataset_train, batch_sampler=batch_sampler_train,collate_fn=gdino_util_misc.collate_fn, num_workers=12)
+    data_loader_train = DataLoader(dataset_train, batch_sampler=batch_sampler_train,collate_fn=gdino_util_misc.collate_fn, num_workers=8)
 
     # if args.distributed:
     #     sampler_val = DistributedSampler(dataset_val, shuffle=False)
@@ -161,13 +161,13 @@ def main():
     #     data_loader_train = DataLoader(dataset_train, batch_sampler=batch_sampler_train,
     #                                 collate_fn=utils.collate_fn, num_workers=args.num_workers)
         
-    # trainer = GdinoBackboneTrainer(
-    #     path=args.path,
-    #     model=effvit_backbone,
-    #     dino_backbone=dino_model,
-    #     data_provider=data_loader_train,
-    #     auto_restart_thresh=args.auto_restart_thresh,
-    # )
+    trainer = GdinoBackboneTrainer(
+        path=args.path,
+        model=effvit_backbone,
+        dino_backbone=dino_model,
+        data_provider=data_loader_train,
+        auto_restart_thresh=args.auto_restart_thresh,
+    )
 
     # initialization
     # setup.init_model(

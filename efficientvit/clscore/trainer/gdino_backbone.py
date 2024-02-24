@@ -17,9 +17,9 @@ from efficientvit.apps.utils import AverageMeter, sync_tensor
 from efficientvit.clscore.trainer.utils import accuracy, apply_mixup, label_smooth
 from efficientvit.models.utils import list_join, list_mean, torch_random_choices
 from efficientvit.apps.data_provider.base import parse_image_size
+import importlib
 
-sys.path.append('/home/aaryang/experiments/Open-GDINO/')
-from groundingdino.util.misc import NestedTensor, nested_tensor_from_tensor_list
+gdino_util_misc = importlib.import_module("Open-GDINO.util.misc")
 
 __all__ = ["GdinoBackboneTrainer"]
 LOG_SOFTMAX_CONST = 1e-6
@@ -108,10 +108,10 @@ class GdinoBackboneTrainer(Trainer):
         
     #     return results
 
-    def prestep(self, samples : NestedTensor) :
+    def prestep(self, samples : gdino_util_misc.NestedTensor) :
         
         if isinstance(samples, (list, torch.Tensor)):
-            samples = nested_tensor_from_tensor_list(samples)
+            samples = gdino_util_misc.nested_tensor_from_tensor_list(samples)
 
         # Zero grad if any accumulates
         self.optimizer.zero_grad()
@@ -119,7 +119,7 @@ class GdinoBackboneTrainer(Trainer):
         return samples
     
     # # Using pre-defined fixed widths (0.25, 0.50, 0.75, 1.0)
-    def runstep(self, samples : NestedTensor) -> dict[str, any]:
+    def runstep(self,  samples : gdino_util_misc.NestedTensor) -> dict[str, any]:
 
         # Put model to train
         self.model.train()
@@ -130,11 +130,14 @@ class GdinoBackboneTrainer(Trainer):
             dino_backbone_features, __ = self.dino_backbone.backbone(samples)
             for l, feat in enumerate(dino_backbone_features):
                 src, mask = feat.decompose()
+                print("Dino backbone shape : ", src.shape)
                 dino_backbone_outputs.append(src)
             with torch.no_grad() :
                 self.model.apply(lambda m: setattr(m, 'width_mult', PREDEFINED_WIDTHS[-1]))
 
-            max_width_outputs = self.model(samples) # ViT Backbone outputs - should also include masks (Feature pyramid)
+            max_width_outputs = self.model(samples.tensors) # ViT Backbone outputs - should also include masks (Feature pyramid)
+            for _ in max_width_outputs :
+                print("Dino backbone shape : ", max_width_outputs[_].shape)
 
             total_kd_loss = 0
             max_width_kd_loss = self.get_kld_loss(dino_backbone_outputs, max_width_outputs)
@@ -147,7 +150,7 @@ class GdinoBackboneTrainer(Trainer):
             with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16):
                 with torch.no_grad():
                     self.model.apply(lambda m: setattr(m, 'width_mult', width_mult))
-                vit_outputs = self.model(samples)
+                vit_outputs = self.model(samples.tensors)
                 kd_loss = self.get_kld_loss(vit_outputs, dino_backbone_outputs)
             self.scaler.scale(kd_loss).backward()
             total_kd_loss += kd_loss

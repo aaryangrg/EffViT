@@ -15,8 +15,9 @@ from efficientvit.models.nn.flexible_ops import (
 )
 from efficientvit.models.utils import build_kwargs_from_config
 from timm.models.layers import to_2tuple
+import importlib
 
-# from Open-GDINO.groundingdino.misc import NestedTensor, nested_tensor_from_tensor_list
+gdino_util_misc = importlib.import_module("Open-GDINO.util.misc")
 
 __all__ = [
     "FlexibleGDINOBackbone",
@@ -222,7 +223,7 @@ class FlexibleGDINOBackbone(nn.Module):
             outs.append(x)
         return outs
 
-    # def forward_raw(self, x: NestedTensor):
+    # def forward_raw(self, x: gdino_util_misc.NestedTensor):
     #     images = x.tensors
     #     masks = x.mask
     #     outs = []
@@ -239,7 +240,7 @@ class FlexibleGDINOBackbone(nn.Module):
     #         m = masks
     #         assert m is not None
     #         mask = torch.nn.functional.interpolate(m[None].float(), size=out_i.shape[-2:]).to(torch.bool)[0]
-    #         outs_dict[idx] = NestedTensor(out_i, mask)
+    #         outs_dict[idx] = gdino_util_misc.NestedTensor(out_i, mask)
 
     #     return outs_dict
 
