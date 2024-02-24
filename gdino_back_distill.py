@@ -39,6 +39,16 @@ parser.add_argument("--last_gamma", type=float, default=0)
 parser.add_argument("--auto_restart_thresh", type=float, default=1.0)
 parser.add_argument("--save_freq", type=int, default=1)
 
+# GROUNDING DINO ARGS
+parser.add_argument('--config_file', '-c', type=str, required=True)
+
+# dataset parameters
+parser.add_argument("--datasets", type=str, required=True, help='path to datasets json')
+parser.add_argument('--device', default='cuda',
+                    help='device to use for training / testing')
+
+parser.add_argument('--pretrain_model_path', help='load from other checkpoint')
+
 def main():
     # parse args
     args, opt = parser.parse_known_args()
