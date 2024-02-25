@@ -17,7 +17,11 @@ from efficientvit.apps.utils import AverageMeter, sync_tensor
 from efficientvit.clscore.trainer.utils import accuracy, apply_mixup, label_smooth
 from efficientvit.models.utils import list_join, list_mean, torch_random_choices
 from efficientvit.apps.data_provider.base import parse_image_size
-
+from efficientvit.apps.data_provider import DataProvider, parse_image_size
+from efficientvit.apps.trainer.run_config import RunConfig
+from efficientvit.apps.utils import EMA
+from efficientvit.models.nn.norm import reset_bn
+from efficientvit.models.utils import is_parallel, load_state_dict_from_file
 
 __all__ = ["GdinoBackboneTrainer"]
 LOG_SOFTMAX_CONST = 1e-6
@@ -41,6 +45,20 @@ class GdinoBackboneTrainer(Trainer):
         self.dino_backbone = dino_backbone
         self.dino_backbone.eval()
 
+
+    def prep_for_training_custom(self, run_config: RunConfig, ema_decay: float or None = None, fp16=False) -> None:
+        self.run_config = run_config
+
+        self.run_config.global_step = 0
+        self.run_config.batch_per_epoch = len(self.data_provider)
+        assert self.run_config.batch_per_epoch > 0, "Training set is empty"
+
+        # build optimizer
+        self.optimizer, self.lr_scheduler = self.run_config.build_optimizer(self.model)
+
+        # fp16
+        self.fp16 = fp16
+        self.scaler = torch.cuda.amp.GradScaler(enabled=self.fp16)
         # self.test_criterion = nn.CrossEntropyLoss()
     
     # Val should run the validation loop of OpenGDino with a new backbone / new model architecture
