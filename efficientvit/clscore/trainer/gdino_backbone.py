@@ -156,7 +156,10 @@ class GdinoBackboneTrainer(Trainer):
             total_kd_loss = 0
             max_width_kd_loss = self.get_kld_loss(max_width_outputs[1:],dino_backbone_outputs)
             total_kd_loss += max_width_kd_loss
-        max_width_output_detached = max_width_outputs.detach()
+        
+        max_width_output_detached = []
+        for feature in max_width_outputs :
+            max_width_output_detached.append(feature.detach())
         self.scaler.scale(max_width_kd_loss).backward()
         
         # Bears significant computational overhead for training
