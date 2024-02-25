@@ -141,6 +141,7 @@ class GdinoBackboneTrainer(Trainer):
         # Put model to train
         self.model.train()
         self.dino_backbone.eval()
+        samples = samples.to("cuda")
 
         # Use half-precision training
         with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16):
