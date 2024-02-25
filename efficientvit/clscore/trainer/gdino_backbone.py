@@ -59,6 +59,7 @@ class GdinoBackboneTrainer(Trainer):
         # fp16
         self.fp16 = fp16
         self.scaler = torch.cuda.amp.GradScaler(enabled=self.fp16)
+        print("Optimizer and lr scheduler created !")
         # self.test_criterion = nn.CrossEntropyLoss()
     
     # Val should run the validation loop of OpenGDino with a new backbone / new model architecture
@@ -139,6 +140,7 @@ class GdinoBackboneTrainer(Trainer):
 
         # Put model to train
         self.model.train()
+        self.dino_backbone.eval()
 
         # Use half-precision training
         with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16):
@@ -225,7 +227,7 @@ class GdinoBackboneTrainer(Trainer):
     def train(self, trials=0, save_freq=1) -> None:
 
         for epoch in range(self.start_epoch, self.run_config.n_epochs + self.run_config.warmup_epochs):
-            train_info_dict = self.train_one_epoch(epoch)
+            train_info_dict = self._train_one_epoch(epoch)
             
             # log
             val_log = self.run_config.epoch_format(epoch)
