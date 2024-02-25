@@ -149,16 +149,10 @@ class GdinoBackboneTrainer(Trainer):
             dino_backbone_features, __ = self.dino_backbone.backbone(samples)
             for l, feat in enumerate(dino_backbone_features):
                 src, mask = feat.decompose()
-                print("Dino backbone shape : ", src.shape)
                 dino_backbone_outputs.append(src)
             with torch.no_grad() :
                 self.model.apply(lambda m: setattr(m, 'width_mult', PREDEFINED_WIDTHS[-1]))
-
             max_width_outputs = self.model(samples.tensors) # ViT Backbone outputs - should also include masks (Feature pyramid)
-            print("Model outputs")
-            for _ in max_width_outputs :
-                print(_.shape)
-
             total_kd_loss = 0
             max_width_kd_loss = self.get_kld_loss(dino_backbone_outputs, max_width_outputs[1:])
             total_kd_loss += max_width_kd_loss
@@ -171,7 +165,7 @@ class GdinoBackboneTrainer(Trainer):
                 with torch.no_grad():
                     self.model.apply(lambda m: setattr(m, 'width_mult', width_mult))
                 vit_outputs = self.model(samples.tensors)
-                kd_loss = self.get_kld_loss(vit_outputs, dino_backbone_outputs)
+                kd_loss = self.get_kld_loss(vit_outputs, dino_backbone_outputs[1:])
             self.scaler.scale(kd_loss).backward()
             total_kd_loss += kd_loss
     
