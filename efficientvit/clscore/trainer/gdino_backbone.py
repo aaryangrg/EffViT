@@ -186,7 +186,7 @@ class GdinoBackboneTrainer(Trainer):
 
     def _train_one_epoch(self, epoch: int) -> dict[str, any]:
     
-        train_loss = AverageMeter()
+        train_loss = AverageMeter(False)
 
         with tqdm(
             total=len(self.data_provider),
