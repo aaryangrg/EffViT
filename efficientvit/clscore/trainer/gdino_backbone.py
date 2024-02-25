@@ -155,11 +155,12 @@ class GdinoBackboneTrainer(Trainer):
                 self.model.apply(lambda m: setattr(m, 'width_mult', PREDEFINED_WIDTHS[-1]))
 
             max_width_outputs = self.model(samples.tensors) # ViT Backbone outputs - should also include masks (Feature pyramid)
+            print("Model outputs")
             for _ in max_width_outputs :
-                print("Dino backbone shape : ", max_width_outputs[_].shape)
+                print(_.shape)
 
             total_kd_loss = 0
-            max_width_kd_loss = self.get_kld_loss(dino_backbone_outputs, max_width_outputs)
+            max_width_kd_loss = self.get_kld_loss(dino_backbone_outputs, max_width_outputs[1:])
             total_kd_loss += max_width_kd_loss
 
         self.scaler.scale(max_width_kd_loss).backward()
