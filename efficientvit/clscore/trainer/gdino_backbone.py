@@ -149,6 +149,7 @@ class GdinoBackboneTrainer(Trainer):
         # Use half-precision training
         with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16):
             samples = samples.to("cuda")
+            print(type(samples))
             dino_backbone_outputs = []
             dino_backbone_features, __ = self.dino_backbone.backbone(samples)
             for l, feat in enumerate(dino_backbone_features):
@@ -169,6 +170,7 @@ class GdinoBackboneTrainer(Trainer):
 
             if self.train_full_flexible_model :
                 # Bears significant computational overhead for training
+                print("Not using flexible width distillation")
                 for width_mult in (PREDEFINED_WIDTHS[:len(PREDEFINED_WIDTHS)-1])[::-1]:
                     with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16):
                         with torch.no_grad():
