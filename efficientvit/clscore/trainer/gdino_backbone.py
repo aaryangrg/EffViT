@@ -35,7 +35,8 @@ class GdinoBackboneTrainer(Trainer):
         dino_backbone : nn.Module,
         data_provider,
         auto_restart_thresh: float or None = None,
-        metric_logger = None
+        metric_logger = None,
+        train_full_flexible_model = True
     ) -> None:
         super().__init__(
             path=path,
@@ -46,6 +47,7 @@ class GdinoBackboneTrainer(Trainer):
         self.dino_backbone = dino_backbone
         self.dino_backbone.eval()
         self.metric_logger = metric_logger
+        self.train_full_flexible_model = train_full_flexible_model
 
 
     def prep_for_training_custom(self, run_config: RunConfig, ema_decay: float or None = None, fp16=False) -> None:
@@ -160,20 +162,21 @@ class GdinoBackboneTrainer(Trainer):
             max_width_kd_loss = self.get_kld_loss(max_width_outputs[1:],dino_backbone_outputs)
             total_kd_loss += max_width_kd_loss
         
-        max_width_output_detached = []
-        for feature in max_width_outputs :
-            max_width_output_detached.append(feature.detach())
-        self.scaler.scale(max_width_kd_loss).backward()
-        
-        # Bears significant computational overhead for training
-        for width_mult in (PREDEFINED_WIDTHS[:len(PREDEFINED_WIDTHS)-1])[::-1]:
-            with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16):
-                with torch.no_grad():
-                    self.model.apply(lambda m: setattr(m, 'width_mult', width_mult))
-                vit_outputs = self.model(samples.tensors)
-                kd_loss = self.get_kld_loss(vit_outputs[1:], max_width_output_detached[1:])
-            self.scaler.scale(kd_loss).backward()
-            total_kd_loss += kd_loss
+            max_width_output_detached = []
+            for feature in max_width_outputs :
+                max_width_output_detached.append(feature.detach())
+            self.scaler.scale(max_width_kd_loss).backward()
+
+            if self.train_full_flexible_model :
+                # Bears significant computational overhead for training
+                for width_mult in (PREDEFINED_WIDTHS[:len(PREDEFINED_WIDTHS)-1])[::-1]:
+                    with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16):
+                        with torch.no_grad():
+                            self.model.apply(lambda m: setattr(m, 'width_mult', width_mult))
+                        vit_outputs = self.model(samples.tensors)
+                        kd_loss = self.get_kld_loss(vit_outputs[1:], max_width_output_detached[1:])
+                    self.scaler.scale(kd_loss).backward()
+                    total_kd_loss += kd_loss
     
         return {
             "loss": total_kd_loss,
