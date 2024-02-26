@@ -13,7 +13,7 @@ import torchpack.distributed as dist
 from tqdm import tqdm
 
 from efficientvit.apps.trainer import Trainer
-from efficientvit.apps.utils import AverageMeter, sync_tensor
+from efficientvit.apps.utils import AverageMeter, metric, sync_tensor
 from efficientvit.clscore.trainer.utils import accuracy, apply_mixup, label_smooth
 from efficientvit.models.utils import list_join, list_mean, torch_random_choices
 from efficientvit.apps.data_provider.base import parse_image_size
@@ -35,6 +35,7 @@ class GdinoBackboneTrainer(Trainer):
         dino_backbone : nn.Module,
         data_provider,
         auto_restart_thresh: float or None = None,
+        metric_logger = None
     ) -> None:
         super().__init__(
             path=path,
@@ -44,6 +45,7 @@ class GdinoBackboneTrainer(Trainer):
         self.auto_restart_thresh = auto_restart_thresh
         self.dino_backbone = dino_backbone
         self.dino_backbone.eval()
+        self.metric_logger = metric_logger
 
 
     def prep_for_training_custom(self, run_config: RunConfig, ema_decay: float or None = None, fp16=False) -> None:
@@ -141,7 +143,6 @@ class GdinoBackboneTrainer(Trainer):
         # Put model to train
         self.model.train()
         self.dino_backbone.eval()
-        samples = samples.to("cuda")
 
         # Use half-precision training
         with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16):
@@ -152,6 +153,7 @@ class GdinoBackboneTrainer(Trainer):
                 dino_backbone_outputs.append(src)
             with torch.no_grad() :
                 self.model.apply(lambda m: setattr(m, 'width_mult', PREDEFINED_WIDTHS[-1]))
+            
             max_width_outputs = self.model(samples.tensors) # ViT Backbone outputs - should also include masks (Feature pyramid)
             total_kd_loss = 0
             max_width_kd_loss = self.get_kld_loss(max_width_outputs[1:],dino_backbone_outputs)
