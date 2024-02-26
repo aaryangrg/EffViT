@@ -146,6 +146,7 @@ class GdinoBackboneTrainer(Trainer):
 
         # Use half-precision training
         with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16):
+            samples = samples.to("cuda")
             dino_backbone_outputs = []
             dino_backbone_features, __ = self.dino_backbone.backbone(samples)
             for l, feat in enumerate(dino_backbone_features):
