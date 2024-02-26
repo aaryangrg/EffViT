@@ -36,7 +36,8 @@ class GdinoBackboneTrainer(Trainer):
         data_provider,
         auto_restart_thresh: float or None = None,
         metric_logger = None,
-        train_full_flexible_model = True
+        train_full_flexible_model = True,
+        fp16_training = False,
     ) -> None:
         super().__init__(
             path=path,
@@ -48,6 +49,7 @@ class GdinoBackboneTrainer(Trainer):
         self.dino_backbone.eval()
         self.metric_logger = metric_logger
         self.train_full_flexible_model = train_full_flexible_model
+        self.fp16_training = fp16_training
 
 
     def prep_for_training_custom(self, run_config: RunConfig, ema_decay: float or None = None, fp16=False) -> None:
@@ -147,7 +149,7 @@ class GdinoBackboneTrainer(Trainer):
         self.dino_backbone.eval()
 
         # Use half-precision training
-        with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16):
+        with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16_training):
             samples = samples.to("cuda")
             print(type(samples.tensors))
             dino_backbone_outputs = []
@@ -170,7 +172,6 @@ class GdinoBackboneTrainer(Trainer):
 
             if self.train_full_flexible_model :
                 # Bears significant computational overhead for training
-                print("Not using flexible width distillation")
                 for width_mult in (PREDEFINED_WIDTHS[:len(PREDEFINED_WIDTHS)-1])[::-1]:
                     with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16):
                         with torch.no_grad():
