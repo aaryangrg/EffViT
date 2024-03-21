@@ -77,8 +77,14 @@ def main():
     #             print(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit = 5))
 
     # MACS calculation & Params (single image)
+
+
     input = torch.randn(1, 3, args.image_size, args.image_size)
     input = input.cuda()
+
+    macs, params = profile(model_b0, inputs = (input,))
+    print(f"MACSs 1x : {macs}, Params: {params}")
+    
     # if args.find_macs : 
     model.apply(lambda m: setattr(m, 'width_mult', 1.0))
     macs, params = profile(model, inputs = (input,))
