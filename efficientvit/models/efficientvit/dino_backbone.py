@@ -254,7 +254,7 @@ def flexible_efficientvit_backbone_swin_t_224_1k(**kwargs) -> FlexibleGDINOBackb
     backbone = FlexibleGDINOBackbone(
         # width_list=[16, 96, 192, 384, 768],
         width_list = [32, 64, 196, 384, 768],
-        depth_list = [1, 2, 3, 3, 4],
+        depth_list = [1, 2, 3, 4, 4],
         dim=16,
         **build_kwargs_from_config(kwargs, FlexibleGDINOBackbone),
     )
