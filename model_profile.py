@@ -10,6 +10,7 @@ import math
 import os
 from tracemalloc import start
 from efficientvit.clscore.data_provider.MiniImageNet import MiniImageNetV2
+from efficientvit.models.efficientvit.dino_backbone import flexible_efficientvit_backbone_swin_t_224_1k
 from torch.profiler import profile as profiler, record_function, ProfilerActivity
 from thop import profile
 
@@ -52,25 +53,40 @@ def main():
         device_list = [int(_) for _ in args.gpu.split(",")]
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
 
-    model = create_custom_cls_model(args.student_model, False, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
-
+    # model = create_custom_cls_model(args.student_model, False, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
+    model = flexible_efficientvit_backbone_swin_t_224_1k()
     model.to("cuda:0")
     model.eval()
 
-    # Includes data-transfer time
-    if args.profile :
-        with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=args.fp16):
-            for i in range(args.num_iterations) :
-                with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], profile_memory=True) as prof:
-                    input = torch.randn(args.batch_size, 3, args.image_size, args.image_size)
-                    input = input.cuda()
-                    model(input)
-                print(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit = 5))
+    # # Includes data-transfer time
+    # if args.profile :
+    #     with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=args.fp16):
+    #         for i in range(args.num_iterations) :
+    #             with profiler(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], profile_memory=True) as prof:
+    #                 input = torch.randn(args.batch_size, 3, args.image_size, args.image_size)
+    #                 input = input.cuda()
+    #                 model(input)
+    #             print(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit = 5))
 
     # MACS calculation & Params (single image)
+    input = torch.randn(1, 3, args.image_size, args.image_size)
+    input = input.cuda()
     # if args.find_macs : 
-    #     macs, params = profile(model, inputs = (input,))
-    #     print(f"MACSs: {macs}, Params: {params}")
+    model.apply(lambda m: setattr(m, 'width_mult', 1.0))
+    macs, params = profile(model, inputs = (input,))
+    print(f"MACSs @ 1.0x : {macs}, Params: {params}")
+
+    model.apply(lambda m: setattr(m, 'width_mult', 0.75))
+    macs, params = profile(model, inputs = (input,))
+    print(f"MACSs @ 0.75x: {macs}, Params: {params}")
+
+    model.apply(lambda m: setattr(m, 'width_mult', 0.50))
+    macs, params = profile(model, inputs = (input,))
+    print(f"MACSs @ 0.50x: {macs}, Params: {params}")
+
+    model.apply(lambda m: setattr(m, 'width_mult', 0.25))
+    macs, params = profile(model, inputs = (input,))
+    print(f"MACSs @ 0.25x: {macs}, Params: {params}")
 # 
 if __name__ == "__main__":
     main()
