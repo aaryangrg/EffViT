@@ -94,20 +94,17 @@ class FlexibleConvLayer(nn.Module):
         # Removed Scaling by ratio
         if self.flex[0] :
             in_channels = int(make_divisible(self.in_channels_basic * self.width_mult))
-            print("In channels : ",in_channels)
         if self.flex[1] : 
             out_channels = int(make_divisible(self.out_channels_basic * self.width_mult))
-            print("Out channels : ",out_channels)
         # Slicing default (max width) conv layer weights
         weight = self.conv.weight[:out_channels, :in_channels, :, :]
         if self.use_bias :
             bias = self.conv.bias[:out_channels]
         else:
             bias = self.conv.bias
-        with torch.autograd.profiler.record_function("model_specific"):
-            out = nn.functional.conv2d(
-                input, weight, bias, self.stride, self.padding,
-                self.dilation, self.groups_desc if self.groups_desc == 1 else in_channels)
+        out = nn.functional.conv2d(
+            input, weight, bias, self.stride, self.padding,
+            self.dilation, self.groups_desc if self.groups_desc == 1 else in_channels)
         # What is this exactly?
         # if getattr(FLAGS, 'conv_averaged', False):
         # Added scaling of output
