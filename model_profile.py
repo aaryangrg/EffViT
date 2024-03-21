@@ -12,6 +12,7 @@ from tracemalloc import start
 from efficientvit.clscore.data_provider.MiniImageNet import MiniImageNetV2
 from efficientvit.models.efficientvit.backbone import efficientvit_backbone_b0, efficientvit_backbone_b3, efficientvit_backbone_l2, efficientvit_backbone_l3
 from efficientvit.models.efficientvit.dino_backbone import flexible_efficientvit_backbone_swin_t_224_1k
+from efficientvit.models.efficientvit.flexible_backbone import flexible_efficientvit_backbone_b3
 from torch.profiler import profile as profiler, record_function, ProfilerActivity
 from thop import profile
 
@@ -59,7 +60,7 @@ def main():
     model.to("cuda:0")
     model.eval()
 
-    model_b0 = efficientvit_backbone_b3()
+    model_b0 = flexible_efficientvit_backbone_b3()
     model_b0.to("cuda")
     b0_params = sum(p.numel() for p in model_b0.parameters() if p.requires_grad)
     print("B3 params : ", b0_params)
@@ -82,6 +83,7 @@ def main():
     input = torch.randn(1, 3, args.image_size, args.image_size)
     input = input.cuda()
 
+    model_b0.apply(lambda m: setattr(m, 'width_mult', 1.0))
     macs, params = profile(model_b0, inputs = (input,))
     print(f"MACSs 1x : {macs}, Params: {params}")
     
