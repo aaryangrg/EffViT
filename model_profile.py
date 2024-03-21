@@ -64,10 +64,6 @@ def main():
     model.to("cuda:0")
     model.eval()
 
-    model_b0 = flexible_efficientvit_backbone_b3()
-    model_b0.to("cuda")
-    b0_params = sum(p.numel() for p in model_b0.parameters() if p.requires_grad)
-    print("B3 params : ", b0_params)
 
     params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print("Model params: ", params)
@@ -86,28 +82,27 @@ def main():
 
     input = torch.randn(1, 3, args.image_size, args.image_size)
     input = input.cuda()
-
-    model_b0.apply(lambda m: setattr(m, 'width_mult', 1.0))
-    flops = FlopCountAnalysis(model_b0, (input,))
-    flops.unsupported_ops_warnings(False).uncalled_modules_warnings(False)
-    print("FLOPS : ",flops.total())
     
     # if args.find_macs : 
     model.apply(lambda m: setattr(m, 'width_mult', 1.0))
-    macs, params = profile(model, inputs = (input,))
-    print(f"MACSs @ 1.0x : {macs}, Params: {params}")
+    flops = FlopCountAnalysis(model, (input,))
+    flops.unsupported_ops_warnings(False).uncalled_modules_warnings(False)
+    print("FLOPS : ",flops.total())
 
     model.apply(lambda m: setattr(m, 'width_mult', 0.75))
-    macs, params = profile(model, inputs = (input,))
-    print(f"MACSs @ 0.75x: {macs}, Params: {params}")
+    flops = FlopCountAnalysis(model, (input,))
+    flops.unsupported_ops_warnings(False).uncalled_modules_warnings(False)
+    print("FLOPS : ",flops.total())
 
     model.apply(lambda m: setattr(m, 'width_mult', 0.50))
-    macs, params = profile(model, inputs = (input,))
-    print(f"MACSs @ 0.50x: {macs}, Params: {params}")
+    flops = FlopCountAnalysis(model, (input,))
+    flops.unsupported_ops_warnings(False).uncalled_modules_warnings(False)
+    print("FLOPS : ",flops.total())
 
     model.apply(lambda m: setattr(m, 'width_mult', 0.25))
-    macs, params = profile(model, inputs = (input,))
-    print(f"MACSs @ 0.25x: {macs}, Params: {params}")
+    flops = FlopCountAnalysis(model, (input,))
+    flops.unsupported_ops_warnings(False).uncalled_modules_warnings(False)
+    print("FLOPS : ",flops.total())
 # 
 if __name__ == "__main__":
     main()
