@@ -94,8 +94,10 @@ class FlexibleConvLayer(nn.Module):
         # Removed Scaling by ratio
         if self.flex[0] :
             in_channels = int(make_divisible(self.in_channels_basic * self.width_mult))
+            print("In channels : ",in_channels)
         if self.flex[1] : 
             out_channels = int(make_divisible(self.out_channels_basic * self.width_mult))
+            print("Out channels : ",out_channels)
         # Slicing default (max width) conv layer weights
         weight = self.conv.weight[:out_channels, :in_channels, :, :]
         if self.use_bias :

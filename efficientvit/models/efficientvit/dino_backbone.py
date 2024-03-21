@@ -80,6 +80,7 @@ class FlexibleGDINOBackbone(nn.Module):
         self.width_list = []
 
         # No normalization and fixed internal convolution kernel size
+        # Why is patch size = 2?
         self.patch_embed = PatchEmbed(patch_size = 2, in_chans=3, embed_dim=3)
         # input stem 
         self.input_stem = [
