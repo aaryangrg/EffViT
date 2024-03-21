@@ -21,4 +21,5 @@ resolutions=("320" "480" "1333")
 for resolution in "${resolutions[@]}"; do
     echo "Resolution : $resolution"
     python3 ../../model_profile.py --image_size $resolution \
+
 done
