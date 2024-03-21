@@ -24,6 +24,10 @@ import time
 from efficientvit.apps.utils import AverageMeter
 from efficientvit.cls_model_zoo import create_cls_model, create_custom_cls_model 
 
+from detectron2.utils.analysis import (
+    FlopCountAnalysis,
+)
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -84,8 +88,9 @@ def main():
     input = input.cuda()
 
     model_b0.apply(lambda m: setattr(m, 'width_mult', 1.0))
-    macs, params = profile(model_b0, inputs = (input,))
-    print(f"MACSs 1x : {macs}, Params: {params}")
+    flops = FlopCountAnalysis(model_b0, (input,))
+    flops.unsupported_ops_warnings(False).uncalled_modules_warnings(False)
+    print("FLOPS : ",flops.total())
     
     # if args.find_macs : 
     model.apply(lambda m: setattr(m, 'width_mult', 1.0))
