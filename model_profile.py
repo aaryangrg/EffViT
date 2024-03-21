@@ -10,7 +10,7 @@ import math
 import os
 from tracemalloc import start
 from efficientvit.clscore.data_provider.MiniImageNet import MiniImageNetV2
-from efficientvit.models.efficientvit.backbone import efficientvit_backbone_b0, efficientvit_backbone_l3
+from efficientvit.models.efficientvit.backbone import efficientvit_backbone_b0, efficientvit_backbone_l2, efficientvit_backbone_l3
 from efficientvit.models.efficientvit.dino_backbone import flexible_efficientvit_backbone_swin_t_224_1k
 from torch.profiler import profile as profiler, record_function, ProfilerActivity
 from thop import profile
@@ -59,7 +59,7 @@ def main():
     model.to("cuda:0")
     model.eval()
 
-    model_b0 = efficientvit_backbone_l3()
+    model_b0 = efficientvit_backbone_l2()
     model_b0.to("cuda")
     b0_params = sum(p.numel() for p in model_b0.parameters() if p.requires_grad)
     print("b0 params : ", b0_params)
