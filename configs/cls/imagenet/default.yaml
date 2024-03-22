@@ -20,9 +20,9 @@ data_provider:
   drop_last: true
 
 run_config:
-  n_epochs: 300
+  n_epochs: 10
   base_lr: 0.00025
-  warmup_epochs: 20
+  warmup_epochs: 1
   warmup_lr: 0.0
   lr_schedule_name: cosine
   lr_schedule_param: {}
