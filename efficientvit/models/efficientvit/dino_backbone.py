@@ -253,8 +253,7 @@ def flexible_efficientvit_backbone_swin_t_224_1k(**kwargs) -> FlexibleGDINOBackb
     #  torch.Size([2, 384, 64, 64]), 
     #  torch.Size([2, 768, 32, 32])]
     backbone = FlexibleGDINOBackbone(
-        # width_list=[16, 96, 192, 384, 768],
-        width_list = [32, 64, 196, 384, 768],
+        width_list = [32, 64, 192, 384, 768],
         depth_list = [1, 2, 3, 4, 4],
         dim=16,
         **build_kwargs_from_config(kwargs, FlexibleGDINOBackbone),
@@ -265,7 +264,7 @@ def flexible_efficientvit_backbone_swin_t_224_1k(**kwargs) -> FlexibleGDINOBackb
 # Modify according to actual channel dimensions
 def flexible_efficientvit_backbone_swin_b_384_22k(**kwargs) -> FlexibleGDINOBackbone:
     backbone = FlexibleGDINOBackbone(
-        width_list = [32, 64, 196, 384, 768],
+        width_list = [32, 64, 192, 384, 768],
         depth_list = [1, 2, 3, 4, 4],
         dim=16,
         **build_kwargs_from_config(kwargs, FlexibleGDINOBackbone),
