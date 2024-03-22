@@ -152,10 +152,11 @@ class GdinoBackboneTrainerNoFlex(Trainer):
     def train(self, trials=0, save_freq=1, criterion = None, postprocessors = None, data_loader_val = None, base_ds = None, args = None, evaluate_custom = None) -> None:
     
         for epoch in range(self.start_epoch, self.run_config.n_epochs + self.run_config.warmup_epochs):
-            # Validate one epoch (using GDINO validation loop) --> BN reset not required for single resolution
-            test_stats, coco_evaluator = evaluate_custom(self.model, criterion, postprocessors,data_loader_val, base_ds, "cuda", wo_class_error=False, args=args)
 
-            # train_info_dict = self._train_one_epoch(epoch)
+            train_info_dict = self._train_one_epoch(epoch)
+
+             # Validate one epoch (using GDINO validation loop) --> BN reset not required for single resolution
+            test_stats, coco_evaluator = evaluate_custom(self.model, criterion, postprocessors,data_loader_val, base_ds, "cuda", wo_class_error=False, args=args)
 
             log_stats = {**{f'test_{k}': v for k, v in test_stats.items()} }
             
@@ -163,8 +164,8 @@ class GdinoBackboneTrainerNoFlex(Trainer):
             for k in test_stats :
                 val_log = val_log + f"val_{k} : {test_stats[k]} | "
             val_log += ")\tTrain("
-            # for key, val in train_info_dict.items():
-            #     val_log += f"{key}={val:.2E},"
+            for key, val in train_info_dict.items():
+                val_log += f"{key}={val:.2E},"
             val_log += (
                 f'lr={list_join(sorted(set([group["lr"] for group in self.optimizer.param_groups])), "#", "%.1E")})'
             )

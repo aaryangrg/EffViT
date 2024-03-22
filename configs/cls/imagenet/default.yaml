@@ -20,7 +20,7 @@ data_provider:
   drop_last: true
 
 run_config:
-  n_epochs: 10
+  n_epochs: 20
   base_lr: 0.00025
   warmup_epochs: 1
   warmup_lr: 0.0
