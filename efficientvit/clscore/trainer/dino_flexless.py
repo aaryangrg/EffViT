@@ -103,11 +103,11 @@ class GdinoBackboneTrainerNoFlex(Trainer):
             "loss": total_kd_loss,
         }
     
-    def custom_l2_loss(self, scale_pred, scale_soft) :
+    def custom_l2_loss(self, scale_pred, scale_soft):
         loss = 0
-        for _ in range(len(scale_pred)) :
-            squared_difference = np.square(scale_pred[_] - scale_soft[_])
-            l2_loss = np.sum(squared_difference)
+        for pred, soft in zip(scale_pred, scale_soft):
+            squared_difference = torch.square(pred - soft)
+            l2_loss = torch.sum(squared_difference)
             loss += l2_loss
         return loss
     
