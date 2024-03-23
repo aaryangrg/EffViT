@@ -38,6 +38,7 @@ class GdinoBackboneTrainerNoFlex(Trainer):
         metric_logger = None,
         train_full_flexible_model = True,
         fp16_training = False,
+        kd_metric = "kld",
     ) -> None:
         super().__init__(
             path=path,
@@ -54,6 +55,15 @@ class GdinoBackboneTrainerNoFlex(Trainer):
         for param in self.gdino_backbone.parameters():
             param.requires_grad = False
         self.gdino_backbone.eval()
+        self.kd_metric = kd_metric
+        if self.kd_metric == "kld" :
+            self.loss_criterion = self.get_kld_loss
+        elif self.kd_metric == "ce" :
+            self.loss_criterion = self.custom_ce_loss
+        elif self.kd_metric == "l2" :
+            self.loss_criterion = self.custom_mse_loss
+        else :
+            self.loss_criterion = self.custom_rmse_loss
 
     def prep_for_training_custom(self, run_config: RunConfig, ema_decay: float or None = None, fp16=False) -> None:
         self.run_config = run_config
@@ -93,8 +103,7 @@ class GdinoBackboneTrainerNoFlex(Trainer):
             
             max_width_outputs = self.model.effvit_backbone(samples.tensors) # list of features in order (mask + position embeds) generated later
             total_kd_loss = 0
-            # max_width_kd_loss = self.get_kld_loss(max_width_outputs[1:],dino_backbone_outputs)
-            max_width_kd_loss = self.custom_l2_loss(max_width_outputs[1:], dino_backbone_outputs)
+            max_width_kd_loss = self.loss_criterion(max_width_outputs[1:], dino_backbone_outputs)
             total_kd_loss += max_width_kd_loss
             # Backward pass on multi-scale KD-loss (added)
         self.scaler.scale(max_width_kd_loss).backward()
@@ -103,12 +112,18 @@ class GdinoBackboneTrainerNoFlex(Trainer):
             "loss": total_kd_loss,
         }
     
-    def custom_l2_loss(self, scale_pred, scale_soft):
+    def custom_mse_loss(self, scale_pred, scale_soft):
         loss = 0
+        loss_fn = nn.MSELoss()
         for pred, soft in zip(scale_pred, scale_soft):
-            squared_difference = torch.square(pred - soft)
-            l2_loss = torch.sum(squared_difference)
-            loss += l2_loss
+            loss += loss_fn(pred, soft)
+        return loss
+
+    def custom_rmse_loss(self, scale_pred, scale_soft):
+        loss = 0
+        loss_fn = nn.MSELoss()
+        for pred, soft in zip(scale_pred, scale_soft):
+            loss += torch.sqrt(loss_fn(pred, soft))
         return loss
     
     def custom_ce_loss(self, scale_pred, scale_soft) :
