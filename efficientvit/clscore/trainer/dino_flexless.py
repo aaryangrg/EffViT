@@ -63,7 +63,7 @@ class GdinoBackboneTrainerNoFlex(Trainer):
         assert self.run_config.batch_per_epoch > 0, "Training set is empty"
 
         # build optimizer
-        self.optimizer, self.lr_scheduler = self.run_config.build_optimizer(self.model)
+        self.optimizer, self.lr_scheduler = self.run_config.build_optimizer(self.model.effvit_backbone)
 
         # fp16
         self.fp16 = fp16
@@ -94,14 +94,22 @@ class GdinoBackboneTrainerNoFlex(Trainer):
             max_width_outputs = self.model.effvit_backbone(samples.tensors) # list of features in order (mask + position embeds) generated later
             total_kd_loss = 0
             # max_width_kd_loss = self.get_kld_loss(max_width_outputs[1:],dino_backbone_outputs)
-            max_width_kd_loss = self.custom_ce_loss(max_width_outputs[1:], dino_backbone_outputs)
+            max_width_kd_loss = self.custom_l2_loss(max_width_outputs[1:], dino_backbone_outputs)
             total_kd_loss += max_width_kd_loss
             # Backward pass on multi-scale KD-loss (added)
-            self.scaler.scale(max_width_kd_loss).backward()
+        self.scaler.scale(max_width_kd_loss).backward()
 
         return {
             "loss": total_kd_loss,
         }
+    
+    def custom_l2_loss(self, scale_pred, scale_soft) :
+        loss = 0
+        for _ in range(len(scale_pred)) :
+            squared_difference = np.square(scale_pred[_] - scale_soft[_])
+            l2_loss = np.sum(squared_difference)
+            loss += l2_loss
+        return loss
     
     def custom_ce_loss(self, scale_pred, scale_soft) :
         loss = 0
