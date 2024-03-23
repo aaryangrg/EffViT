@@ -93,7 +93,8 @@ class GdinoBackboneTrainerNoFlex(Trainer):
             
             max_width_outputs = self.model.effvit_backbone(samples.tensors) # list of features in order (mask + position embeds) generated later
             total_kd_loss = 0
-            max_width_kd_loss = self.get_kld_loss(max_width_outputs[1:],dino_backbone_outputs)
+            # max_width_kd_loss = self.get_kld_loss(max_width_outputs[1:],dino_backbone_outputs)
+            max_width_kd_loss = self.custom_ce_loss(max_width_outputs[1:], dino_backbone_outputs)
             total_kd_loss += max_width_kd_loss
             # Backward pass on multi-scale KD-loss (added)
             self.scaler.scale(max_width_kd_loss).backward()
@@ -101,6 +102,13 @@ class GdinoBackboneTrainerNoFlex(Trainer):
         return {
             "loss": total_kd_loss,
         }
+    
+    def custom_ce_loss(self, scale_pred, scale_soft) :
+        loss = 0
+        criterion = nn.CrossEntropyLoss()
+        for _ in range(len(scale_pred)) :
+            loss += criterion(scale_pred[_], scale_soft[_])
+        return loss
     
     def get_kld_loss(self,scale_pred, scale_soft, temperature = 1.0):
         loss = 0
@@ -156,6 +164,7 @@ class GdinoBackboneTrainerNoFlex(Trainer):
             train_info_dict = self._train_one_epoch(epoch)
 
              # Validate one epoch (using GDINO validation loop) --> BN reset not required for single resolution
+            self.model.effvit_backbone.apply(lambda m: setattr(m, 'width_mult', PREDEFINED_WIDTHS[-1]))
             test_stats, coco_evaluator = evaluate_custom(self.model, criterion, postprocessors,data_loader_val, base_ds, "cuda", wo_class_error=False, args=args)
 
             log_stats = {**{f'test_{k}': v for k, v in test_stats.items()} }
