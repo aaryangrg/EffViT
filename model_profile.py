@@ -11,7 +11,7 @@ import os
 from tracemalloc import start
 from efficientvit.clscore.data_provider.MiniImageNet import MiniImageNetV2
 from efficientvit.models.efficientvit.backbone import efficientvit_backbone_b0, efficientvit_backbone_b3, efficientvit_backbone_l2, efficientvit_backbone_l3
-from efficientvit.models.efficientvit.dino_backbone import flexible_efficientvit_backbone_swin_t_224_1k
+from efficientvit.models.efficientvit.dino_backbone import flexible_efficientvit_backbone_swin_t_224_1k, flexible_efficientvit_backbone_swin_t_224_1k_rectified
 from efficientvit.models.efficientvit.flexible_backbone import flexible_efficientvit_backbone_b3
 from torch.profiler import profile as profiler, record_function, ProfilerActivity
 from thop import profile
@@ -60,7 +60,7 @@ def main():
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
 
     # model = create_custom_cls_model(args.student_model, False, width_multiplier = args.width_multiplier, depth_multiplier=args.depth_multiplier)
-    model = flexible_efficientvit_backbone_swin_t_224_1k()
+    model = flexible_efficientvit_backbone_swin_t_224_1k_rectified()
     model.to("cuda:0")
     model.eval()
 
