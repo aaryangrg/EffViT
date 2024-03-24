@@ -15,7 +15,7 @@ echo CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
 
 nvidia-smi
 
-resolutions=("320" "480" "1333")
+resolutions=("320" "480" "1024" "1333")
 
 for resolution in "${resolutions[@]}"; do
     echo "Resolution : $resolution"
