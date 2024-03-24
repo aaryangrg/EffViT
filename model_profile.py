@@ -87,6 +87,9 @@ def main():
     model.apply(lambda m: setattr(m, 'width_mult', 1.0))
     flops = FlopCountAnalysis(model, (input,))
     flops.unsupported_ops_warnings(False).uncalled_modules_warnings(False)
+    out = model(input)
+    for _ in out :
+        print(_.shape)
     print("FLOPS : ",flops.total())
 
     model.apply(lambda m: setattr(m, 'width_mult', 0.75))
