@@ -292,38 +292,38 @@ class FlexibleGDINOBackboneRectified(nn.Module):
         self.patch_embed = PatchEmbed(patch_size = 4, in_chans=3, embed_dim=width_list[0])
 
         # Input : 2 x 96 x 256 x 256 --> Out : 2 x 96 x 256 x 256
-        self.input_stem = [ 
-            FlexibleConvLayer(
-                in_channels=width_list[0],
-                out_channels=width_list[0],
-                stride=1,
-                norm=norm,
-                act_func=act_func,
-                flex = [False, True]
-            )
-        ]
+        # self.input_stem = [ 
+        #     FlexibleConvLayer(
+        #         in_channels=width_list[0],
+        #         out_channels=width_list[0],
+        #         stride=1,
+        #         norm=norm,
+        #         act_func=act_func,
+        #         flex = [False, True]
+        #     )
+        # ]
 
-        # Input : 2 x 96 x 256 x 256 --> Out : 2 x 96 x 256 x 256
-        for _ in range(depth_list[0]):
-            if _ == depth_list[0]-1:
-                flex_vals = [True, False]
-                residual_func = None
-            else :
-                flex_vals = [True, True]
-                residual_func = IdentityLayer()
-            block = self.build_local_block(
-                in_channels=width_list[0],
-                out_channels=width_list[0],
-                stride=1,
-                expand_ratio=1,
-                norm=norm,
-                act_func=act_func,
-                flex = flex_vals
-            )
-            self.input_stem.append(ResidualBlock(block, residual_func))
-        in_channels = width_list[0]
-        self.input_stem = OpSequential(self.input_stem)
-        self.width_list.append(in_channels)
+        # # Input : 2 x 96 x 256 x 256 --> Out : 2 x 96 x 256 x 256
+        # for _ in range(depth_list[0]):
+        #     if _ == depth_list[0]-1:
+        #         flex_vals = [True, False]
+        #         residual_func = None
+        #     else :
+        #         flex_vals = [True, True]
+        #         residual_func = IdentityLayer()
+        #     block = self.build_local_block(
+        #         in_channels=width_list[0],
+        #         out_channels=width_list[0],
+        #         stride=1,
+        #         expand_ratio=1,
+        #         norm=norm,
+        #         act_func=act_func,
+        #         flex = flex_vals
+        #     )
+        #     self.input_stem.append(ResidualBlock(block, residual_func))
+        # in_channels = width_list[0]
+        # self.input_stem = OpSequential(self.input_stem)
+        # self.width_list.append(in_channels)
 
         # Input : 2 x 96 x 256 x 256 --> Out : 2 x 96 x 256 x 256 --> 0
         # Input : 2 x 96 x 256 x 256 --> Out : 2 x 192 x 128 x 128 --> 1
