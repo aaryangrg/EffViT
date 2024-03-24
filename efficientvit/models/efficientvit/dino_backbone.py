@@ -433,7 +433,7 @@ class FlexibleGDINOBackboneRectified(nn.Module):
     def forward(self, x: torch.Tensor) -> list[torch.Tensor]:
         outs = []
         x = self.patch_embed(x)
-        x = self.input_stem(x)
+        # x = self.input_stem(x)
         for stage_id, stage in enumerate(self.stages, 0):
             x = stage(x)
             outs.append(x)
