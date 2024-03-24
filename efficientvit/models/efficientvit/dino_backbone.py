@@ -395,6 +395,13 @@ class FlexibleGDINOBackboneRectified(nn.Module):
             self.width_list.append(in_channels)
         self.stages = nn.ModuleList(self.stages)
 
+        output_layer_norms = []
+        # Initalizing separate layer norms for each output
+        for i_layer in self.width_list[2:]: # For Last 3 outputs (outputs which are actually used) 
+            layer = nn.LayerNorm(i_layer)
+            output_layer_norms.append(layer)
+        self.output_layer_norms = nn.ModuleList(output_layer_norms)
+
     @staticmethod
     def build_local_block(
         in_channels: int,
@@ -436,7 +443,13 @@ class FlexibleGDINOBackboneRectified(nn.Module):
         x = self.input_stem(x)
         for stage_id, stage in enumerate(self.stages, 0):
             x = stage(x)
-            outs.append(x)
+            if stage_id > 0 :
+                # Make B x (H * W) X C, apply layer normalization, convert back to original shape (no changes made directly to x)
+                B, C, H, W = x.shape[0], x.shape[1], x.shape[2], x.shape[3]
+                y = self.output_layer_norms[stage_id-1](x.permute(0, 2, 3, 1).contiguous().view(B, -1, C)).view(B, H, W, C).permute(0, 3, 1, 2)
+                outs.append(y)
+            else :
+                outs.append(x) # Not used currently (dimension 96)
         return outs
 
 def flexible_efficientvit_backbone_swin_t_224_1k_rectified(**kwargs) -> FlexibleGDINOBackbone:
