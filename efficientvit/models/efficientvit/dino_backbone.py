@@ -324,7 +324,8 @@ class FlexibleGDINOBackboneRectified(nn.Module):
         # in_channels = width_list[0]
         # self.input_stem = OpSequential(self.input_stem)
         # self.width_list.append(in_channels)
-
+        
+        in_channels = width_list[0]
         # Input : 2 x 96 x 256 x 256 --> Out : 2 x 96 x 256 x 256 --> 0
         # Input : 2 x 96 x 256 x 256 --> Out : 2 x 192 x 128 x 128 --> 1
         self.stages = []
