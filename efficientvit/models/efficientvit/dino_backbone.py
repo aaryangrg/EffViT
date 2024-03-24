@@ -442,7 +442,7 @@ class FlexibleGDINOBackboneRectified(nn.Module):
 def flexible_efficientvit_backbone_swin_t_224_1k_rectified(**kwargs) -> FlexibleGDINOBackbone:
     backbone = FlexibleGDINOBackboneRectified(
         width_list = [96, 96, 192, 384, 768],
-        depth_list = [1, 2, 2, 3, 3],
+        depth_list = [1, 2, 2, 3, 4],
         dim=16,
         **build_kwargs_from_config(kwargs, FlexibleGDINOBackbone),
     )
