@@ -20,7 +20,7 @@ from efficientvit.apps.data_provider.base import parse_image_size
 from efficientvit.apps.data_provider import DataProvider, parse_image_size
 from efficientvit.apps.trainer.run_config import RunConfig
 from efficientvit.apps.utils import EMA
-from efficientvit.models.nn.norm import reset_bn
+from efficientvit.models.nn.norm import reset_bn, reset_bn_dino
 from efficientvit.models.utils import is_parallel, load_state_dict_from_file
 
 __all__ = ["GdinoBackboneTrainerNoFlex"]
@@ -183,11 +183,11 @@ class GdinoBackboneTrainerNoFlex(Trainer):
     def train(self, trials=0, save_freq=1, criterion = None, postprocessors = None, data_loader_val = None, base_ds = None, args = None, evaluate_custom = None) -> None:
     
         for epoch in range(self.start_epoch, self.run_config.n_epochs + self.run_config.warmup_epochs):
-
+            self.model.effvit_backbone.train()
             train_info_dict = self._train_one_epoch(epoch)
 
-             # Validate one epoch (using GDINO validation loop) --> BN reset not required for single resolution
-            self.model.effvit_backbone.apply(lambda m: setattr(m, 'width_mult', PREDEFINED_WIDTHS[-1]))
+            reset_bn_dino(self.model.effvit_backbone,data_loader_val,sync=True) # Update from data_loader_val to part of the training dataloader (sub-samples)
+            self.model.effvit_backbone.eval()
             test_stats, coco_evaluator = evaluate_custom(self.model, criterion, postprocessors,data_loader_val, base_ds, "cuda", wo_class_error=False, args=args)
 
             log_stats = {**{f'test_{k}': v for k, v in test_stats.items()} }

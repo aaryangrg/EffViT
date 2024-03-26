@@ -139,6 +139,88 @@ def reset_bn(
             m.running_mean.data[:feature_dim].copy_(bn_mean[name].avg)
             m.running_var.data[:feature_dim].copy_(bn_var[name].avg)
 
+def reset_bn_dino(
+    model: nn.Module,
+    data_loader: list,
+    sync=True,
+    progress_bar=False,
+) -> None:
+    import copy
+
+    import torch.nn.functional as F
+    import torchpack.distributed as dist
+    from tqdm import tqdm
+
+    from efficientvit.apps.utils import AverageMeter, sync_tensor
+    from efficientvit.models.utils import get_device, list_join
+
+    bn_mean = {}
+    bn_var = {}
+    print("BN RESET..")
+    tmp_model = copy.deepcopy(model)
+    for name, m in tmp_model.named_modules():
+        if isinstance(m, _BatchNorm):
+            bn_mean[name] = AverageMeter(is_distributed=False)
+            bn_var[name] = AverageMeter(is_distributed=False)
+
+            def new_forward(bn, mean_est, var_est):
+                def lambda_forward(x):
+                    x = x.contiguous()
+                    if sync:
+                        batch_mean = x.mean(0, keepdim=True).mean(2, keepdim=True).mean(3, keepdim=True)  # 1, C, 1, 1
+                        batch_mean = sync_tensor(batch_mean, reduce="cat")
+                        batch_mean = torch.mean(batch_mean, dim=0, keepdim=True)
+
+                        batch_var = (x - batch_mean) * (x - batch_mean)
+                        batch_var = batch_var.mean(0, keepdim=True).mean(2, keepdim=True).mean(3, keepdim=True)
+                        batch_var = sync_tensor(batch_var, reduce="cat")
+                        batch_var = torch.mean(batch_var, dim=0, keepdim=True)
+                    else:
+                        batch_mean = x.mean(0, keepdim=True).mean(2, keepdim=True).mean(3, keepdim=True)  # 1, C, 1, 1
+                        batch_var = (x - batch_mean) * (x - batch_mean)
+                        batch_var = batch_var.mean(0, keepdim=True).mean(2, keepdim=True).mean(3, keepdim=True)
+
+                    batch_mean = torch.squeeze(batch_mean)
+                    batch_var = torch.squeeze(batch_var)
+
+                    mean_est.update(batch_mean.data, x.size(0))
+                    var_est.update(batch_var.data, x.size(0))
+
+                    # bn forward using calculated mean & var
+                    _feature_dim = batch_mean.shape[0]
+                    return F.batch_norm(
+                        x,
+                        batch_mean,
+                        batch_var,
+                        bn.weight[:_feature_dim],
+                        bn.bias[:_feature_dim],
+                        False,
+                        0.0,
+                        bn.eps,
+                    )
+
+                return lambda_forward
+
+            m.forward = new_forward(m, bn_mean[name], bn_var[name])
+
+    # skip if there is no batch normalization layers in the network
+    if len(bn_mean) == 0:
+        return
+
+    tmp_model.eval()
+    with torch.no_grad():
+        with tqdm(total=len(data_loader), desc="reset bn", disable=not progress_bar or not dist.is_master()) as t:
+            for samples, targets in data_loader:
+                samples.tensors = samples.tensors.to(get_device(tmp_model))
+                tmp_model(samples.tensors)
+
+    # Updating original model running mean and sd with - val set mean and sd
+    for name, m in model.named_modules():
+        if name in bn_mean and bn_mean[name].count > 0:
+            feature_dim = bn_mean[name].avg.size(0)
+            assert isinstance(m, _BatchNorm)
+            m.running_mean.data[:feature_dim].copy_(bn_mean[name].avg)
+            m.running_var.data[:feature_dim].copy_(bn_var[name].avg)
 
 def set_norm_eps(model: nn.Module, eps: float or None = None) -> None:
     for m in model.modules():
