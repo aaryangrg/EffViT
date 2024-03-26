@@ -213,3 +213,18 @@ class GdinoBackboneTrainerNoFlex(Trainer):
                 epoch=epoch,
                 model_name="model_best.pt",
             )
+
+    def after_step(self) -> None:
+        self.scaler.unscale_(self.optimizer)
+        # gradient clip
+        if self.run_config.grad_clip is not None:
+            torch.nn.utils.clip_grad_value_(self.model.parameters(), self.run_config.grad_clip)
+        # update
+        self.scaler.step(self.optimizer)
+        self.scaler.update()
+
+        self.lr_scheduler.step()
+        self.run_config.step()
+        # update ema
+        if self.ema is not None:
+            self.ema.step(self.network.effvit_backbone, self.run_config.global_step)
