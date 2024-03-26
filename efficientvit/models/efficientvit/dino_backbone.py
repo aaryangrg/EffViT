@@ -289,7 +289,7 @@ class FlexibleGDINOBackboneRectified(nn.Module):
         self.width_list = []
         
         # Input : 2 x 3 x 1024 x 1024 --> Out : 2 x 96 x 256 x 256
-        self.patch_embed = PatchEmbed(patch_size = 4, in_chans=3, embed_dim=width_list[0])
+        self.patch_embed = PatchEmbed(patch_size = 4, in_chans=3, embed_dim=width_list[0], norm_layer=nn.LayerNorm)
 
         # Input : 2 x 96 x 256 x 256 --> Out : 2 x 96 x 256 x 256
         self.input_stem = [ 
