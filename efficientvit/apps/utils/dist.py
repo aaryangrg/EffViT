@@ -3,7 +3,7 @@
 # International Conference on Computer Vision (ICCV), 2023
 
 import torch
-import torch.distributed
+import torch.distributed as dist
 from torchpack import distributed
 
 from efficientvit.models.utils.list import list_mean, list_sum
@@ -31,8 +31,8 @@ def sync_tensor(tensor: torch.Tensor or float, reduce="mean") -> torch.Tensor or
 def sync_tensor_custom(tensor: torch.Tensor or float, reduce="mean") -> torch.Tensor or list[torch.Tensor]:
     if not isinstance(tensor, torch.Tensor):
         tensor = torch.Tensor(1).fill_(tensor).cuda()
-    tensor_list = [torch.empty_like(tensor) for _ in range(distributed.get_world_size())]
-    torch.distributed.all_gather(tensor_list, tensor.contiguous(), async_op=False)
+    tensor_list = [torch.empty_like(tensor) for _ in range(dist.get_world_size())]
+    dist.all_gather(tensor_list, tensor.contiguous(), async_op=False)
     if reduce == "mean":
         return list_mean(tensor_list)
     elif reduce == "sum":
