@@ -151,7 +151,7 @@ def reset_bn_dino(
     import torchpack.distributed as dist
     from tqdm import tqdm
 
-    from efficientvit.apps.utils import AverageMeter, sync_tensor
+    from efficientvit.apps.utils import AverageMeter, sync_tensor, sync_tensor_custom
     from efficientvit.models.utils import get_device, list_join
 
     bn_mean = {}
@@ -168,12 +168,12 @@ def reset_bn_dino(
                     x = x.contiguous()
                     if sync:
                         batch_mean = x.mean(0, keepdim=True).mean(2, keepdim=True).mean(3, keepdim=True)  # 1, C, 1, 1
-                        batch_mean = sync_tensor(batch_mean, reduce="cat")
+                        batch_mean = sync_tensor_custom(batch_mean, reduce="cat")
                         batch_mean = torch.mean(batch_mean, dim=0, keepdim=True)
 
                         batch_var = (x - batch_mean) * (x - batch_mean)
                         batch_var = batch_var.mean(0, keepdim=True).mean(2, keepdim=True).mean(3, keepdim=True)
-                        batch_var = sync_tensor(batch_var, reduce="cat")
+                        batch_var = sync_tensor_custom(batch_var, reduce="cat")
                         batch_var = torch.mean(batch_var, dim=0, keepdim=True)
                     else:
                         batch_mean = x.mean(0, keepdim=True).mean(2, keepdim=True).mean(3, keepdim=True)  # 1, C, 1, 1
