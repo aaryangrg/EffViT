@@ -75,6 +75,10 @@ class GdinoBackboneTrainerNoFlex(Trainer):
         # build optimizer
         self.optimizer, self.lr_scheduler = self.run_config.build_optimizer(self.model.effvit_backbone)
 
+        #Default has EMA decay config too
+        if ema_decay is not None:
+            self.ema = EMA(self.model.effvit_backbone, ema_decay)
+
         # fp16
         self.fp16 = fp16
         self.scaler = torch.cuda.amp.GradScaler(enabled=self.fp16)

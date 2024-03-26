@@ -55,7 +55,7 @@ def main():
     config = setup.setup_exp_config(args.config, recursive=True, opt_args=opt)
     print("Experiment config setup")
     # save exp config
-    setup.save_ exp_config(config, args.path)
+    setup.save_exp_config(config, args.path)
     data_provider = setup.setup_data_provider(config, [ImageNetDataProviderSubset], is_distributed=True)
     print("Data Provider Created")
     # setup run config
