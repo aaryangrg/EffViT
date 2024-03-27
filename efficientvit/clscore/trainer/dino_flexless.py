@@ -147,8 +147,7 @@ class GdinoBackboneTrainerNoFlex(Trainer):
         return loss
 
     def _train_one_epoch(self, epoch: int) -> dict[str, any]:
-        
-        count = 1400
+    
         train_loss = AverageMeter(False)
 
         with tqdm(
@@ -182,9 +181,6 @@ class GdinoBackboneTrainerNoFlex(Trainer):
                 }
                 t.set_postfix(postfix_dict)
                 t.update()
-                count -= 1
-                if count == 0 :
-                    break
         return {
             "loss" : train_loss.avg
         }
