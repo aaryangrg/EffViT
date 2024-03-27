@@ -147,7 +147,8 @@ class GdinoBackboneTrainerNoFlex(Trainer):
         return loss
 
     def _train_one_epoch(self, epoch: int) -> dict[str, any]:
-    
+        
+        count = 100
         train_loss = AverageMeter(False)
 
         with tqdm(
@@ -181,6 +182,9 @@ class GdinoBackboneTrainerNoFlex(Trainer):
                 }
                 t.set_postfix(postfix_dict)
                 t.update()
+                count -= 1 
+                if count == 0 : 
+                    break
         return {
             "loss" : train_loss.avg
         }
@@ -196,7 +200,7 @@ class GdinoBackboneTrainerNoFlex(Trainer):
             reset_bn_dino(self.model.effvit_backbone,data_loader_val,sync=True) # Update from data_loader_val to part of the training dataloader (sub-samples)
             
             dis.barrier()  # Preventing OOM
-            
+
             self.model.effvit_backbone.eval()
             test_stats, coco_evaluator = evaluate_custom(self.model, criterion, postprocessors,data_loader_val, base_ds, "cuda", wo_class_error=False, args=args)
 
