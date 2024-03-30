@@ -148,7 +148,7 @@ class GdinoBackboneTrainerNoFlex(Trainer):
             loss_dict = self.task_criterion(final_outputs, targets, cap_list, captions)
             weight_dict = self.task_criterion.weight_dict
             task_losses = sum(loss_dict[k] * weight_dict[k] for k in loss_dict.keys() if k in weight_dict)
-        self.scaler.scale(task_losses).backward() # Back prop only task loss
+        self.scaler.scale(task_losses).backward(retain_graph = True) # Back prop only task loss
         with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16_training):
             max_width_kd_loss = self.loss_criterion(backbone_outputs, dino_backbone_outputs)
         self.scaler.scale(max_width_kd_loss).backward() # Back prop distillation loss
