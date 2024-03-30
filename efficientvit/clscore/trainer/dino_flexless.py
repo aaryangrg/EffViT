@@ -151,7 +151,7 @@ class GdinoBackboneTrainerNoFlex(Trainer):
             max_width_kd_loss = 0
             total_loss = task_losses
             # Backward pass on multi-scale KD-loss (added)
-        self.scaler.scale(max_width_kd_loss).backward()
+        self.scaler.scale(total_loss).backward()
 
         return {
             "kd_loss": max_width_kd_loss,
