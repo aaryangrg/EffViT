@@ -142,22 +142,22 @@ class GdinoBackboneTrainerNoFlex(Trainer):
                 # dino_backbone_features = {idx : NestedTensor(output, mask),}
                 for k in dino_backbone_features :
                     src, mask = dino_backbone_features[k].decompose()
-                    dino_backbone_outputs.append(src) 
+                    dino_backbone_outputs.append(src.detach()) 
             
             backbone_outputs, final_outputs = self.model(samples, captions = captions)
             loss_dict = self.task_criterion(final_outputs, targets, cap_list, captions)
             weight_dict = self.task_criterion.weight_dict
             task_losses = sum(loss_dict[k] * weight_dict[k] for k in loss_dict.keys() if k in weight_dict)
-        self.scaler.scale(task_losses) # Back prop only task loss
+        self.scaler.scale(task_losses).backward() # Back prop only task loss
         with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16_training):
             max_width_kd_loss = self.loss_criterion(backbone_outputs, dino_backbone_outputs)
-        self.scaler.scale(max_width_kd_loss) # Back prop distillation loss
-        total_loss = task_losses + max_width_kd_loss 
+        self.scaler.scale(max_width_kd_loss).backward() # Back prop distillation loss
+        # total_loss = task_losses + max_width_kd_loss 
         # self.scaler.scale(total_loss).backward()
 
         return {
             "kd_loss": max_width_kd_loss,
-            "task_loss": total_loss,
+            "task_loss": task_losses,
         }
     
     def custom_mse_loss(self, scale_pred, scale_soft):
