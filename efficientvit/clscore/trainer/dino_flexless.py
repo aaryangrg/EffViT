@@ -40,6 +40,7 @@ class GdinoBackboneTrainerNoFlex(Trainer):
         train_full_flexible_model = True,
         fp16_training = False,
         kd_metric = "kld",
+        task_criterion = None
     ) -> None:
         super().__init__(
             path=path,
@@ -65,6 +66,8 @@ class GdinoBackboneTrainerNoFlex(Trainer):
             self.loss_criterion = self.custom_mse_loss
         else :
             self.loss_criterion = self.custom_rmse_loss
+        
+        self.task_criterion = task_criterion
 
     def prep_for_training_custom(self, run_config: RunConfig, ema_decay: float or None = None, fp16=False) -> None:
         self.run_config = run_config
@@ -117,6 +120,41 @@ class GdinoBackboneTrainerNoFlex(Trainer):
             "loss": total_kd_loss,
         }
     
+    def runstep_with_task_loss(self,  samples, targets) -> dict[str, any]:
+        # Put model to train --> ensure rest of model has frozen params
+        self.model.effvit_backbone.train()
+        self.task_criterion.train()
+        with torch.no_grad() :
+            self.model.effvit_backbone.apply(lambda m: setattr(m, 'width_mult', PREDEFINED_WIDTHS[-1]))
+
+        # Use half-precision training
+        with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16_training):
+            samples = samples.to("cuda")
+            captions = [t["caption"] for t in targets]
+            cap_list = [t["cap_list"] for t in targets]
+            targets = [{k: v.to("cuda") for k, v in t.items() if torch.is_tensor(v)} for t in targets]
+            dino_backbone_outputs = []
+            # This is Joiner.backbone() --> Swin Transfomer directly without positional embeds
+            dino_backbone_features = self.gdino_backbone(samples)
+            # dino_backbone_features = {idx : NestedTensor(output, mask),}
+            for k in dino_backbone_features :
+                src, mask = dino_backbone_features[k].decompose()
+                dino_backbone_outputs.append(src) 
+            
+            backbone_outputs, final_outputs = self.model(samples, captions = captions)
+            loss_dict = self.task_criterion(final_outputs, targets, cap_list, captions)
+            weight_dict = self.task_criterion.weight_dict
+            task_losses = sum(loss_dict[k] * weight_dict[k] for k in loss_dict.keys() if k in weight_dict)
+            max_width_kd_loss = self.loss_criterion(backbone_outputs, dino_backbone_outputs)
+            total_loss = task_losses + max_width_kd_loss
+            # Backward pass on multi-scale KD-loss (added)
+        self.scaler.scale(max_width_kd_loss).backward()
+
+        return {
+            "kd_loss": max_width_kd_loss,
+            "task_loss": total_loss,
+        }
+    
     def custom_mse_loss(self, scale_pred, scale_soft):
         loss = 0
         loss_fn = nn.MSELoss()
@@ -162,7 +200,9 @@ class GdinoBackboneTrainerNoFlex(Trainer):
                 # clear gradient
                 self.optimizer.zero_grad()
                 # forward & backward
+                # output_dict = self.runstep(samples)
                 output_dict = self.runstep(samples)
+
                 # update: optimizer, lr_scheduler
                 self.after_step()
 
@@ -183,6 +223,50 @@ class GdinoBackboneTrainerNoFlex(Trainer):
                 t.update()
         return {
             "loss" : train_loss.avg
+        }
+
+    def _train_one_epoch_task_loss(self, epoch: int) -> dict[str, any]:
+
+        kd_loss = AverageMeter(False)
+        task_loss = AverageMeter(False)
+
+        with tqdm(
+            total=len(self.data_provider),
+            desc="Train Epoch #{}".format(epoch + 1),
+            disable=not dist.is_master(),
+            file=sys.stdout,
+        ) as t:
+            for samples, targets in self.data_provider:
+                # preprocessing
+                samples = self.prestep(samples)
+                # clear gradient
+                self.optimizer.zero_grad()
+                # forward & backward
+                output_dict = self.runstep_with_task_loss(samples, targets)
+
+                # update: optimizer, lr_scheduler
+                self.after_step()
+
+                # update train metrics
+                kd_loss.update(output_dict["kd_loss"])
+                task_loss.update(output_dict["task_loss"])
+
+                # tqdm
+                postfix_dict = {
+                    "kd_loss": kd_loss.avg,
+                    "task_loss": task_loss.avg,
+                    "lr": list_join(
+                        sorted(set([group["lr"] for group in self.optimizer.param_groups])),
+                        "#",
+                        "%.1E",
+                    ),
+                    "progress": self.run_config.progress,
+                }
+                t.set_postfix(postfix_dict)
+                t.update()
+        return {
+            "kd_loss" : kd_loss.avg,
+            "task_loss" : task_loss.avg
         }
 
     def train(self, trials=0, save_freq=1, criterion = None, postprocessors = None, data_loader_val = None, base_ds = None, args = None, evaluate_custom = None) -> None:
@@ -219,12 +303,47 @@ class GdinoBackboneTrainerNoFlex(Trainer):
                 epoch=epoch,
                 model_name="model_best.pt",
             )
+        
+    def train_task(self, trials=0, save_freq=1, criterion = None, postprocessors = None, data_loader_val = None, base_ds = None, args = None, evaluate_custom = None) -> None:
+    
+        for epoch in range(self.start_epoch, self.run_config.n_epochs + self.run_config.warmup_epochs):
+            self.model.train()
+            train_info_dict = self._train_one_epoch_task_loss(epoch)
+
+            dis.barrier() # Preventing OOM
+
+            reset_bn_dino(self.model.effvit_backbone,data_loader_val,sync=True) # Update from data_loader_val to part of the training dataloader (sub-samples)
+            
+            dis.barrier()  # Preventing OOM
+
+            self.model.eval() # Will include EfficientViT params
+            test_stats, coco_evaluator = evaluate_custom(self.model, criterion, postprocessors,data_loader_val, base_ds, "cuda", wo_class_error=False, args=args)
+
+            log_stats = {**{f'test_{k}': v for k, v in test_stats.items()} }
+            
+            val_log = self.run_config.epoch_format(epoch)
+            for k in test_stats :
+                val_log = val_log + f"val_{k} : {test_stats[k]} | "
+            val_log += ")\tTrain("
+            for key, val in train_info_dict.items():
+                val_log += f"{key}={val:.2E},"
+            val_log += (
+                f'lr={list_join(sorted(set([group["lr"] for group in self.optimizer.param_groups])), "#", "%.1E")})'
+            )
+            self.write_log(val_log, prefix="valid", print_log=False)
+
+            # Save model if val mAP > current mAP
+            self.save_model(
+                only_state_dict=False,
+                epoch=epoch,
+                model_name="model_best.pt",
+            )
 
     def after_step(self) -> None:
         self.scaler.unscale_(self.optimizer)
         # gradient clip
         if self.run_config.grad_clip is not None:
-            torch.nn.utils.clip_grad_value_(self.model.parameters(), self.run_config.grad_clip)
+            torch.nn.utils.clip_grad_value_(self.model.effvit_backbone.parameters(), self.run_config.grad_clip)
         # update
         self.scaler.step(self.optimizer)
         self.scaler.update()
