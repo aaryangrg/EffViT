@@ -39,7 +39,7 @@ class GdinoBackboneTrainerNoFlex(Trainer):
         auto_restart_thresh: float or None = None,
         metric_logger = None,
         train_full_flexible_model = True,
-        fp16_training = False,
+        fp16_training = True,
         kd_metric = "kld",
         task_criterion = None
     ) -> None:
