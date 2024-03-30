@@ -150,7 +150,8 @@ class GdinoBackboneTrainerNoFlex(Trainer):
             task_losses = sum(loss_dict[k] * weight_dict[k] for k in loss_dict.keys() if k in weight_dict)
         self.scaler.scale(task_losses).backward(retain_graph = True) # Back prop only task loss
         with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.fp16_training):
-            max_width_kd_loss = self.loss_criterion(backbone_outputs, dino_backbone_outputs)
+            # max_width_kd_loss = self.loss_criterion(backbone_outputs, dino_backbone_outputs)
+            max_width_kd_loss = self.get_kld_loss_single(backbone_outputs[0], dino_backbone_outputs[0])
         self.scaler.scale(max_width_kd_loss).backward() # Back prop distillation loss
         # total_loss = task_losses + max_width_kd_loss 
         # self.scaler.scale(total_loss).backward()
@@ -189,6 +190,12 @@ class GdinoBackboneTrainerNoFlex(Trainer):
             loss += F.kl_div(p_s, p_t, reduction='mean')
         return loss
 
+    def get_kld_loss_single(self,scale_pred, scale_soft, temperature = 1.0):
+        p_s = F.log_softmax(scale_pred / temperature, dim=1)
+        p_t = F.softmax(scale_soft / temperature, dim=1)
+        loss = F.kl_div(p_s, p_t, reduction='mean')
+        return loss
+    
     def _train_one_epoch(self, epoch: int) -> dict[str, any]:
     
         train_loss = AverageMeter(False)
