@@ -148,10 +148,9 @@ class GdinoBackboneTrainerNoFlex(Trainer):
             loss_dict = self.task_criterion(final_outputs, targets, cap_list, captions)
             weight_dict = self.task_criterion.weight_dict
             task_losses = sum(loss_dict[k] * weight_dict[k] for k in loss_dict.keys() if k in weight_dict)
-            # max_width_kd_loss = self.loss_criterion(backbone_outputs, dino_backbone_outputs)
-            max_width_kd_loss = 0
+            max_width_kd_loss = self.loss_criterion(backbone_outputs, dino_backbone_outputs)
             total_loss = task_losses + max_width_kd_loss
-        self.scaler.scale(total_loss).backward() # Fp 32 backward pass (re-creating previous success)
+        self.scaler.scale(total_loss).backward()
 
         return {
             "kd_loss": max_width_kd_loss,

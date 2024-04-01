@@ -22,7 +22,9 @@ __all__ = [
     "FlexibleGDINOBackboneRectified",
     "flexible_efficientvit_backbone_swin_t_224_1k",
     "flexible_efficientvit_backbone_swin_b_384_22k",
-    "flexible_efficientvit_backbone_swin_t_224_1k_rectified"
+    "flexible_efficientvit_backbone_swin_t_224_1k_v1",
+    "flexible_efficientvit_backbone_swin_t_224_1k_v2",
+    "flexible_efficientvit_backbone_swin_t_224_1k_v3"
 ]
 
 # From Grounding Dino / Open Grounding Dino Implementation
@@ -452,25 +454,28 @@ class FlexibleGDINOBackboneRectified(nn.Module):
                 outs.append(x) # Not used currently (dimension 96)
         return outs
 
-# def flexible_efficientvit_backbone_swin_t_224_1k_rectified(**kwargs) -> FlexibleGDINOBackbone:
-#     backbone = FlexibleGDINOBackboneRectified(
-#         width_list = [96, 96, 192, 384, 768],
-#         depth_list = [1, 2, 2, 3, 3],
-#         dim=16,
-#         **build_kwargs_from_config(kwargs, FlexibleGDINOBackbone),
-#     )
-#     return backbone
+# ~32M
+def flexible_efficientvit_backbone_swin_t_224_1k_v1(**kwargs) -> FlexibleGDINOBackbone:
+    backbone = FlexibleGDINOBackboneRectified(
+        width_list = [96, 96, 192, 384, 768],
+        depth_list = [1, 2, 2, 3, 3],
+        dim=16,
+        **build_kwargs_from_config(kwargs, FlexibleGDINOBackbone),
+    )
+    return backbone
 
-# def flexible_efficientvit_backbone_swin_t_224_1k_rectified(**kwargs) -> FlexibleGDINOBackbone:
-#     backbone = FlexibleGDINOBackboneRectified(
-#         width_list = [96, 96, 192, 384, 768],
-#         depth_list = [1, 2, 2, 2, 2],
-#         dim=16,
-#         **build_kwargs_from_config(kwargs, FlexibleGDINOBackbone),
-#     )
-#     return backbone
+# ~22M
+def flexible_efficientvit_backbone_swin_t_224_1k_v2(**kwargs) -> FlexibleGDINOBackbone:
+    backbone = FlexibleGDINOBackboneRectified(
+        width_list = [96, 96, 192, 384, 768],
+        depth_list = [1, 2, 2, 2, 2],
+        dim=16,
+        **build_kwargs_from_config(kwargs, FlexibleGDINOBackbone),
+    )
+    return backbone
 
-def flexible_efficientvit_backbone_swin_t_224_1k_rectified(**kwargs) -> FlexibleGDINOBackbone:
+# ~12M
+def flexible_efficientvit_backbone_swin_t_224_1k_v3(**kwargs) -> FlexibleGDINOBackbone:
     backbone = FlexibleGDINOBackboneRectified(
         width_list = [96, 96, 192, 384, 768],
         depth_list = [1, 1, 1, 1, 1],
