@@ -151,7 +151,7 @@ class GdinoBackboneTrainerNoFlex(Trainer):
             # max_width_kd_loss = self.loss_criterion(backbone_outputs, dino_backbone_outputs)
             max_width_kd_loss = 0
             total_loss = task_losses + max_width_kd_loss
-            self.scaler.scale(total_loss).backward()
+        self.scaler.scale(total_loss).backward() # Fp 32 backward pass (re-creating previous success)
 
         return {
             "kd_loss": max_width_kd_loss,
