@@ -6,6 +6,7 @@ from concurrent.futures.process import _MAX_WINDOWS_WORKERS
 import os
 from re import M
 import sys
+import time
 import numpy as np
 import torch
 import torch.nn as nn
@@ -25,6 +26,7 @@ from efficientvit.apps.utils import EMA
 from efficientvit.models.nn.norm import reset_bn, reset_bn_dino
 from efficientvit.models.utils import is_parallel, load_state_dict_from_file
 
+
 __all__ = ["GdinoBackboneTrainerNoFlex"]
 LOG_SOFTMAX_CONST = 1e-6
 PREDEFINED_WIDTHS = [0.25, 0.50, 0.75, 1.0]
@@ -41,7 +43,8 @@ class GdinoBackboneTrainerNoFlex(Trainer):
         train_full_flexible_model = True,
         fp16_training = True,
         kd_metric = "kld",
-        task_criterion = None
+        task_criterion = None,
+        writer = None
     ) -> None:
         super().__init__(
             path=path,
@@ -69,6 +72,9 @@ class GdinoBackboneTrainerNoFlex(Trainer):
             self.loss_criterion = self.custom_rmse_loss
         
         self.task_criterion = task_criterion
+
+        self.writer = writer
+        self.best_val = 0.0
 
     def prep_for_training_custom(self, run_config: RunConfig, ema_decay: float or None = None, fp16=False) -> None:
         self.run_config = run_config
@@ -229,6 +235,10 @@ class GdinoBackboneTrainerNoFlex(Trainer):
                 }
                 t.set_postfix(postfix_dict)
                 t.update()
+        rank = torch.distributed.get_rank()
+        if rank == 0 and self.writer: # Only process 1 writes
+            self.writer.add_scalar("kd_loss", train_loss.avg, global_step=epoch)
+            self.writer.flush()
         return {
             "loss" : train_loss.avg
         }
@@ -272,6 +282,11 @@ class GdinoBackboneTrainerNoFlex(Trainer):
                 }
                 t.set_postfix(postfix_dict)
                 t.update()
+        rank = torch.distributed.get_rank()
+        if rank == 0 and self.writer: # Only process 1 writes
+            self.writer.add_scalar("kd_loss", kd_loss.avg, global_step=epoch)
+            self.writer.add_scalar("task_loss", task_loss.avg, global_step = epoch)
+            self.writer.flush()
         return {
             "kd_loss" : kd_loss.avg,
             "task_loss" : task_loss.avg
@@ -305,15 +320,30 @@ class GdinoBackboneTrainerNoFlex(Trainer):
             )
             self.write_log(val_log, prefix="valid", print_log=False)
 
+            rank = torch.distributed.get_rank()
+            if rank == 0 and self.writer: # Only process 1 writes
+                self.writer.add_scalar("Val: mAP(0.50:0.05:0.95)", test_stats["coco_eval_bbox"][0], global_step=epoch)
+                self.writer.flush()
+
             # Save model if val mAP > current mAP
-            self.save_model(
-                only_state_dict=False,
-                epoch=epoch,
-                model_name="model_best.pt",
-            )
+            if test_stats["coco_eval_bbox"][0] > self.best_val :
+                # Save model if val mAP > current mAP
+                self.save_model(
+                    only_state_dict=False,
+                    epoch=epoch,
+                    model_name="model_best.pt",
+                )
+                self.best_val = test_stats["coco_eval_bbox"][0]
+        
+            if epoch % 10 == 0 :
+                self.save_model(
+                    only_state_dict=False,
+                    epoch=epoch,
+                    model_name="checkpoint.pt",
+                )
         
     def train_task(self, trials=0, save_freq=1, criterion = None, postprocessors = None, data_loader_val = None, base_ds = None, args = None, evaluate_custom = None) -> None:
-    
+        
         for epoch in range(self.start_epoch, self.run_config.n_epochs + self.run_config.warmup_epochs):
             self.model.train()
             train_info_dict = self._train_one_epoch_task_loss(epoch)
@@ -340,12 +370,26 @@ class GdinoBackboneTrainerNoFlex(Trainer):
             )
             self.write_log(val_log, prefix="valid", print_log=False)
 
-            # Save model if val mAP > current mAP
-            self.save_model(
-                only_state_dict=False,
-                epoch=epoch,
-                model_name="model_best.pt",
-            )
+            rank = torch.distributed.get_rank()
+            if rank == 0 and self.writer: # Only process 1 writes
+                self.writer.add_scalar("Val: mAP(0.50:0.05:0.95)", test_stats["coco_eval_bbox"][0], global_step=epoch)
+                self.writer.flush()
+
+            if test_stats["coco_eval_bbox"][0] > self.best_val :
+                # Save model if val mAP > current mAP
+                self.save_model(
+                    only_state_dict=False,
+                    epoch=epoch,
+                    model_name="model_best.pt",
+                )
+                self.best_val = test_stats["coco_eval_bbox"][0]
+            
+            if epoch % 10 == 0 :
+                self.save_model(
+                    only_state_dict=False,
+                    epoch=epoch,
+                    model_name="checkpoint.pt",
+                )
 
     def after_step(self) -> None:
         self.scaler.unscale_(self.optimizer)
