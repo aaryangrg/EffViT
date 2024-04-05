@@ -68,8 +68,10 @@ class GdinoBackboneTrainerNoFlex(Trainer):
             self.loss_criterion = self.custom_ce_loss
         elif self.kd_metric == "l2" :
             self.loss_criterion = self.custom_mse_loss
-        else :
+        elif self.kd_metric == "rmse" :
             self.loss_criterion = self.custom_rmse_loss
+        else :
+            self.loss_criterion = None
         
         self.task_criterion = task_criterion
 
@@ -154,7 +156,10 @@ class GdinoBackboneTrainerNoFlex(Trainer):
             loss_dict = self.task_criterion(final_outputs, targets, cap_list, captions)
             weight_dict = self.task_criterion.weight_dict
             task_losses = sum(loss_dict[k] * weight_dict[k] for k in loss_dict.keys() if k in weight_dict)
-            max_width_kd_loss = self.loss_criterion(backbone_outputs, dino_backbone_outputs)
+            if self.loss_criterion :
+                max_width_kd_loss = self.loss_criterion(backbone_outputs, dino_backbone_outputs)
+            else :
+                max_width_kd_loss = 0
             total_loss = task_losses + max_width_kd_loss
         self.scaler.scale(total_loss).backward()
 

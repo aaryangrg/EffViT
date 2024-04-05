@@ -103,6 +103,81 @@ class SegHead(DAGBlock):
 
         super(SegHead, self).__init__(inputs, "add", None, middle=middle, outputs=outputs)
 
+# Using Flexible Backbone V1 --> output dimensionality @ each stage would change based on current multiplier ratio
+# Multi-scale features should also have flexible inputs (input layer) and rest can stay at constant width / channels
+class FlexibleSegHead(DAGBlock):
+    def __init__(
+        self,
+        fid_list: list[str],
+        in_channel_list: list[int],
+        stride_list: list[int],
+        head_stride: int,
+        head_width: int,
+        head_depth: int,
+        expand_ratio: float,
+        middle_op: str,
+        final_expand: float or None,
+        n_classes: int,
+        dropout=0,
+        norm="bn2d",
+        act_func="hswish",
+    ):
+        inputs = {}
+        for fid, in_channel, stride in zip(fid_list, in_channel_list, stride_list):
+            factor = stride // head_stride
+            if factor == 1:
+                inputs[fid] = ConvLayer(in_channel, head_width, 1, norm=norm, act_func=None) # Flexible conv layer [True, False]
+            else:
+                inputs[fid] = OpSequential(
+                    [
+                        ConvLayer(in_channel, head_width, 1, norm=norm, act_func=None), # Flexible conv layer [True, False]
+                        UpSampleLayer(factor=factor), # Match all spatial resolutions?
+                    ]
+                )
+
+        middle = []
+        for _ in range(head_depth):
+            if middle_op == "mbconv":
+                block = MBConv(
+                    head_width,
+                    head_width,
+                    expand_ratio=expand_ratio,
+                    norm=norm,
+                    act_func=(act_func, act_func, None),
+                )
+            elif middle_op == "fmbconv":
+                block = FusedMBConv(
+                    head_width,
+                    head_width,
+                    expand_ratio=expand_ratio,
+                    norm=norm,
+                    act_func=(act_func, None),
+                )
+            else:
+                raise NotImplementedError
+            middle.append(ResidualBlock(block, IdentityLayer()))
+        middle = OpSequential(middle)
+
+        outputs = {
+            "segout": OpSequential(
+                [
+                    None
+                    if final_expand is None
+                    else ConvLayer(head_width, head_width * final_expand, 1, norm=norm, act_func=act_func),
+                    ConvLayer(
+                        head_width * (final_expand or 1),
+                        n_classes,
+                        1,
+                        use_bias=True,
+                        dropout=dropout,
+                        norm=None,
+                        act_func=None,
+                    ),
+                ]
+            )
+        }
+
+        super(SegHead, self).__init__(inputs, "add", None, middle=middle, outputs=outputs)
 
 class EfficientViTSeg(nn.Module):
     def __init__(self, backbone: EfficientViTBackbone or EfficientViTLargeBackbone, head: SegHead) -> None:
